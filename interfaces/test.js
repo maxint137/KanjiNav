@@ -2,6 +2,7 @@ var assert = require('assert');
 var assert = require('assert');
 var interfaces = require('./interfaces');
 var connect = require('./connectTestDB');
+var _ = require('underscore');
 
 describe('interfaces', function () {
     var db;
@@ -18,11 +19,7 @@ describe('interfaces', function () {
             
             var curJlpt = words[0].JLPT;
             words.slice(0,9).forEach(function(word){
-                
-                console.log("curJlpt/word.JLPT", curJlpt, "/", word.JLPT);
-                
                 assert.ok(word.JLPT <= curJlpt);
-                
                 curJlpt = word.JLPT;
             });
             done();
@@ -49,6 +46,36 @@ describe('interfaces', function () {
             done();
         });
     });    
+    
+    it('can get grouped-words connected to a given word', function (done) {
+        interfaces.getConnectedWordsGrouped(db, '青山', function (error, groupsOfWords) {
+
+            assert.ifError(error);
+            assert.ok(Array.isArray(groupsOfWords));
+            assert.equal(groupsOfWords.length, 2);
+            
+            assert.equal(groupsOfWords[0].words[0].word, '青');
+            assert.equal(groupsOfWords[0].kanji, '青');
+
+            assert.equal(groupsOfWords[1].words[0].word, '山');
+            assert.equal(groupsOfWords[1].kanji, '山');
+
+            var curJlpt = groupsOfWords[0].words[0].JLPT;
+            groupsOfWords[0].words.forEach(function(word){
+                assert.ok(word.JLPT <= curJlpt);
+                curJlpt = word.JLPT;
+            });
+
+            curJlpt = groupsOfWords[1].words[0].JLPT;
+            groupsOfWords[1].words.forEach(function(word){
+                assert.ok(word.JLPT <= curJlpt);
+                curJlpt = word.JLPT;
+            });
+            done();
+        });
+    });
+
+    
 
     before(function (done) {
 
