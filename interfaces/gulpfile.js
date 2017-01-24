@@ -19,5 +19,5 @@ gulp.task('test', function () {
 });
 
 gulp.task('watch', function () {
-    gulp.watch(['./test.js', './interfaces.js'], ['test']);
+    gulp.watch(['./test.js', './interfaces.js', './wordConnected.js', './kanji.js', './word.js'], ['test']);
 });

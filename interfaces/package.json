@@ -1,15 +1,17 @@
 {
-  "scripts": {
-    "test": "gulp test",
-    "watch": "gulp watch"
-  },
-  "dependencies": {
-    "async": "latest",
-    "mongodb": "latest"
-  },
-  "devDependencies": {
-    "gulp": "latest",
-    "gulp-mocha": "latest",
-    "mocha": "latest"
-  }
+    "scripts": {
+        "test": "gulp test",
+        "watch": "gulp watch"
+    },
+    "dependencies": {
+        "async": "latest",
+        "mongodb": "latest",
+        "mongoose": "latest",
+        "bluebird": "latest"
+    },
+    "devDependencies": {
+        "gulp": "latest",
+        "gulp-mocha": "latest",
+        "mocha": "latest"
+    }
 }
