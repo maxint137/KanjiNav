@@ -1,5 +1,5 @@
 {
-  "name": "JLPT Ingestion",
+  "name": "JLPTs_Ingestion",
   "version": "0.1.0",
   "description": "Parse JLPT words/kanji TSV files into JSON, put them inside a mongodb collection",
   "homepage": "https://nihongoichiban.com/2011/04/10/complete-list-of-kanji-for-jlpt-n5/",
@@ -8,9 +8,11 @@
   ],
   "author": "Max Levy",
   "dependencies": {
-    "d3": "^4.4.0",
-    "mongodb": "^2.2.21",
-    "promise": "^7.1.1",
-    "underscore": "^1.8.3"
+    "d3": "latest",
+    "underscore": "latest",
+    "async": "latest",
+    "mongodb": "latest",
+    "mongoose": "latest",
+    "bluebird": "latest"
   }
 }

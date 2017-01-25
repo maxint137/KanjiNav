@@ -1,0 +1,6 @@
+{
+    "dependencies": {
+        "mongoose": "latest",
+        "bluebird": "latest"
+    }
+}

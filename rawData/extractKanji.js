@@ -53,7 +53,7 @@ function extractDocs(filename, extractor) {
 
 function extractKanji(d, jlpt) {
     return {
-        kanji: d.Kanji,
+        character: d.Kanji,
         onyomi: d.Onyomi.split(' '),
         kunyomi: d.Kunyomi.split(' '),
         english: d.English.replace(', ', ',').split(','),
