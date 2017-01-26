@@ -35,4 +35,7 @@ var KanjiSchema = new mongoose.Schema({
     }]
 });
 
-var Kanji = module.exports = mongoose.model('Kanji', KanjiSchema);
+module.exports = {
+    Schema: KanjiSchema,
+    Model: mongoose.model('Kanji', KanjiSchema)
+};
