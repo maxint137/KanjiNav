@@ -28,6 +28,6 @@ var WordSchema = new mongoose.Schema({
 });
 
 module.exports = {
-    WordModel: mongoose.model('Word', WordSchema),
-    WordSchema: WordSchema
+    Schema: WordSchema,
+    Model: mongoose.model('Word', WordSchema)
 };
