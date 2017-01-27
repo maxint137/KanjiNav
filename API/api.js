@@ -14,17 +14,29 @@ module.exports = function (wagner) {
         return function (req, res) {
 
             var rqWord = req.params.word;
-            // TODO: make sure the word is valid
 
-            Promise.map(rqWord.split(''), function (nextChar, index) {
+            // keeping only the kanji
+            // match the range: 0x4e00 - 0x9faf  (http://www.rikai.com/library/kanjitables/kanji_codes.unicode.shtml)
+            // http://stackoverflow.com/questions/15033196/using-javascript-to-check-whether-a-string-contains-japanese-characters-includi
+            var kanjiRex = /[\u4e00-\u9faf]/g;
 
+            // filter out katakana and hiragana chars
+            var kanjis = rqWord.match(kanjiRex);
+            if (null == kanjis) {
+                return res.
+                status(status.NOT_FOUND).
+                json({
+                    error: "No kanji found in " + rqWord
+                });
+            }
+
+            Promise.map(kanjis, function (nextChar, index) {
                     return Kanji.find({
                             character: new RegExp(nextChar)
                         })
                         .populate('words');
                 })
                 .then(function (kanjis) {
-
                     // make sure we don't have multiple entries for the same kanji:
                     if (1 < _.max(_.map(kanjis, function (k) {
                             return k.length;

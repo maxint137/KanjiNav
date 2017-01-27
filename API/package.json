@@ -7,11 +7,15 @@
         "wagner-core": "latest"
     },
     "devDependencies": {
+        "gulp": "latest",
+        "gulp-mocha": "latest",
         "mocha": "latest",
         "superagent": "latest",
         "bluebird": "latest"
     },
     "scripts": {
-        "test": "mocha test.js"
+        "testM": "mocha test.js",
+        "test": "gulp test",
+        "watch": "gulp watch"
     }
 }

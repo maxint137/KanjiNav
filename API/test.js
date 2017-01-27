@@ -1,6 +1,7 @@
 var Promise = require("bluebird");
 
 var assert = require('assert');
+var _ = require('underscore');
 var express = require('express');
 var superagent = Promise.promisifyAll(require('superagent'));
 var wagner = require('wagner-core');
@@ -39,31 +40,50 @@ describe('Category API', function () {
 
     });
 
-    it('can test something', function (done) {
+    var testWord1 = 'moshe';
+    it('returns 404 for GET wordNav/word/' + testWord1, function (done) {
 
-        var url = encodeURI(URL_ROOT + '/wordNav/word/砂糖');
-        console.log('accessing ' + url);
+        var url = encodeURI(URL_ROOT + '/wordNav/word/' + testWord1);
+        superagent.getAsync(url)
+            .then(function (err, res) {
+                assert.ok(false, 'Was supposed to fail for that request');
+                done();
+            })
+            .catch(function (e) {
+                console.log(e)
+                assert.equal(404, e.status);
+                done();
+            });
+    });
+
+    var testWord2 = '砂糖い';
+    it('returns 2 (filled) kanji for GET wordNav/word/' + testWord2, function (done) {
+
+        var url = encodeURI(URL_ROOT + '/wordNav/word/' + testWord2);
 
         superagent.getAsync(url)
             .then(function (res) {
-            
+
                 var result;
                 assert.doesNotThrow(function () {
                     result = JSON.parse(res.text);
                 });
-            
-                //console.log(JSON.stringify(result));
+
                 //console.log(JSON.stringify(result, null, '  '));
 
-                //console.log(JSON.stringify(result.kanjis[1], null, '  '));
-            
                 assert.equal(result.kanjis.length, 2);
-            
+
                 assert.equal(result.kanjis[0].character, '砂');
                 assert.equal(result.kanjis[1].character, '糖');
 
-                done();
+                _.each(result.kanjis[0].words, function (word) {
+                    assert.ok(word.JLPT);
+                });
+                _.each(result.kanjis[1].words, function (word) {
+                    assert.ok(word.JLPT);
+                });
 
+                done();
             })
             .catch(function (e) {
                 assert.ifError(e);
