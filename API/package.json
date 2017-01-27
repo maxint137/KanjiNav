@@ -1,0 +1,17 @@
+{
+    "dependencies": {
+        "express": "latest",
+        "http-status": "latest",
+        "mongoose": "latest",
+        "underscore": "latest",
+        "wagner-core": "latest"
+    },
+    "devDependencies": {
+        "mocha": "latest",
+        "superagent": "latest",
+        "bluebird": "latest"
+    },
+    "scripts": {
+        "test": "mocha test.js"
+    }
+}

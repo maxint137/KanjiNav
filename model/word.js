@@ -1,10 +1,10 @@
-var promise = require("bluebird");
-var mongoose = require('mongoose');
+var Promise = require("bluebird");
+var mongoose = Promise.promisifyAll(require('mongoose')),
+    Schema = mongoose.Schema;
 
 mongoose.Promise = global.Promise;
-promise.promisifyAll(require("mongoose"));
 
-var WordSchema = new mongoose.Schema({
+var WordSchema = module.exports = new mongoose.Schema({
     word: {
         type: String,
         required: true,
@@ -27,7 +27,3 @@ var WordSchema = new mongoose.Schema({
     },
 });
 
-module.exports = {
-    Schema: WordSchema,
-    Model: mongoose.model('Word', WordSchema)
-};

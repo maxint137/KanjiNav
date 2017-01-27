@@ -1,15 +1,15 @@
-var mongoose = require('mongoose'), Schema = mongoose.Schema;
-var Word = require('./word');
+var Promise = require("bluebird");
+var mongoose = Promise.promisifyAll(require('mongoose')),
+    Schema = mongoose.Schema;
 
-var WordNavSchema = new mongoose.Schema({
-    word: Word.Schema,
+mongoose.Promise = global.Promise;
+
+var WordSchema = require('./word');
+
+var WordNavSchema = module.exports = new mongoose.Schema({
+    word: WordSchema,
     kanjis: [{
         type: Schema.Types.ObjectId,
         ref: 'Kanji'
     }]
 });
-
-module.exports = {
-    Schema: WordNavSchema,
-    Model: mongoose.model('WordNav', WordNavSchema)
-};

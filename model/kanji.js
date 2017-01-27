@@ -1,11 +1,11 @@
-var promise = require("bluebird");
+var Promise = require("bluebird");
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 mongoose.Promise = global.Promise;
-promise.promisifyAll(require("mongoose"));
+Promise.promisifyAll(require("mongoose"));
 
-var KanjiSchema = new mongoose.Schema({
+var KanjiSchema = module.exports = new mongoose.Schema({
     character: {
         type: String,
         required: true,
@@ -34,8 +34,3 @@ var KanjiSchema = new mongoose.Schema({
         ref: 'Word'
     }]
 });
-
-module.exports = {
-    Schema: KanjiSchema,
-    Model: mongoose.model('Kanji', KanjiSchema)
-};
