@@ -47,7 +47,8 @@
         <i class='fa fa-play'></i>
     </button>
 
-    <script src='http://d3js.org/d3.v3.min.js'></script>
+    <script src='http://d3js.org/d3.v3.js'></script>
+    <script src="http://marvl.infotech.monash.edu/webcola/cola.v3.min.js"></script>
     <script>
         var responseData = {
             "kanjis": [{
@@ -578,35 +579,54 @@
                 }
             ];
 
-            force = d3.layout.force()
-                .size([width, height])
-                .nodes(dataNodes)
-                .links(dataLinks);
+            var drinkCola = true;
+            if (drinkCola) {
+                // WebCoLa
+                force = cola.d3adaptor()
+                    .linkDistance(30)//http://marvl.infotech.monash.edu/webcola/doc/classes/cola.layout.html#linkdistance
+                    .size([width, height]);
 
-            force.gravity(0);
+                force
+                    .nodes(dataNodes)//http://marvl.infotech.monash.edu/webcola/doc/classes/cola.layout.html#nodes
+                    .links(dataLinks)//http://marvl.infotech.monash.edu/webcola/doc/classes/cola.layout.html#links
+                    .constraints({"axis":"y", "left":0, "right":1, "gap":25})// https://github.com/tgdwyer/WebCola/wiki/Constraints
+                    .symmetricDiffLinkLengths(5)    //http://marvl.infotech.monash.edu/webcola/doc/classes/cola.layout.html#symmetricdifflinklengths
+                    //.avoidOverlaps(true) //http://marvl.infotech.monash.edu/webcola/doc/classes/cola.layout.html#avoidoverlaps
+                    //.start();
+                    .start(10,15,20);   //http://marvl.infotech.monash.edu/webcola/doc/classes/cola.layout.html#start
+                
+            } else {
+                // d3
+                force = d3.layout.force()
+                    .size([width, height])
+                    .nodes(dataNodes)
+                    .links(dataLinks);
+
+                force.gravity(0);
+                force.linkStrength(0.1);
+                force.charge(function (node) {
+                    return node.graph === 0 ? -30 : -3;
+                });
+            }
+
             force.linkDistance(height / 6);
-            force.linkStrength(0.1);
-
-            force.charge(function (node) {
-                return node.graph === 0 ? -30 : -3;
-            });
 
             links = svg.selectAll('.link')
                 .data(dataLinks)
                 .enter().append('line')
                 .attr('class', 'link')
-                .attr('x1', function (d) {
-                    return dataNodes[d.source].x;
-                })
-                .attr('y1', function (d) {
-                    return dataNodes[d.source].y;
-                })
-                .attr('x2', function (d) {
-                    return dataNodes[d.target].x;
-                })
-                .attr('y2', function (d) {
-                    return dataNodes[d.target].y;
-                });
+                //                .attr('x1', function (d) {
+                //                    return dataNodes[d.source].x;
+                //                })
+                //                .attr('y1', function (d) {
+                //                    return dataNodes[d.source].y;
+                //                })
+                //                .attr('x2', function (d) {
+                //                    return dataNodes[d.target].x;
+                //                })
+                //                .attr('y2', function (d) {
+                //                    return dataNodes[d.target].y;
+                //                });
 
             nodes = svg.selectAll("g")
                 .data(dataNodes)
@@ -662,6 +682,8 @@
             if (force.fullSpeed) {
 
                 links.attr('x1', function (d) {
+                        debugger;
+
                         return d.source.x;
                     })
                     .attr('y1', function (d) {

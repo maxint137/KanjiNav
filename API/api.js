@@ -13,6 +13,8 @@ module.exports = function (wagner) {
 
         return function (req, res) {
 
+            res.setHeader('Access-Control-Allow-Origin', '*');
+
             var rqWord = req.params.word;
 
             // keeping only the kanji

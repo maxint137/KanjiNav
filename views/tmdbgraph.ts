@@ -1,5 +1,5 @@
 ///<reference path="../extern/jquery.d.ts"/>
-module tmdb {
+module tmdb_ {
     export class NodeType {
         constructor(
             public type: string,
