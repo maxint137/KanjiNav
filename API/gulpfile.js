@@ -20,5 +20,5 @@ gulp.task('test', function() {
 });
 
 gulp.task('watch', function() {
-  gulp.watch(['./api.js', './index.js', './test.js'], ['test']);
+  gulp.watch(['./api.js', './index.js', './../model/models.js', './test.js'], ['test']);
 });
