@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <title>Force Layout Example 5</title>
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #b1afaf;
+        }
+        
+        .node {
+            fill: #ccc;
+            stroke: #fff;
+            stroke-width: 2px;
+        }
+        
+        .link {
+            stroke: #777;
+            stroke-width: 2px;
+        }
+        
+        .text {
+            /*http://jisho.org/search/%E5%8B%95%20%23kanji*/
+            font-family: "HiraKakuPro-W3", "Hiragino Kaku Gothic Pro W3", "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", "メイリオ", Meiryo, "游ゴシック", YuGothic, "ＭＳ Ｐゴシック", "MS PGothic", "ＭＳ ゴシック", "MS Gothic", sans-serif;
+            font-size: 22px;
+            text-align: left;
+            text-decoration: none;
+            font-weight: normal;
+            line-height: 1;
+        }
+        
+        button {
+            position: absolute;
+            width: 30px;
+        }
+        
+        button#play {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <button id='play' title='Next frame'>
+        <i class='fa fa-play'></i>
+    </button>
+
+    <script src='http://d3js.org/d3.v3.min.js'></script>
+    <script>
+        var responseData = {
+            "kanjis": [{
+                "_id": "58883418e46ff154dc7c1866",
+                "character": "動",
+                "JLPT": 4,
+                "__v": 1,
+                "words": [{
+                    "_id": "5882353f4df6c0316400e820",
+                    "word": "自動車",
+                    "hiragana": "じどうしゃ",
+                    "JLPT": 5,
+                    "english": ["Automobile"]
+                }, {
+                    "_id": "5882353f4df6c0316400e8a8",
+                    "word": "動物",
+                    "hiragana": "どうぶつ",
+                    "JLPT": 5,
+                    "english": ["animal"]
+                }, {
+                    "_id": "5882353f4df6c0316400e9da",
+                    "word": "動く",
+                    "hiragana": "うごく",
+                    "JLPT": 4,
+                    "english": ["to move"]
+                }, {
+                    "_id": "5882353f4df6c0316400e9e9",
+                    "word": "運動",
+                    "hiragana": "うんどう・する",
+                    "JLPT": 4,
+                    "english": ["to exercise"]
+                }, {
+                    "_id": "5882353f4df6c0316400eb52",
+                    "word": "動物園",
+                    "hiragana": "どうぶつえん",
+                    "JLPT": 4,
+                    "english": ["zoo"]
+                }, {
+                    "_id": "5882353f4df6c0316400ec90",
+                    "word": "移動",
+                    "hiragana": "いどう",
+                    "JLPT": 3,
+                    "english": ["removal", "migration", "movement"]
+                }, {
+                    "_id": "5882353f4df6c0316400ecb0",
+                    "word": "動かす",
+                    "hiragana": "うごかす",
+                    "JLPT": 3,
+                    "english": ["to move", "to shift"]
+                }, {
+                    "_id": "5882353f4df6c0316400ecca",
+                    "word": "運動",
+                    "hiragana": "うんどう",
+                    "JLPT": 3,
+                    "english": ["motion", "exercise"]
+                }, {
+                    "_id": "5882353f4df6c0316400ed62",
+                    "word": "活動",
+                    "hiragana": "かつどう",
+                    "JLPT": 3,
+                    "english": ["action", "activity"]
+                }, {
+                    "_id": "5882353f4df6c0316400ed93",
+                    "word": "感動",
+                    "hiragana": "かんどう",
+                    "JLPT": 3,
+                    "english": ["being deeply moved", "excitement", "impression", "deep emotion"]
+                }, {
+                    "_id": "5882353f4df6c0316400ee67",
+                    "word": "行動",
+                    "hiragana": "こうどう",
+                    "JLPT": 3,
+                    "english": ["action", "conduct", "behaviour", "mobilization"]
+                }, {
+                    "_id": "5882353f4df6c0316400ef05",
+                    "word": "自動",
+                    "hiragana": "じどう",
+                    "JLPT": 3,
+                    "english": ["automatic", "self-motion"]
+                }, {
+                    "_id": "5882353f4df6c0316400f0f5",
+                    "word": "動詞",
+                    "hiragana": "どうし",
+                    "JLPT": 3,
+                    "english": ["verb"]
+                }, {
+                    "_id": "5882353f4df6c0316400f51b",
+                    "word": "形容動詞",
+                    "hiragana": "けいようどうし",
+                    "JLPT": 2,
+                    "english": ["adjectival noun", "quasi-adjective"]
+                }, {
+                    "_id": "5882353f4df6c0316400f7f4",
+                    "word": "動作",
+                    "hiragana": "どうさ",
+                    "JLPT": 2,
+                    "english": ["action", "movements", "motions", "bearing", "behaviour", "manners"]
+                }, {
+                    "_id": "5882353f4df6c0316400fc46",
+                    "word": "形容動詞",
+                    "hiragana": "けいようどうし",
+                    "JLPT": 1,
+                    "english": ["adjectival noun", "quasi-adjective"]
+                }, {
+                    "_id": "5882353f4df6c0316400ff1f",
+                    "word": "動作",
+                    "hiragana": "どうさ",
+                    "JLPT": 1,
+                    "english": ["action", "movements", "motions", "bearing", "behaviour", "manners"]
+                }],
+                "english": ["move", "motion", " change", " confusion", " shift", " shake"],
+                "kunyomi": ["うご.く"],
+                "onyomi": ["ドウ", "ウゴ.カ"]
+            }, {
+                "_id": "58883418e46ff154dc7c1890",
+                "character": "物",
+                "JLPT": 4,
+                "__v": 1,
+                "words": [{
+                    "_id": "5882353f4df6c0316400e797",
+                    "word": "買い物",
+                    "hiragana": "かいもの",
+                    "JLPT": 5,
+                    "english": ["Shopping"]
+                }, {
+                    "_id": "5882353f4df6c0316400e7d5",
+                    "word": "果物",
+                    "hiragana": "くだもの",
+                    "JLPT": 5,
+                    "english": ["Fruit"]
+                }, {
+                    "_id": "5882353f4df6c0316400e86d",
+                    "word": "建物",
+                    "hiragana": "たてもの",
+                    "JLPT": 5,
+                    "english": ["building"]
+                }, {
+                    "_id": "5882353f4df6c0316400e872",
+                    "word": "食べ物",
+                    "hiragana": "たべもの",
+                    "JLPT": 5,
+                    "english": ["food"]
+                }, {
+                    "_id": "5882353f4df6c0316400e8a8",
+                    "word": "動物",
+                    "hiragana": "どうぶつ",
+                    "JLPT": 5,
+                    "english": ["animal"]
+                }, {
+                    "_id": "5882353f4df6c0316400e8d7",
+                    "word": "荷物",
+                    "hiragana": "にもつ",
+                    "JLPT": 5,
+                    "english": ["luggage"]
+                }, {
+                    "_id": "5882353f4df6c0316400e8e1",
+                    "word": "飲み物",
+                    "hiragana": "のみもの",
+                    "JLPT": 5,
+                    "english": ["a drink"]
+                }, {
+                    "_id": "5882353f4df6c0316400e96e",
+                    "word": "物",
+                    "hiragana": "もの",
+                    "JLPT": 5,
+                    "english": ["thing"]
+                }, {
+                    "_id": "5882353f4df6c0316400e9f5",
+                    "word": "贈り物",
+                    "hiragana": "おくりもの",
+                    "JLPT": 4,
+                    "english": ["gift"]
+                }, {
+                    "_id": "5882353f4df6c0316400ea4e",
+                    "word": "着物",
+                    "hiragana": "きもの",
+                    "JLPT": 4,
+                    "english": ["kimono"]
+                }, {
+                    "_id": "5882353f4df6c0316400ea72",
+                    "word": "見物",
+                    "hiragana": "けんぶつ",
+                    "JLPT": 4,
+                    "english": ["sightseeing"]
+                }, {
+                    "_id": "5882353f4df6c0316400eaba",
+                    "word": "品物",
+                    "hiragana": "しなもの",
+                    "JLPT": 4,
+                    "english": ["goods"]
+                }, {
+                    "_id": "5882353f4df6c0316400eb52",
+                    "word": "動物園",
+                    "hiragana": "どうぶつえん",
+                    "JLPT": 4,
+                    "english": ["zoo"]
+                }, {
+                    "_id": "5882353f4df6c0316400eb82",
+                    "word": "乗り物",
+                    "hiragana": "のりもの",
+                    "JLPT": 4,
+                    "english": ["vehicle"]
+                }, {
+                    "_id": "5882353f4df6c0316400ec1c",
+                    "word": "忘れ物",
+                    "hiragana": "わすれもの",
+                    "JLPT": 4,
+                    "english": ["lost article"]
+                }, {
+                    "_id": "5882353f4df6c0316400ec67",
+                    "word": "生き物",
+                    "hiragana": "いきもの",
+                    "JLPT": 3,
+                    "english": ["living thing", "animal"]
+                }, {
+                    "_id": "5882353f4df6c0316400ee7c",
+                    "word": "穀物",
+                    "hiragana": "こくもつ",
+                    "JLPT": 3,
+                    "english": ["grain", "cereal", "corn"]
+                }, {
+                    "_id": "5882353f4df6c0316400eeb5",
+                    "word": "作物",
+                    "hiragana": "さくもつ",
+                    "JLPT": 3,
+                    "english": ["produce (e.g. agricultural)", "crops"]
+                }, {
+                    "_id": "5882353f4df6c0316400ef6e",
+                    "word": "植物",
+                    "hiragana": "しょくぶつ",
+                    "JLPT": 3,
+                    "english": ["plant", "vegetation"]
+                }, {
+                    "_id": "5882353f4df6c0316400ef6f",
+                    "word": "食物",
+                    "hiragana": "しょくもつ",
+                    "JLPT": 3,
+                    "english": ["food", "foodstuff"]
+                }, {
+                    "_id": "5882353f4df6c0316400ef78",
+                    "word": "書物",
+                    "hiragana": "しょもつ",
+                    "JLPT": 3,
+                    "english": ["books"]
+                }, {
+                    "_id": "5882353f4df6c0316400ef93",
+                    "word": "人物",
+                    "hiragana": "じんぶつ",
+                    "JLPT": 3,
+                    "english": ["character", "personality", "person", "man", "personage", "talented man"]
+                }, {
+                    "_id": "5882353f4df6c0316400efdd",
+                    "word": "生物",
+                    "hiragana": "せいぶつ",
+                    "JLPT": 3,
+                    "english": ["raw food"]
+                }, {
+                    "_id": "5882353f4df6c0316400f1a3",
+                    "word": "博物館",
+                    "hiragana": "はくぶつかん",
+                    "JLPT": 3,
+                    "english": ["museum"]
+                }, {
+                    "_id": "5882353f4df6c0316400f21a",
+                    "word": "物価",
+                    "hiragana": "ぶっか",
+                    "JLPT": 3,
+                    "english": ["prices of commodities", "prices (in general)"]
+                }, {
+                    "_id": "5882353f4df6c0316400f21b",
+                    "word": "物質",
+                    "hiragana": "ぶっしつ",
+                    "JLPT": 3,
+                    "english": ["material", "substance"]
+                }, {
+                    "_id": "5882353f4df6c0316400f21c",
+                    "word": "物理",
+                    "hiragana": "ぶつり",
+                    "JLPT": 3,
+                    "english": ["physics"]
+                }, {
+                    "_id": "5882353f4df6c0316400f264",
+                    "word": "本物",
+                    "hiragana": "ほんもの",
+                    "JLPT": 3,
+                    "english": ["genuine article"]
+                }, {
+                    "_id": "5882353f4df6c0316400f2d2",
+                    "word": "物音",
+                    "hiragana": "ものおと",
+                    "JLPT": 3,
+                    "english": ["sounds"]
+                }, {
+                    "_id": "5882353f4df6c0316400f2d3",
+                    "word": "物語",
+                    "hiragana": "ものがたり",
+                    "JLPT": 3,
+                    "english": ["tale", "story", "legend"]
+                }, {
+                    "_id": "5882353f4df6c0316400f2d4",
+                    "word": "物事",
+                    "hiragana": "ものごと",
+                    "JLPT": 3,
+                    "english": ["things", "everything"]
+                }, {
+                    "_id": "5882353f4df6c0316400f371",
+                    "word": "編物",
+                    "hiragana": "あみもの",
+                    "JLPT": 2,
+                    "english": ["knitting", "web"]
+                }, {
+                    "_id": "5882353f4df6c0316400f3a9",
+                    "word": "入れ物",
+                    "hiragana": "いれもの",
+                    "JLPT": 2,
+                    "english": ["container", "case", "receptacle"]
+                }, {
+                    "_id": "5882353f4df6c0316400f412",
+                    "word": "落し物",
+                    "hiragana": "おとしもの",
+                    "JLPT": 2,
+                    "english": ["lost property"]
+                }, {
+                    "_id": "5882353f4df6c0316400f497",
+                    "word": "貨物",
+                    "hiragana": "かもつ",
+                    "JLPT": 2,
+                    "english": ["cargo", "freight"]
+                }, {
+                    "_id": "5882353f4df6c0316400f560",
+                    "word": "鉱物",
+                    "hiragana": "こうぶつ",
+                    "JLPT": 2,
+                    "english": ["mineral"]
+                }, {
+                    "_id": "5882353f4df6c0316400f5ff",
+                    "word": "実物",
+                    "hiragana": "じつぶつ",
+                    "JLPT": 2,
+                    "english": ["real thing", "original"]
+                }, {
+                    "_id": "5882353f4df6c0316400f6dd",
+                    "word": "瀬戸物",
+                    "hiragana": "せともの",
+                    "JLPT": 2,
+                    "english": ["earthenware", "crockery", "china"]
+                }, {
+                    "_id": "5882353f4df6c0316400f869",
+                    "word": "農産物",
+                    "hiragana": "のうさんぶつ",
+                    "JLPT": 2,
+                    "english": ["agricultural produce"]
+                }, {
+                    "_id": "5882353f4df6c0316400f91f",
+                    "word": "物騒",
+                    "hiragana": "ぶっそう",
+                    "JLPT": 2,
+                    "english": ["dangerous", "disturbed", "insecure"]
+                }, {
+                    "_id": "5882353f4df6c0316400f9d1",
+                    "word": "名物",
+                    "hiragana": "めいぶつ",
+                    "JLPT": 2,
+                    "english": ["famous product", "special product", "speciality"]
+                }, {
+                    "_id": "5882353f4df6c0316400f9f5",
+                    "word": "物置",
+                    "hiragana": "ものおき",
+                    "JLPT": 2,
+                    "english": ["storage room"]
+                }, {
+                    "_id": "5882353f4df6c0316400f9f6",
+                    "word": "物語る",
+                    "hiragana": "ものがたる",
+                    "JLPT": 2,
+                    "english": ["to tell", "to indicate"]
+                }, {
+                    "_id": "5882353f4df6c0316400f9f7",
+                    "word": "物差し",
+                    "hiragana": "ものさし",
+                    "JLPT": 2,
+                    "english": ["ruler", "measure"]
+                }, {
+                    "_id": "5882353f4df6c0316400f9f8",
+                    "word": "物凄い",
+                    "hiragana": "ものすごい",
+                    "JLPT": 2,
+                    "english": ["earth-shattering", "staggering", "to a very great extent"]
+                }, {
+                    "_id": "5882353f4df6c0316400fa9c",
+                    "word": "編物",
+                    "hiragana": "あみもの",
+                    "JLPT": 1,
+                    "english": ["knitting", "web"]
+                }, {
+                    "_id": "5882353f4df6c0316400fad4",
+                    "word": "入れ物",
+                    "hiragana": "いれもの",
+                    "JLPT": 1,
+                    "english": ["container", "case", "receptacle"]
+                }, {
+                    "_id": "5882353f4df6c0316400fb3d",
+                    "word": "落し物",
+                    "hiragana": "おとしもの",
+                    "JLPT": 1,
+                    "english": ["lost property"]
+                }, {
+                    "_id": "5882353f4df6c0316400fbc2",
+                    "word": "貨物",
+                    "hiragana": "かもつ",
+                    "JLPT": 1,
+                    "english": ["cargo", "freight"]
+                }, {
+                    "_id": "5882353f4df6c0316400fc8b",
+                    "word": "鉱物",
+                    "hiragana": "こうぶつ",
+                    "JLPT": 1,
+                    "english": ["mineral"]
+                }, {
+                    "_id": "5882353f4df6c0316400fd2a",
+                    "word": "実物",
+                    "hiragana": "じつぶつ",
+                    "JLPT": 1,
+                    "english": ["real thing", "original"]
+                }, {
+                    "_id": "5882353f4df6c0316400fe08",
+                    "word": "瀬戸物",
+                    "hiragana": "せともの",
+                    "JLPT": 1,
+                    "english": ["earthenware", "crockery", "china"]
+                }, {
+                    "_id": "5882353f4df6c0316400ff94",
+                    "word": "農産物",
+                    "hiragana": "のうさんぶつ",
+                    "JLPT": 1,
+                    "english": ["agricultural produce"]
+                }, {
+                    "_id": "5882353f4df6c0316401004a",
+                    "word": "物騒",
+                    "hiragana": "ぶっそう",
+                    "JLPT": 1,
+                    "english": ["dangerous", "disturbed", "insecure"]
+                }, {
+                    "_id": "5882353f4df6c031640100fc",
+                    "word": "名物",
+                    "hiragana": "めいぶつ",
+                    "JLPT": 1,
+                    "english": ["famous product", "special product", "speciality"]
+                }, {
+                    "_id": "5882353f4df6c03164010120",
+                    "word": "物置",
+                    "hiragana": "ものおき",
+                    "JLPT": 1,
+                    "english": ["storage room"]
+                }, {
+                    "_id": "5882353f4df6c03164010121",
+                    "word": "物語る",
+                    "hiragana": "ものがたる",
+                    "JLPT": 1,
+                    "english": ["to tell", "to indicate"]
+                }, {
+                    "_id": "5882353f4df6c03164010122",
+                    "word": "物差し",
+                    "hiragana": "ものさし",
+                    "JLPT": 1,
+                    "english": ["ruler", "measure"]
+                }, {
+                    "_id": "5882353f4df6c03164010123",
+                    "word": "物凄い",
+                    "hiragana": "ものすごい",
+                    "JLPT": 1,
+                    "english": ["earth-shattering", "staggering", "to a very great extent"]
+                }],
+                "english": ["thing", "object", " matter"],
+                "kunyomi": ["もの", "もの-"],
+                "onyomi": ["ブツ", "モツ"]
+            }]
+        }
+    </script>
+    <script>
+        var width = 640,
+            height = 480;
+
+        var animationStep = 400;
+
+        var force = null,
+            nodes = null,
+            links = null;
+
+        var svg = d3.select('body').append('svg')
+            .attr('width', width)
+            .attr('height', height);
+
+        var initForce = function () {
+            svg.selectAll('*').remove();
+
+            var dataNodes = [
+                {
+                    x: width / 3,
+                    y: height / 3,
+                    graph: 0
+                },
+                {
+                    x: width / 3,
+                    y: 2 * height / 3,
+                    graph: 0
+                },
+                {
+                    x: 2 * width / 3,
+                    y: height / 3,
+                    graph: 1
+                },
+                {
+                    x: 2 * width / 3,
+                    y: 2 * height / 3,
+                    graph: 1
+                }
+            ];
+
+            var dataLinks = [
+                {
+                    source: 0,
+                    target: 1
+                },
+                {
+                    source: 2,
+                    target: 3
+                }
+            ];
+
+            force = d3.layout.force()
+                .size([width, height])
+                .nodes(dataNodes)
+                .links(dataLinks);
+
+            force.gravity(0);
+            force.linkDistance(height / 6);
+            force.linkStrength(0.1);
+
+            force.charge(function (node) {
+                return node.graph === 0 ? -30 : -3;
+            });
+
+            links = svg.selectAll('.link')
+                .data(dataLinks)
+                .enter().append('line')
+                .attr('class', 'link')
+                .attr('x1', function (d) {
+                    return dataNodes[d.source].x;
+                })
+                .attr('y1', function (d) {
+                    return dataNodes[d.source].y;
+                })
+                .attr('x2', function (d) {
+                    return dataNodes[d.target].x;
+                })
+                .attr('y2', function (d) {
+                    return dataNodes[d.target].y;
+                });
+
+            nodes = svg.selectAll("g")
+                .data(dataNodes)
+                .enter().append("g")
+                .attr("transform", function (d, i) {
+                    return "translate(" + (d.x) + "," + (d.y) + ")";
+                });
+
+            nodes.append("circle")
+                .attr("r", "2.0em")
+                .attr('class', 'node');
+
+            nodes.append("text")
+                .attr('class', 'text')
+                .attr("dx", "-1.0em")
+                .attr("dy", "0.3em")
+                .text(function (d) {
+                    return '動物'
+                })
+                .attr("transform", function (d, i) {
+                    //return "translate(" + 0 + "," + (size / 2) + ")";
+                });
+
+            force.on('tick', stepForce);
+
+        };
+
+        var stepForce = function () {
+
+            if (force.fullSpeed) {
+
+                nodes.attr('cx', function (d) {
+                        return d.x;
+                    })
+                    .attr('cy', function (d) {
+                        return d.y;
+                    })
+                    .attr('transform', function (d) {
+                        return "translate(" + (d.x) + "," + (d.y) + ")";
+                    });
+            } else {
+
+                nodes.transition().ease('linear').duration(animationStep)
+                    .attr('cx', function (d) {
+                        return d.x;
+                    })
+                    .attr('cy', function (d) {
+                        return d.y;
+                    });
+            }
+
+
+            if (force.fullSpeed) {
+
+                links.attr('x1', function (d) {
+                        return d.source.x;
+                    })
+                    .attr('y1', function (d) {
+                        return d.source.y;
+                    })
+                    .attr('x2', function (d) {
+                        return d.target.x;
+                    })
+                    .attr('y2', function (d) {
+                        return d.target.y;
+                    });
+
+            } else {
+
+                links.transition().ease('linear').duration(animationStep)
+                    .attr('x1', function (d) {
+                        return d.source.x;
+                    })
+                    .attr('y1', function (d) {
+                        return d.source.y;
+                    })
+                    .attr('x2', function (d) {
+                        return d.target.x;
+                    })
+                    .attr('y2', function (d) {
+                        return d.target.y;
+                    });
+            }
+
+            if (!force.fullSpeed) {
+                force.stop();
+            }
+
+            // If we're animating the layout in slow motion, continue
+            // after a delay to allow the animation to take effect.
+
+            if (force.slowMotion) {
+                setTimeout(
+                    function () {
+                        force.start();
+                    },
+                    animationStep
+                );
+            }
+        };
+
+        d3.select('#play').on('click', function () {
+
+            force.slowMotion = false;
+            force.fullSpeed = true;
+
+            force.start();
+
+        });
+
+
+        initForce();
+    </script>
+
+</body>
+
+</html>
