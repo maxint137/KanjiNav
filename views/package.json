@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "underscore": "latest",
+    "webcola": "^3.3.0"
+  }
+}
