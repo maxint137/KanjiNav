@@ -41,6 +41,7 @@ describe('KanjiNav API', function () {
     });
 
 
+    // UF have a test for 大部分 - the last kanji is not in the DB
 
     var method2 = '/word/品川プリンスホテル';
     method2 = '/word/砂糖'
