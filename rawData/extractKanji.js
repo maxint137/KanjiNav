@@ -5,7 +5,7 @@ var d3 = require("d3");
 var us = require("underscore");
 
 var mongodb = require('mongodb');
-var uri = 'mongodb://localhost:27017/TestDB';
+var uri = 'mongodb://localhost:27018/TestDB';
 
 var KanjiList = ["JLPT5/KanjiList.N5.tsv",
                  "JLPT4/KanjiList.N4.tsv",
@@ -20,10 +20,6 @@ var VocabList = ["JLPT5/VocabList.N5.tsv",
                  "JLPT2/VocabList.N2.tsv",
                  "JLPT1/VocabList.N1.tsv"
 ];
-
-
-var Promise = require('promise');
-
 
 function extractDocs(filename, extractor) {
 

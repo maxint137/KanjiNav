@@ -1,6 +1,7 @@
 {
     "dependencies": {
         "mongoose": "latest",
+        "wagner-core": "latest",
         "bluebird": "latest"
     }
 }

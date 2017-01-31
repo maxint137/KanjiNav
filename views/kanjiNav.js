@@ -52,8 +52,6 @@ var kanjiNav;
         }
         Graph.prototype.getNode = function (type, id, f) {
             var _this = this;
-            console.log("getNode->" + id);
-            debugger;
             var d = $.Deferred();
             var name = type + id.toString();
             if (name in this.nodes) {
@@ -69,9 +67,14 @@ var kanjiNav;
                     if (null == v) {
                         return;
                     }
-                    var neighbourname = type.next() + v.character;
-                    if (neighbourname in _this.nodes) {
-                        _this.addEdge(node, _this.nodes[neighbourname]);
+                    try {
+                        var neighbourname = type.next() + v.character;
+                        if (neighbourname in _this.nodes) {
+                            _this.addEdge(node, _this.nodes[neighbourname]);
+                        }
+                    }
+                    catch (error) {
+                        debugger;
                     }
                 });
                 d.resolve(node);
@@ -80,7 +83,12 @@ var kanjiNav;
         };
         Graph.prototype.expandNeighbours = function (node, f) {
             var _this = this;
-            var dn = node.cast.map(function (c) { return _this.getNode(node.type.next(), c[node.type.next().id], function (v) {
+            if (node.cast.filter(function (c) { return !c; }).length) {
+                console.log("Nulls for " + node.id);
+            }
+            var dn = node.cast
+                .filter(function (c) { return null != c; })
+                .map(function (c) { return _this.getNode(node.type.next(), c[node.type.next().id], function (v) {
                 //v.label = c[v.type.label];
                 _this.addEdge(node, v);
                 f(v);
@@ -95,7 +103,12 @@ var kanjiNav;
         };
         Graph.prototype.fullyExpanded = function (node) {
             var _this = this;
-            return node.cast && node.cast.every(function (v) { return (node.type.next() + v[node.type.next().id]) in _this.nodes; });
+            if (node.cast && 0 < node.cast.filter(function (v) { return !v; }).length) {
+                console.log("Nulls for " + node.id);
+            }
+            return node.cast && node.cast
+                .filter(function (v) { return null != v; })
+                .every(function (v) { return (node.type.next() + v[node.type.next().id]) in _this.nodes; });
         };
         Graph.prototype.addNode = function (type, id) {
             var node = new Node(type, id);

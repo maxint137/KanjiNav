@@ -124,7 +124,8 @@
         var nodeWidth = 30, nodeHeight = 35;
 
         // get first node
-        var d = modelgraph.getNode(kanjiNav.Word, '砂糖');   // 50034, 17609
+        var start = getParameterByName('start') || '楽しい';
+        var d = modelgraph.getNode(kanjiNav.Word, start);   // 50034, 17609
         $.when(d).then(function (startNode) {
             //debugger;
             addViewNode(startNode);
@@ -332,6 +333,19 @@
             zoom.translate([tx, ty]).scale(s);
             redraw(true);
         }
+
+        function getParameterByName(name, url) {
+            if (!url) {
+                url = window.location.href;
+            }
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+
     </script>
 <button onclick="fullScreen(outer[0][0], fullScreenCancel);zoomToFit()">Full screen</button>
 <button onclick="zoomToFit()">Zoom to fit (or double click)</button>

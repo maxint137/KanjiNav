@@ -56,9 +56,6 @@ module kanjiNav {
 
         getNode(type: NodeType, id: string, f: (v: Node) => void): JQueryPromise<Node> {
 
-            console.log("getNode->" + id);
-            debugger;
-
             var d = $.Deferred<Node>();
             var name: string = type + id.toString();
             if (name in this.nodes) {
@@ -79,10 +76,16 @@ module kanjiNav {
                         return;
                     }
 
-                    var neighbourname: string = type.next() + v.character;
-                    if (neighbourname in this.nodes) {
-                        this.addEdge(node, this.nodes[neighbourname]);
+                    try {
+
+                        var neighbourname: string = type.next() + v.character;
+                        if (neighbourname in this.nodes) {
+                            this.addEdge(node, this.nodes[neighbourname]);
+                        }
+                    } catch (error) {
+                        debugger;
                     }
+
                 });
                 d.resolve(node);
             });
@@ -90,7 +93,14 @@ module kanjiNav {
         }
 
         expandNeighbours(node: Node, f: (v: Node) => void): JQueryPromise<Node[]> {
-            var dn = node.cast.map(c => this.getNode(node.type.next(), c[node.type.next().id], v => {
+
+            if (node.cast.filter(c => !c).length) {
+                console.log("Nulls for " + node.id);
+            }
+
+            var dn = node.cast
+                        .filter(c => null != c)
+                        .map(c => this.getNode(node.type.next(), c[node.type.next().id], v => {
                 //v.label = c[v.type.label];
                 this.addEdge(node, v);
                 f(v);
@@ -105,7 +115,14 @@ module kanjiNav {
         }
 
         fullyExpanded(node: Node): boolean {
-            return node.cast && node.cast.every(v => (node.type.next() + v[node.type.next().id]) in this.nodes);
+
+            if (node.cast && 0 < node.cast.filter(v => !v).length) {
+                console.log("Nulls for " + node.id);
+            }
+
+            return node.cast && node.cast
+                .filter(v => null != v)
+                .every(v => (node.type.next() + v[node.type.next().id]) in this.nodes);
         }
 
         addNode(type: NodeType, id: string): Node {

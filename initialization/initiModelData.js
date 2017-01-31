@@ -1,14 +1,14 @@
 // infra
 var Promise = require("bluebird");
 var Mongoose = Promise.promisifyAll(require('mongoose'));
+var wagner = require('wagner-core');
 
-// app
-var Db = require('./../model/db');
-var KanjiModel = require('./../model/kanji').Model;
-var WordModel = require('./../model/word').Model;
+require('./../model/models')(wagner);
+
+wagner.invoke(function (Kanji) {
 
 // find all the kanjis without the assigned words:
-KanjiModel.findAsync({
+Kanji.findAsync({
     words: {
         $exists: false
     }
@@ -18,15 +18,18 @@ KanjiModel.findAsync({
 
     Promise.map(kanjis, function (nextKanji, index) {
 
-        console.log("Kick find-words for #" + index + ", " + nextKanji.character.charCodeAt(0));
+        console.log("Kick find-words for #" + index + ", " + nextKanji.character);
 
-        var words = WordModel.findAsync({
-            word: new RegExp(nextKanji.character)
+        var words = [];
+        wagner.invoke(function (Word) {
+            words = Word.findAsync({
+                word: new RegExp(nextKanji.character)
+            });
         });
 
         return words;
     }, {concurrency: 7}).map(function (words, index) {
-        console.log('Mapping ' + words.length + ' words for ' + kanjis[index].character.charCodeAt(0) + ' #' + index);
+        console.log('Mapping ' + words.length + ' words for ' + kanjis[index].character + ' #' + index);
 
         words.forEach(function (w) {
             kanjis[index].words.push(w._id);
@@ -47,3 +50,7 @@ KanjiModel.findAsync({
         process.exit(-1);
     });
 });
+});
+
+return;
+
