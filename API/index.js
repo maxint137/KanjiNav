@@ -1,5 +1,6 @@
 var express = require('express');
 var wagner = require('wagner-core');
+var path = require('path')
 
 require('./../model/models')(wagner);
 
@@ -10,12 +11,9 @@ app.use('/api/v1', require('./api')(wagner));
 app.use(express.static('./../views'));
 app.use('/extern', express.static('./../extern'));
 
-
-var options = {
-  index: "./../views/navigateKanji.html"
-};
-app.use('/', express.static('app', options));
-
+app.get('/', function(req, res) {
+    res.sendFile(path.join(__dirname + '/../views/navigateKanji.html'));
+});
 
 app.listen(3000);
 console.log('Listening on port 3000!');
