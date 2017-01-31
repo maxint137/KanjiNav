@@ -8,7 +8,7 @@ var wagner = require('wagner-core');
 
 var URL_ROOT = 'http://localhost:3000';
 
-describe('Category API', function () {
+describe('KanjiNav API', function () {
     var server;
     var Category;
 
@@ -40,48 +40,43 @@ describe('Category API', function () {
 
     });
 
-    var testWord1 = 'moshe';
-    it('returns 404 for GET wordNav/word/' + testWord1, function (done) {
 
-        var url = encodeURI(URL_ROOT + '/wordNav/word/' + testWord1);
-        superagent.getAsync(url)
-            .then(function (err, res) {
-                assert.ok(false, 'Was supposed to fail for that request');
-                done();
-            })
-            .catch(function (e) {
-                console.log(e)
-                assert.equal(404, e.status);
-                done();
-            });
-    });
 
-    var testWord2 = '砂糖い';
-    it('returns 2 (filled) kanji for GET wordNav/word/' + testWord2, function (done) {
+    var method2 = '/word/品川プリンスホテル';
+    method2 = '/word/砂糖'
+    it('returns 2 (filled) kanji for GET ' + method2, function (done) {
 
-        var url = encodeURI(URL_ROOT + '/wordNav/word/' + testWord2);
+        var url = encodeURI(URL_ROOT + method2);
 
         superagent.getAsync(url)
             .then(function (res) {
-
-                var result;
+                var word;
                 assert.doesNotThrow(function () {
-                    result = JSON.parse(res.text);
+                    word = JSON.parse(res.text);
                 });
 
-                //console.log(JSON.stringify(result, null, '  '));
+                //console.log(JSON.stringify(word, null, '  '));
 
-                assert.equal(result.kanjis.length, 2);
+                assert.equal(word.kanjis.length, 2);
 
-                assert.equal(result.kanjis[0].character, '砂');
-                assert.equal(result.kanjis[1].character, '糖');
+                assert.equal(method2.split('').reverse()[1], word.kanjis[0].character);
+                assert.equal(method2.split('').reverse()[0], word.kanjis[1].character);
 
-                _.each(result.kanjis[0].words, function (word) {
-                    assert.ok(word.JLPT);
-                });
-                _.each(result.kanjis[1].words, function (word) {
-                    assert.ok(word.JLPT);
-                });
+                assert.ok(word.word);
+                assert.ok(word.hiragana);
+                assert.ok(word.JLPT);
+                assert.ok(word.english);
+                assert.equal(true, 0 in word.english);
+
+                word.kanjis.forEach(function (kanji) {
+                    assert.equal(true, 0 in kanji.english);
+                    assert.equal(true, 0 in kanji.words);
+
+                    assert.ok(kanji.JLPT);
+                    assert.ok(kanji.kunyomi);
+                    assert.ok(kanji.onyomi);
+                    assert.ok(kanji.english);
+                }, this);
 
                 done();
             })
@@ -92,4 +87,65 @@ describe('Category API', function () {
 
             });
     });
+
+    var method3 = '/word/砂糖ス'
+    it('can`t handle unknown words ' + method3, function (done) {
+
+        var url = encodeURI(URL_ROOT + method3);
+
+        superagent.getAsync(url)
+            .then(function (res) {
+                var word;
+                assert.doesNotThrow(function () {
+                    word = JSON.parse(res.text);
+                });
+                done();
+            }) .catch(function (e) {
+                //console.log(e)
+                assert.ifError(e);
+                done();
+            });
+    });
+
+    var method = '/kanji/砂';
+    it('returns kanji with words for GET ' + method, function (done) {
+
+        var url = encodeURI(URL_ROOT + method);
+        superagent.getAsync(url)
+            .then(function (res) {
+                var kanji;
+                assert.doesNotThrow(function () {
+                    kanji = JSON.parse(res.text);
+                });
+
+                //console.log(JSON.stringify(kanji, null, '  '));
+
+                // check the kanji's properties
+                assert.equal(method.split('').reverse()[0], kanji.character);
+                assert.ok(kanji.JLPT);
+                assert.ok(kanji.kunyomi);
+                assert.ok(kanji.onyomi);
+                assert.ok(kanji.english);
+                assert.equal(true, 0 in kanji.english);
+                assert.equal(true, 0 in kanji.words);
+
+                // make sure the words are populated
+                kanji.words.forEach(function (word) {
+                    assert.ok(word.word);
+                    assert.ok(word.hiragana);
+                    assert.ok(word.JLPT);
+                    assert.ok(word.english);
+                    assert.equal(true, 0 in word.english);
+                }, this);
+
+                done();
+            })
+            .catch(function (e) {
+                //console.log(e)
+                assert.ifError(e);
+                done();
+            });
+    });
+
 });
+

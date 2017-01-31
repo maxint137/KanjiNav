@@ -37,4 +37,3 @@ process.on('SIGINT', function () {
 // BRING IN THE SCHEMAS & MODELS
 require('./kanji');
 require('./word');
-require('./wordNav');

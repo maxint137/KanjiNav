@@ -12,7 +12,6 @@ module.exports = function (wagner) {
     var models = {
         Kanji: mongoose.model('Kanji', require('./Kanji')),
         Word: mongoose.model('Word', require('./Word')),
-        WordNav: mongoose.model('WordNav', require('./WordNav'))
     };
     
     _.each(models, function(value, key){

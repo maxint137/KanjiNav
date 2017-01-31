@@ -114,8 +114,8 @@ module tmdb {
 
         var d = $.Deferred<any>();
 
-        // http://localhost:3000/api/v1/wordNav/word/品川
-        var query = "http://localhost:3000/api/v1/wordNav/word/" + id;
+        // http://localhost:3000/api/v1/word/品川
+        var query = "http://localhost:3000/api/v1/word/" + id;
 
         return $.get(query);
     }

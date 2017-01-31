@@ -6,8 +6,6 @@ var Mongoose = Promise.promisifyAll(require('mongoose'));
 var Db = require('./../model/db');
 var KanjiModel = require('./../model/kanji').Model;
 var WordModel = require('./../model/word').Model;
-var WordNavModel = require('./../model/wordNav').Model;
-
 
 // find all the kanjis without the assigned words:
 KanjiModel.findAsync({

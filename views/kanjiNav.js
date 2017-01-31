@@ -112,8 +112,8 @@ var tmdb;
     tmdb.Edge = Edge;
     function request(type, id) {
         var d = $.Deferred();
-        // http://localhost:3000/api/v1/wordNav/word/品川
-        var query = "http://localhost:3000/api/v1/wordNav/word/" + id;
+        // http://localhost:3000/api/v1/word/品川
+        var query = "http://localhost:3000/api/v1/word/" + id;
         return $.get(query);
     }
 })(tmdb || (tmdb = {}));

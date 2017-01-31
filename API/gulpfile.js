@@ -15,6 +15,7 @@ gulp.task('test', function() {
     on('end', function() {
       if (!error) {
         console.log('Tests succeeded!');
+        process.exit(0);
       }
     });
 });

@@ -4,6 +4,9 @@ var mongoose = Promise.promisifyAll(require('mongoose')),
 
 mongoose.Promise = global.Promise;
 
+var KanjiSchema = require('./kanji');
+
+
 var WordSchema = module.exports = new mongoose.Schema({
     word: {
         type: String,
@@ -25,5 +28,9 @@ var WordSchema = module.exports = new mongoose.Schema({
         min: 1,
         max: 5
     },
+
+    // these aren't a part of the Word document, instead filling these on the fly
+    kanjis: [KanjiSchema]
 });
+
 
