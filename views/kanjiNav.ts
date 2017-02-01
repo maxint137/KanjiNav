@@ -28,6 +28,7 @@ module kanjiNav {
         cast: any[];
         jlpt: number;
         english: string[];
+        hiragana: string;
         onyomi: string[];
         kunyomi: string[];
 
@@ -43,8 +44,13 @@ module kanjiNav {
         copyData(data: any): Node {
             this.jlpt = data.JLPT;
             this.english = data.english;
+            this.hiragana = data.hiragana;
             this.onyomi = data.onyomi;
             this.kunyomi = data.kunyomi;
+
+            if (this.type.castSel in data) {
+                this.cast = data[this.type.castSel];
+            }
 
             return this;
         }
@@ -56,7 +62,7 @@ module kanjiNav {
 
         constructor(public jlptFilter: string) { }
 
-        getNode(type: NodeType, id: string, f: (v: Node) => void): JQueryPromise<Node> {
+        getNode(type: NodeType, id: string, f: (v: Node) => void, parent?: Node): JQueryPromise<Node> {
 
             var d = $.Deferred<Node>();
             var name: string = type + id.toString();
@@ -64,6 +70,11 @@ module kanjiNav {
                 return this.nodes[name];
             }
             var node = this.addNode(type, id);
+
+            if (parent && 0 != parent.cast.filter(c => c[type.id] == id).length) {
+
+                node.copyData(parent.cast.filter(c => c[type.id] == id)[0]);
+            }
 
             f === undefined || f(node);
 
@@ -80,7 +91,7 @@ module kanjiNav {
 
                     try {
 
-                        var neighbourname: string = type.next() + v.character;
+                        var neighbourname: string = type.next() + v[type.next().id];
                         if (neighbourname in this.nodes) {
                             this.addEdge(node, this.nodes[neighbourname]);
                         }
@@ -100,13 +111,15 @@ module kanjiNav {
                 console.log("Nulls for " + node.id);
             }
 
+            // fetch the nodes listed in the cast, bridge edges to these, and call back the client (so it can addViewNode)
             var dn = node.cast
-                .filter(c => null != c)
-                .map(c => this.getNode(node.type.next(), c[node.type.next().id], v => {
-                    //v.label = c[v.type.label];
-                    this.addEdge(node, v);
-                    f(v);
-                }));
+                    //.filter(c => null != c)
+                    .map(c => this.getNode(node.type.next(), c[node.type.next().id], v => {
+                        //v.label = c[v.type.label];
+                        this.addEdge(node, v);
+                        f(v);
+                    }, node));
+
             var d = $.Deferred<Node[]>();
             $.when.apply($, dn)
                 .then(function () {

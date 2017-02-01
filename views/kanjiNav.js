@@ -38,8 +38,12 @@ var kanjiNav;
         Node.prototype.copyData = function (data) {
             this.jlpt = data.JLPT;
             this.english = data.english;
+            this.hiragana = data.hiragana;
             this.onyomi = data.onyomi;
             this.kunyomi = data.kunyomi;
+            if (this.type.castSel in data) {
+                this.cast = data[this.type.castSel];
+            }
             return this;
         };
         return Node;
@@ -51,7 +55,7 @@ var kanjiNav;
             this.nodes = {};
             this.edges = {};
         }
-        Graph.prototype.getNode = function (type, id, f) {
+        Graph.prototype.getNode = function (type, id, f, parent) {
             var _this = this;
             var d = $.Deferred();
             var name = type + id.toString();
@@ -59,6 +63,9 @@ var kanjiNav;
                 return this.nodes[name];
             }
             var node = this.addNode(type, id);
+            if (parent && 0 != parent.cast.filter(function (c) { return c[type.id] == id; }).length) {
+                node.copyData(parent.cast.filter(function (c) { return c[type.id] == id; })[0]);
+            }
             f === undefined || f(node);
             var cast = request(type, id, this.jlptFilter);
             $.when(cast).then(function (c) {
@@ -69,7 +76,7 @@ var kanjiNav;
                         return;
                     }
                     try {
-                        var neighbourname = type.next() + v.character;
+                        var neighbourname = type.next() + v[type.next().id];
                         if (neighbourname in _this.nodes) {
                             _this.addEdge(node, _this.nodes[neighbourname]);
                         }
@@ -87,13 +94,13 @@ var kanjiNav;
             if (node.cast.filter(function (c) { return !c; }).length) {
                 console.log("Nulls for " + node.id);
             }
+            // fetch the nodes listed in the cast, bridge edges to these, and call back the client (so it can addViewNode)
             var dn = node.cast
-                .filter(function (c) { return null != c; })
                 .map(function (c) { return _this.getNode(node.type.next(), c[node.type.next().id], function (v) {
                 //v.label = c[v.type.label];
                 _this.addEdge(node, v);
                 f(v);
-            }); });
+            }, node); });
             var d = $.Deferred();
             $.when.apply($, dn)
                 .then(function () {
