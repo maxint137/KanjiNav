@@ -140,7 +140,7 @@ var kanjiNav;
         var d = $.Deferred();
         // http://localhost:3000/api/v1/word/食品
         // http://localhost:3000/api/v1/kanji/品
-        var query = "http://localhost:3000/api/v1/" + type.type + "/" + id;
+        var query = "http://localhost:3000/api/v1/" + type.type + "/" + id + '?JLPT=45';
         return $.get(query);
     }
 })(kanjiNav || (kanjiNav = {}));

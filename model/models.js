@@ -7,7 +7,7 @@ mongoose.Promise = global.Promise;
 
 module.exports = function (wagner) {
 
-    mongoose.connect('mongodb://localhost:27018/TestDB');
+    mongoose.connect('mongodb://localhost:27017/TestDB');
     
     var models = {
         Kanji: mongoose.model('Kanji', require('./kanji')),

@@ -18,6 +18,9 @@ module.exports = function (wagner) {
         return word.match(kanjiRex);
     }
 
+    /** 
+     *  Query for a specific kanji
+     */
     var path = '/kanji/:kanji';
     api.get(path, wagner.invoke(function (Kanji) {
 
@@ -31,11 +34,21 @@ module.exports = function (wagner) {
             })
                 .populate('words')
                 .then(function (populated) {
+                    // keep only the requested levels
+                    if (req.query.JLPT) {
+                        var reqLevels = req.query.JLPT.split('');
+
+                        populated.words = _.filter(populated.words, function (w) { return -1 != reqLevels.indexOf(''+w.JLPT)});
+                    }
+
                     return res.json(populated);
                 })
         };
     }));
 
+    /** 
+     *  Query for a specific word
+     */
     var path = '/word/:word';
     api.get(path, wagner.invoke(function (Word) {
 
@@ -50,8 +63,7 @@ module.exports = function (wagner) {
             })
                 .then(function (wordFound) {
                     // UF: it might happen that we don't have this word
-                    if(null === wordFound)
-                    {
+                    if (null === wordFound) {
                         return res.json(wordFound)
 
                         // return res.
