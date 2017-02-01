@@ -46,7 +46,8 @@ var kanjiNav;
     }());
     kanjiNav.Node = Node;
     var Graph = (function () {
-        function Graph() {
+        function Graph(jlptFilter) {
+            this.jlptFilter = jlptFilter;
             this.nodes = {};
             this.edges = {};
         }
@@ -59,7 +60,7 @@ var kanjiNav;
             }
             var node = this.addNode(type, id);
             f === undefined || f(node);
-            var cast = request(type, id);
+            var cast = request(type, id, this.jlptFilter);
             $.when(cast).then(function (c) {
                 node.copyData(c);
                 (node.cast = c[type.castSel]).forEach(function (v) {
@@ -136,11 +137,11 @@ var kanjiNav;
         return Edge;
     }());
     kanjiNav.Edge = Edge;
-    function request(type, id) {
+    function request(type, id, jlptFilter) {
         var d = $.Deferred();
         // http://localhost:3000/api/v1/word/食品
         // http://localhost:3000/api/v1/kanji/品
-        var query = "http://localhost:3000/api/v1/" + type.type + "/" + id + '?JLPT=45';
+        var query = "http://localhost:3000/api/v1/" + type.type + "/" + id + (jlptFilter ? '?JLPT=' + jlptFilter : '');
         return $.get(query);
     }
 })(kanjiNav || (kanjiNav = {}));

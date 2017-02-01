@@ -54,6 +54,8 @@ module kanjiNav {
         nodes: any = {};
         edges: any = {};
 
+        constructor(public jlptFilter: string) { }
+
         getNode(type: NodeType, id: string, f: (v: Node) => void): JQueryPromise<Node> {
 
             var d = $.Deferred<Node>();
@@ -65,7 +67,7 @@ module kanjiNav {
 
             f === undefined || f(node);
 
-            var cast = request(type, id);
+            var cast = request(type, id, this.jlptFilter);
             $.when(cast).then(c => {
                 node.copyData(c);
 
@@ -99,12 +101,12 @@ module kanjiNav {
             }
 
             var dn = node.cast
-                        .filter(c => null != c)
-                        .map(c => this.getNode(node.type.next(), c[node.type.next().id], v => {
-                //v.label = c[v.type.label];
-                this.addEdge(node, v);
-                f(v);
-            }));
+                .filter(c => null != c)
+                .map(c => this.getNode(node.type.next(), c[node.type.next().id], v => {
+                    //v.label = c[v.type.label];
+                    this.addEdge(node, v);
+                    f(v);
+                }));
             var d = $.Deferred<Node[]>();
             $.when.apply($, dn)
                 .then(function () {
@@ -147,13 +149,13 @@ module kanjiNav {
         }
     }
 
-    function request(type: NodeType, id: string): JQueryPromise<any> {
+    function request(type: NodeType, id: string, jlptFilter: string): JQueryPromise<any> {
 
         var d = $.Deferred<any>();
 
         // http://localhost:3000/api/v1/word/食品
         // http://localhost:3000/api/v1/kanji/品
-        var query = "http://localhost:3000/api/v1/" + type.type + "/" + id + '?JLPT=45';
+        var query = "http://localhost:3000/api/v1/" + type.type + "/" + id + (jlptFilter ? '?JLPT=' + jlptFilter : '');
 
         return $.get(query);
     }

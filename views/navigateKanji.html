@@ -48,9 +48,7 @@
 </head>
 
 <body>
-    <a href="../index.html">cola.js home</a>
-    <h1>Online Graph Exploration</h1>
-    <p>Pink nodes are incomplete. Click on them to expand their neighbours.</p>
+    <h1>Kanji-Nav</h1>
     <script src="../extern/d3.v3.js"></script>
     <script src="../extern/jquery-1.10.2.min.js"></script>
     <script src="../extern/fullscreen.js"></script>
@@ -119,7 +117,7 @@
                 .attr("transform", "translate(" + zoom.translate() + ") scale(" + zoom.scale() + ")");
         }
 
-        var modelgraph = new kanjiNav.Graph();
+        var modelgraph = new kanjiNav.Graph( getParameterByName('JLPT'));
 
         var viewgraph = { nodes: [], links: [] };
 
@@ -127,7 +125,7 @@
 
         // get first node
         var start = getParameterByName('start') || '楽しい';
-        var d = modelgraph.getNode(kanjiNav.Word, start);   // 50034, 17609
+        var d = modelgraph.getNode(kanjiNav.Word, start);
         $.when(d).then(function (startNode) {
             //debugger;
             addViewNode(startNode);
@@ -351,20 +349,6 @@
     </script>
 <button onclick="fullScreen(outer[0][0], fullScreenCancel);zoomToFit()">Full screen</button>
 <button onclick="zoomToFit()">Zoom to fit (or double click)</button>
-Mouse wheel zooms, left-mouse-button drag on the background to pan.
-<p>
-    This example introduces the notion of a "model" graph and a "view" graph. The model graph is too large to sensibly display
-    in one go. Instead we begin with just a small neighbourhood showing in the view graph which is bound to SVG visuals following
-    the usual D3 pattern. The pink nodes have neighbours in the model graph that are not shown in the view graph. Clicking
-    on a red node causes its invisible neighbours to be added to the view and we use D3's enter/exit selections to update
-    the display as usual.
-</p>
-<p>
-    The stability of WebCoLa layout makes this type of dynamic graph layout much less chaotic than is possible with the D3 force
-    layout.
-    <p>
-        Data from <a href="http://www.themoviedb.org">tmdb</a>.
-    </p>
 
 <script type="text/javascript">
 reformal_wdg_domain    = "kanjiNav";
