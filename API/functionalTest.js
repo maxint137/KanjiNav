@@ -70,8 +70,7 @@ describe('KanjiNav API', function() {
 
     (function() {
         // UF have a test for 大部分 - the last kanji is not in the DB
-        var query = '/word/品川プリンスホテル';
-        query = '/word/砂糖'
+        var query = '/word/砂糖'
         it('returns 2 (filled) kanji for GET ' + query, function(done) {
 
             var url = encodeURI(URL_ROOT + query);
