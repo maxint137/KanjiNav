@@ -5,7 +5,7 @@ var _ = require('underscore');
 var express = require('express');
 var status = require('http-status');
 
-module.exports = function (wagner) {
+module.exports = function(wagner) {
     var api = express.Router();
 
     function extractKanjis(word) {
@@ -22,23 +22,23 @@ module.exports = function (wagner) {
      *  Query for a specific kanji
      */
     var path = '/kanji/:kanji';
-    api.get(path, wagner.invoke(function (Kanji) {
+    api.get(path, wagner.invoke(function(Kanji) {
 
-        return function (req, res) {
+        return function(req, res) {
 
             res.setHeader('Access-Control-Allow-Origin', '*');
             var kanji = req.params.kanji[0];
 
             Kanji.findOne({
-                character: new RegExp(kanji)
-            })
+                    character: new RegExp(kanji)
+                })
                 .populate('words')
-                .then(function (populated) {
+                .then(function(populated) {
                     // keep only the requested levels
                     if (req.query.JLPT) {
                         var reqLevels = req.query.JLPT.split('');
 
-                        populated.words = _.filter(populated.words, function (w) { return -1 != reqLevels.indexOf(''+w.JLPT)});
+                        populated.words = _.filter(populated.words, function(w) { return -1 != reqLevels.indexOf('' + w.JLPT) });
                     }
 
                     return res.json(populated);
@@ -50,18 +50,18 @@ module.exports = function (wagner) {
      *  Query for a specific word
      */
     var path = '/word/:word';
-    api.get(path, wagner.invoke(function (Word) {
+    api.get(path, wagner.invoke(function(Word) {
 
-        return function (req, res) {
+        return function(req, res) {
 
             res.setHeader('Access-Control-Allow-Origin', '*');
 
             var rqWord = req.params.word;
 
             return Word.findOneAsync({
-                word: new RegExp(rqWord)
-            })
-                .then(function (wordFound) {
+                    word: rqWord //new RegExp(rqWord)
+                })
+                .then(function(wordFound) {
                     // UF: it might happen that we don't have this word
                     if (null === wordFound) {
                         return res.json(wordFound)
@@ -75,15 +75,15 @@ module.exports = function (wagner) {
 
                     var kanjis = extractKanjis(wordFound.word);
 
-                    wagner.invoke(function (Kanji) {
+                    wagner.invoke(function(Kanji) {
 
-                        Promise.map(kanjis, function (nextChar) {
+                        Promise.map(kanjis, function(nextChar) {
                             return Kanji.findOne({
-                                character: new RegExp(nextChar)
-                            })
+                                    character: new RegExp(nextChar)
+                                })
                                 .populate('words');
 
-                        }).then(function (kanjis) {
+                        }).then(function(kanjis) {
 
                             wordFound.kanjis = kanjis;
                             return res.json(wordFound);
@@ -95,6 +95,3 @@ module.exports = function (wagner) {
 
     return api;
 };
-
-
-

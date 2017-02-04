@@ -10,11 +10,11 @@ var URL_HOST = 'localhost'
 var URL_PORT = 3007;
 var URL_ROOT = 'http://' + URL_HOST + ':' + URL_PORT;
 
-describe('KanjiNav API', function () {
+describe('KanjiNav API', function() {
     var server;
     var Category;
 
-    before(function () {
+    before(function() {
         var app = express();
 
         // Bootstrap server
@@ -27,12 +27,12 @@ describe('KanjiNav API', function () {
         Kanji = models.Kanji;
     });
 
-    after(function () {
+    after(function() {
         // Shut the server down when we're done
         server.close();
     });
 
-    beforeEach(function (done) {
+    beforeEach(function(done) {
         // Make sure categories are empty before each test
         //        Category.remove({}, function (error) {
         //            assert.ifError(error);
@@ -42,19 +42,44 @@ describe('KanjiNav API', function () {
 
     });
 
-
-    (function () {
-        // UF have a test for 大部分 - the last kanji is not in the DB
-        var query = '/word/品川プリンスホテル';
-        query = '/word/砂糖'
-        it('returns 2 (filled) kanji for GET ' + query, function (done) {
+    (function() {
+        var query = '/word/友';
+        it('has no issues with tomo word ' + query, function(done) {
 
             var url = encodeURI(URL_ROOT + query);
 
             superagent.getAsync(url)
-                .then(function (res) {
+                .then(function(res) {
                     var word;
-                    assert.doesNotThrow(function () {
+                    assert.doesNotThrow(function() {
+                        word = JSON.parse(res.text);
+                    });
+
+                    assert.equal(word.word, query.split('').reverse()[0]);
+
+                    done();
+                }).catch(function(e) {
+                    //console.log(e)
+                    assert.ifError(e);
+                    done();
+                });
+
+        });
+    }());
+
+
+    (function() {
+        // UF have a test for 大部分 - the last kanji is not in the DB
+        var query = '/word/品川プリンスホテル';
+        query = '/word/砂糖'
+        it('returns 2 (filled) kanji for GET ' + query, function(done) {
+
+            var url = encodeURI(URL_ROOT + query);
+
+            superagent.getAsync(url)
+                .then(function(res) {
+                    var word;
+                    assert.doesNotThrow(function() {
                         word = JSON.parse(res.text);
                     });
 
@@ -71,7 +96,7 @@ describe('KanjiNav API', function () {
                     assert.ok(word.english);
                     assert.equal(true, 0 in word.english);
 
-                    word.kanjis.forEach(function (kanji) {
+                    word.kanjis.forEach(function(kanji) {
                         assert.equal(true, 0 in kanji.english);
                         assert.equal(true, 0 in kanji.words);
 
@@ -83,7 +108,7 @@ describe('KanjiNav API', function () {
 
                     done();
                 })
-                .catch(function (e) {
+                .catch(function(e) {
                     assert.ifError(e);
                     console.log(e);
                     process.exit(-1);
@@ -92,37 +117,36 @@ describe('KanjiNav API', function () {
         });
     })();
 
-    (function () {
+    (function() {
         var query = '/word/砂糖ス'
-        it('can`t handle unknown words ' + query, function (done) {
+        it('can`t handle unknown words ' + query, function(done) {
 
             var url = encodeURI(URL_ROOT + query);
 
             superagent.getAsync(url)
-                .then(function (res) {
+                .then(function(res) {
                     var word;
-                    assert.doesNotThrow(function () {
+                    assert.doesNotThrow(function() {
                         word = JSON.parse(res.text);
                     });
                     done();
-                }).catch(function (e) {
+                }).catch(function(e) {
                     //console.log(e)
                     assert.ifError(e);
                     done();
                 });
         });
-    }
-    )();
+    })();
 
-    (function () {
+    (function() {
         var query = '/kanji/砂';
-        it('returns kanji with words for GET ' + query, function (done) {
+        it('returns kanji with words for GET ' + query, function(done) {
 
             var url = encodeURI(URL_ROOT + query);
             superagent.getAsync(url)
-                .then(function (res) {
+                .then(function(res) {
                     var kanji;
-                    assert.doesNotThrow(function () {
+                    assert.doesNotThrow(function() {
                         kanji = JSON.parse(res.text);
                     });
 
@@ -138,7 +162,7 @@ describe('KanjiNav API', function () {
                     assert.equal(true, 0 in kanji.words);
 
                     // make sure the words are populated
-                    kanji.words.forEach(function (word) {
+                    kanji.words.forEach(function(word) {
                         assert.ok(word.word);
                         assert.ok(word.hiragana);
                         assert.ok(word.JLPT);
@@ -148,7 +172,7 @@ describe('KanjiNav API', function () {
 
                     done();
                 })
-                .catch(function (e) {
+                .catch(function(e) {
                     //console.log(e)
                     assert.ifError(e);
                     done();
@@ -156,16 +180,16 @@ describe('KanjiNav API', function () {
         })
     })();
 
-    (function () {
+    (function() {
         //http://localhost:3000/api/v1/kanji/%E4%BC%9A?JLPT=45
         var query = '/kanji/会?JLPT=45';
-        it('filters words in kanji: ' + query, function (done) {
+        it('filters words in kanji: ' + query, function(done) {
 
             var url = encodeURI(URL_ROOT + query);
             superagent.getAsync(url)
-                .then(function (res) {
+                .then(function(res) {
                     var kanji;
-                    assert.doesNotThrow(function () {
+                    assert.doesNotThrow(function() {
                         kanji = JSON.parse(res.text);
                     });
 
@@ -173,7 +197,7 @@ describe('KanjiNav API', function () {
                     assert.equal(10, kanji.words.length);
 
                     // all from JLPT4/5
-                    kanji.words.forEach(function (w) {
+                    kanji.words.forEach(function(w) {
                         assert.ok(4 == w.JLPT || 5 == w.JLPT);
                     }, this);
 
@@ -183,4 +207,3 @@ describe('KanjiNav API', function () {
     })();
 
 });
-
