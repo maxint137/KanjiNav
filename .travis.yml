@@ -1,9 +1,9 @@
 before_script:
-    - npm install; npm install -g gulp
+  - npm install; npm install -g gulp
 
 script: gulp test
 language: node_js
 env:
-    - PORT=3000
+  - PORT=3000
 node_js:
-    - "5.1"
+  - "5.1"
