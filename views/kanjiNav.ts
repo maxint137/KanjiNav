@@ -61,6 +61,11 @@ module kanjiNav {
         edges: any = {};
 
         constructor(public jlptFilter: string) { }
+        
+        reset() {
+            this.nodes = {};
+            this.edges = {};
+        }
 
         getNode(type: NodeType, id: string, f: (v: Node) => void, parent?: Node): JQueryPromise<Node> {
 

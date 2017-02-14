@@ -8,8 +8,10 @@
     <link rel="icon" type="image/png" href="favicon.png" />
 
     <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
-    <title>Incremental exploration of a large graph</title>
+
+    <title>Kanji Navigator</title>
     <style>
         @import url(style.css);
         body {
@@ -50,13 +52,19 @@
     </style>
 </head>
 
+
 <body>
-    <h1>Kanji-Nav</h1>
+    <div class="col-xs-2" style="margin-bottom: 5px;">
+        <input type="text" class="form-control input-sm" style="display: inline" id="word" placeholder="Enter a word here" value="楽しい">
+    </div>
+    <button type="button" class="btn btn-default btn-sm" onclick="navigateToWord()">Go!</button>
     <script src="../extern/d3.v3.js"></script>
     <script src="../extern/jquery-1.10.2.min.js"></script>
     <script src="../extern/fullscreen.js"></script>
     <script src="../extern/cola.js"></script>
     <script src="kanjiNav.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
     <script>
         var width = 960,
             height = 500,
@@ -115,10 +123,15 @@
 
         function redraw(transition) {
             // if mouse down then we are dragging not panning
-            if (nodeMouseDown) return;
+            if (nodeMouseDown) {
+                debugger;
+                return;
+            }
+
             (transition ? vis.transition() : vis)
             .attr("transform", "translate(" + zoom.translate() + ") scale(" + zoom.scale() + ")");
         }
+
 
         var modelgraph = new kanjiNav.Graph(getParameterByName('JLPT'));
 
@@ -130,14 +143,17 @@
         var nodeWidth = 30,
             nodeHeight = 35;
 
+        function main(word) {
+
+            var d = modelgraph.getNode(kanjiNav.Word, word);
+            $.when(d).then(function(startNode) {
+                addViewNode(startNode);
+                refocus(startNode);
+            });
+        }
+
         // get first node
-        var start = getParameterByName('start') || '楽しい';
-        var d = modelgraph.getNode(kanjiNav.Word, start);
-        $.when(d).then(function(startNode) {
-            //debugger;
-            addViewNode(startNode);
-            refocus(startNode);
-        });
+        main(getParameterByName('start') || '楽しい');
 
         function refocus(focus) {
             var neighboursExpanded = modelgraph.expandNeighbours(focus, function(v) {
@@ -267,15 +283,22 @@
                     return d.viewgraphid;
                 })
 
+            node.exit().remove();
+
+            var mouseDownEvent = {};
+            var mouseUpEvent = {};
+
             var nodeEnter = node.enter().append("g")
                 .attr("id", function(d) {
                     return d.name()
                 })
                 .attr("class", "node")
                 .on("mousedown", function() {
+                    mouseDownEvent = d3.event;
                     nodeMouseDown = true;
                 }) // recording the mousedown state allows us to differentiate dragging from panning
-                .on("mouseup", function() {
+                .on("mouseup", function(e, x, y, z) {
+                    mouseUpEvent = d3.event;
                     nodeMouseDown = false;
                 })
                 .on("touchmove", function() {
@@ -286,6 +309,15 @@
                 }) // on mouse over nodes we show "spikes" indicating there are hidden neighbours
                 .on("mouseleave", function(d) {
                     unhintNeighbours(d)
+                })
+                .on("click", function(d) {
+                    if (Math.abs(mouseDownEvent.screenX - mouseUpEvent.screenX) +
+                        Math.abs(mouseDownEvent.screenY - mouseUpEvent.screenY) < 2) {
+                        click(d)
+                    }
+                })
+                .on("touchend", function(d) {
+                    click(d)
                 })
                 .call(d3cola.drag);
 
@@ -307,12 +339,6 @@
                 .attr("dy", "1.0em")
                 .text(function(d) {
                     return d.id;
-                })
-                .on("click", function(d) {
-                    click(d)
-                })
-                .on("touchend", function(d) {
-                    click(d)
                 });
 
             nodeEnter.append("text")
@@ -321,12 +347,6 @@
                 .attr("dy", "0.0em")
                 .text(function(d) {
                     return d.hiragana ? d.hiragana : '';
-                })
-                .on("click", function(d) {
-                    click(d)
-                })
-                .on("touchend", function(d) {
-                    click(d)
                 });
 
             nodeEnter.append("text")
@@ -335,12 +355,6 @@
                 .attr("dy", "3.2em")
                 .text(function(d) {
                     return d.english && 0 in d.english ? d.english[0] : '?';
-                })
-                .on("click", function(d) {
-                    click(d)
-                })
-                .on("touchend", function(d) {
-                    click(d)
                 });
 
             nodeEnter.append("title")
@@ -398,6 +412,20 @@
             };
         }
 
+        function navigateToWord() {
+
+            viewgraph = {
+                nodes: [],
+                links: []
+            };
+
+            update();
+
+            modelgraph.reset();
+
+            main($("#word").val());
+        }
+
         function fullScreenCancel() {
             outer.attr("width", width).attr("height", height);
             zoomToFit();
@@ -431,6 +459,7 @@
     <button onclick="fullScreen(outer[0][0], fullScreenCancel);zoomToFit()">Full screen</button>
     <button onclick="zoomToFit()">Zoom to fit (or double click)</button>
 
+    <!-- Google analytics and the feedback stuff -->
     <script type="text/javascript">
         reformal_wdg_domain = "kanjiNav";
         reformal_wdg_mode = 0;
@@ -471,7 +500,7 @@
     <script type="text/javascript" language="JavaScript" src="http://idea.informer.com/tab6.js?domain=kanjiNav"></script>
     <noscript><a href="http://kanjiNav.idea.informer.com">Kanji Navigator feedback </a>
     <a href="http://idea.informer.com"><img src="http://widget.idea.informer.com/tmpl/images/widget_logo.jpg" /></a>
-</noscript>
+    </noscript>
 
 </body>
 

@@ -55,6 +55,10 @@ var kanjiNav;
             this.nodes = {};
             this.edges = {};
         }
+        Graph.prototype.reset = function () {
+            this.nodes = {};
+            this.edges = {};
+        };
         Graph.prototype.getNode = function (type, id, f, parent) {
             var _this = this;
             var d = $.Deferred();
