@@ -11,44 +11,43 @@
 
     <title>Incremental exploration of a large graph</title>
     <style>
-@import url(style.css);
-
+        @import url(style.css);
         body {
             background-color: gray;
         }
-
-.text {
-    /*http://jisho.org/search/%E5%8B%95%20%23kanji*/
-    font-family: "HiraKakuPro-W3", "Hiragino Kaku Gothic Pro W3", "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", "メイリオ", Meiryo, "游ゴシック", YuGothic, "ＭＳ Ｐゴシック", "MS PGothic", "ＭＳ ゴシック", "MS Gothic", sans-serif;
-    font-size: 22px;
-    text-align: left;
-    text-decoration: none;
-    font-weight: normal;
-    line-height: 1;
-    text-anchor: middle;
-}
-
-.english {
-    text-anchor: middle;
-}
-
-.background {
-    stroke: white;
-    stroke-width: 1px;
-    fill: gray;
-}
-.node {
-    background-color: white;
-  /*stroke: #fff;
+        
+        .text {
+            /*http://jisho.org/search/%E5%8B%95%20%23kanji*/
+            font-family: "HiraKakuPro-W3", "Hiragino Kaku Gothic Pro W3", "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", "メイリオ", Meiryo, "游ゴシック", YuGothic, "ＭＳ Ｐゴシック", "MS PGothic", "ＭＳ ゴシック", "MS Gothic", sans-serif;
+            font-size: 22px;
+            text-align: left;
+            text-decoration: none;
+            font-weight: normal;
+            line-height: 1;
+            text-anchor: middle;
+        }
+        
+        .english {
+            text-anchor: middle;
+        }
+        
+        .background {
+            stroke: white;
+            stroke-width: 1px;
+            fill: gray;
+        }
+        
+        .node {
+            background-color: white;
+            /*stroke: #fff;
   stroke-width: 1.5px;*/
-}
-
-.spike {
-    fill: url(#SpikeGradient);
-    stroke-width: 0;
-}
-
-</style>
+        }
+        
+        .spike {
+            fill: url(#SpikeGradient);
+            stroke-width: 0;
+        }
+    </style>
 </head>
 
 <body>
@@ -118,26 +117,30 @@
             // if mouse down then we are dragging not panning
             if (nodeMouseDown) return;
             (transition ? vis.transition() : vis)
-                .attr("transform", "translate(" + zoom.translate() + ") scale(" + zoom.scale() + ")");
+            .attr("transform", "translate(" + zoom.translate() + ") scale(" + zoom.scale() + ")");
         }
 
         var modelgraph = new kanjiNav.Graph(getParameterByName('JLPT'));
 
-        var viewgraph = { nodes: [], links: [] };
+        var viewgraph = {
+            nodes: [],
+            links: []
+        };
 
-        var nodeWidth = 30, nodeHeight = 35;
+        var nodeWidth = 30,
+            nodeHeight = 35;
 
         // get first node
         var start = getParameterByName('start') || '楽しい';
         var d = modelgraph.getNode(kanjiNav.Word, start);
-        $.when(d).then(function (startNode) {
+        $.when(d).then(function(startNode) {
             //debugger;
             addViewNode(startNode);
             refocus(startNode);
         });
 
         function refocus(focus) {
-            var neighboursExpanded = modelgraph.expandNeighbours(focus, function (v) {
+            var neighboursExpanded = modelgraph.expandNeighbours(focus, function(v) {
                 if (!inView(v)) addViewNode(v, focus);
             });
             refreshViewGraph();
@@ -148,15 +151,19 @@
 
         function refreshViewGraph() {
             viewgraph.links = [];
-            viewgraph.nodes.forEach(function (v) {
+            viewgraph.nodes.forEach(function(v) {
                 var fullyExpanded = modelgraph.fullyExpanded(v);
                 v.colour = fullyExpanded ? "yellow" : red
                 if (!v.cast) return;
             });
-            Object.keys(modelgraph.edges).forEach(function (e) {
+            Object.keys(modelgraph.edges).forEach(function(e) {
                 var l = modelgraph.edges[e];
-                var u = modelgraph.nodes[l.source], v = modelgraph.nodes[l.target];
-                if (inView(u) && inView(v)) viewgraph.links.push({ source: u, target: v });
+                var u = modelgraph.nodes[l.source],
+                    v = modelgraph.nodes[l.target];
+                if (inView(u) && inView(v)) viewgraph.links.push({
+                    source: u,
+                    target: v
+                });
                 if (inView(u) && !inView(v)) u.colour = red;
                 if (!inView(u) && inView(v)) v.colour = red;
             });
@@ -182,7 +189,9 @@
                     .attr("x", 0).attr("y", 0)
                     .attr("width", 10).attr("height", 2)
                     .attr("transform", "translate(" + vi.x + "," + vi.y + ") rotate(" + (360 * i / hiddenEdges) + ")")
-                    .on("click", function () { click(v) });
+                    .on("click", function() {
+                        click(v)
+                    });
             }
         }
 
@@ -191,28 +200,32 @@
             dview.selectAll(".spike").remove();
         }
 
-        function inView(v) { return typeof v.viewgraphid !== 'undefined'; }
+        function inView(v) {
+            return typeof v.viewgraphid !== 'undefined';
+        }
 
         function addViewNode(v, startpos) {
             v.viewgraphid = viewgraph.nodes.length;
 
             var d = v.getImage();
-            $.when(d).then(function (node) {
+            $.when(d).then(function(node) {
 
                 return;
 
                 d3.select("#" + node.name()).append("image")
                     .attr("transform", "translate(2,2)")
-                    .attr("xlink:href", function (v) {
+                    .attr("xlink:href", function(v) {
                         var url = v.imgurl;
                         var simg = this;
                         var img = new Image();
-                        img.onload = function () {
+                        img.onload = function() {
                             simg.setAttribute("width", nodeWidth - 4);
                             simg.setAttribute("height", nodeHeight - 4);
                         }
                         return img.src = url;
-                    }).on("click", function () { click(node) })
+                    }).on("click", function() {
+                        click(node)
+                    })
             });
             if (typeof startpos !== 'undefined') {
                 v.x = startpos.x;
@@ -239,7 +252,7 @@
             link.exit().remove();
 
             link
-                .attr("fill", function (d) {
+                .attr("fill", function(d) {
                     if (d.source.colour === red && d.target.colour === red) return red;
                     if (d.source.colour !== red && d.target.colour !== red) return "darkgray";
                     return d.source.colour === red ? "url(#ReverseEdgeGradient)" : "url(#EdgeGradient)";
@@ -250,19 +263,35 @@
 
         function updateNodes(viewgraph) {
             var node = nodesLayer.selectAll(".node")
-                .data(viewgraph.nodes, function (d) { return d.viewgraphid; })
+                .data(viewgraph.nodes, function(d) {
+                    return d.viewgraphid;
+                })
 
             var nodeEnter = node.enter().append("g")
-                .attr("id", function (d) { return d.name() })
+                .attr("id", function(d) {
+                    return d.name()
+                })
                 .attr("class", "node")
-                .on("mousedown", function () { nodeMouseDown = true; }) // recording the mousedown state allows us to differentiate dragging from panning
-                .on("mouseup", function () { nodeMouseDown = false; })
-                .on("touchmove", function () { d3.event.preventDefault() })
-                .on("mouseenter", function (d) { hintNeighbours(d) }) // on mouse over nodes we show "spikes" indicating there are hidden neighbours
-                .on("mouseleave", function (d) { unhintNeighbours(d) })
+                .on("mousedown", function() {
+                    nodeMouseDown = true;
+                }) // recording the mousedown state allows us to differentiate dragging from panning
+                .on("mouseup", function() {
+                    nodeMouseDown = false;
+                })
+                .on("touchmove", function() {
+                    d3.event.preventDefault()
+                })
+                .on("mouseenter", function(d) {
+                    hintNeighbours(d)
+                }) // on mouse over nodes we show "spikes" indicating there are hidden neighbours
+                .on("mouseleave", function(d) {
+                    unhintNeighbours(d)
+                })
                 .call(d3cola.drag);
 
-            nodeEnter.append("g").attr("id", function (d) { return d.name() + "_spikes" })
+            nodeEnter.append("g").attr("id", function(d) {
+                    return d.name() + "_spikes"
+                })
                 .attr("transform", "translate(3,3)");
 
             // nodeEnter.append("rect")
@@ -276,34 +305,48 @@
                 .attr('class', 'text')
                 .attr("dx", "0.7em")
                 .attr("dy", "1.0em")
-                .text(function (d) {
+                .text(function(d) {
                     return d.id;
                 })
-                .on("click", function (d) { click(d) })
-                .on("touchend", function (d) { click(d) });
+                .on("click", function(d) {
+                    click(d)
+                })
+                .on("touchend", function(d) {
+                    click(d)
+                });
 
             nodeEnter.append("text")
                 .attr('class', 'furigana')
                 .attr("dx", "-1.0em")
                 .attr("dy", "0.0em")
-                .text(function (d) {
+                .text(function(d) {
                     return d.hiragana ? d.hiragana : '';
                 })
-                .on("click", function (d) { click(d) })
-                .on("touchend", function (d) { click(d) });
+                .on("click", function(d) {
+                    click(d)
+                })
+                .on("touchend", function(d) {
+                    click(d)
+                });
 
             nodeEnter.append("text")
                 .attr('class', 'english')
                 .attr("dx", "1.5em")
                 .attr("dy", "3.2em")
-                .text(function (d) {
+                .text(function(d) {
                     return d.english && 0 in d.english ? d.english[0] : '?';
                 })
-                .on("click", function (d) { click(d) })
-                .on("touchend", function (d) { click(d) });
+                .on("click", function(d) {
+                    click(d)
+                })
+                .on("touchend", function(d) {
+                    click(d)
+                });
 
             nodeEnter.append("title")
-                .text(function (d) { return d.id; });
+                .text(function(d) {
+                    return d.id;
+                });
 
             //node.style("fill", function (d) { return d.colour; });
 
@@ -318,39 +361,57 @@
             var link = updateLinks(viewgraph);
             var node = updateNodes(viewgraph);
 
-            d3cola.on("tick", function () {
-                link.attr("transform", function (d) {
-                    var dx = d.source.x - d.target.x, dy = d.source.y - d.target.y;
+            d3cola.on("tick", function() {
+                link.attr("transform", function(d) {
+                    var dx = d.source.x - d.target.x,
+                        dy = d.source.y - d.target.y;
                     var r = 180 * Math.atan2(dy, dx) / Math.PI;
                     return "translate(" + d.target.x + "," + d.target.y + ") rotate(" + r + ") ";
-                }).attr("width", function (d) {
-                    var dx = d.source.x - d.target.x, dy = d.source.y - d.target.y;
+                }).attr("width", function(d) {
+                    var dx = d.source.x - d.target.x,
+                        dy = d.source.y - d.target.y;
                     return Math.sqrt(dx * dx + dy * dy);
                 });
 
-                node.attr("transform", function (d) { return "translate(" + (d.x - nodeWidth / 2) + "," + (d.y - nodeHeight / 2) + ")"; });
+                node.attr("transform", function(d) {
+                    return "translate(" + (d.x - nodeWidth / 2) + "," + (d.y - nodeHeight / 2) + ")";
+                });
             });
         }
+
         function graphBounds() {
-            var x = Number.POSITIVE_INFINITY, X = Number.NEGATIVE_INFINITY, y = Number.POSITIVE_INFINITY, Y = Number.NEGATIVE_INFINITY;
-            nodesLayer.selectAll(".node").each(function (v) {
+            var x = Number.POSITIVE_INFINITY,
+                X = Number.NEGATIVE_INFINITY,
+                y = Number.POSITIVE_INFINITY,
+                Y = Number.NEGATIVE_INFINITY;
+            nodesLayer.selectAll(".node").each(function(v) {
                 x = Math.min(x, v.x - nodeWidth / 2);
                 X = Math.max(X, v.x + nodeWidth / 2);
                 y = Math.min(y, v.y - nodeHeight / 2);
                 Y = Math.max(Y, v.y + nodeHeight / 2);
             });
-            return { x: x, X: X, y: y, Y: Y };
+            return {
+                x: x,
+                X: X,
+                y: y,
+                Y: Y
+            };
         }
+
         function fullScreenCancel() {
             outer.attr("width", width).attr("height", height);
             zoomToFit();
         }
+
         function zoomToFit() {
             var b = graphBounds();
-            var w = b.X - b.x, h = b.Y - b.y;
-            var cw = outer.attr("width"), ch = outer.attr("height");
+            var w = b.X - b.x,
+                h = b.Y - b.y;
+            var cw = outer.attr("width"),
+                ch = outer.attr("height");
             var s = Math.min(cw / w, ch / h);
-            var tx = (-b.x * s + (cw / s - w) * s / 2), ty = (-b.y * s + (ch / s - h) * s / 2);
+            var tx = (-b.x * s + (cw / s - w) * s / 2),
+                ty = (-b.y * s + (ch / s - h) * s / 2);
             zoom.translate([tx, ty]).scale(s);
             redraw(true);
         }
@@ -366,47 +427,49 @@
             if (!results[2]) return '';
             return decodeURIComponent(results[2].replace(/\+/g, " "));
         }
-
     </script>
-<button onclick="fullScreen(outer[0][0], fullScreenCancel);zoomToFit()">Full screen</button>
-<button onclick="zoomToFit()">Zoom to fit (or double click)</button>
+    <button onclick="fullScreen(outer[0][0], fullScreenCancel);zoomToFit()">Full screen</button>
+    <button onclick="zoomToFit()">Zoom to fit (or double click)</button>
 
-<script type="text/javascript">
-                 reformal_wdg_domain = "kanjiNav";
-                 reformal_wdg_mode = 0;
-                 reformal_wdg_title = "Kanji Navigator";
-                 reformal_wdg_ltitle = "Leave feedback";
-                 reformal_wdg_lfont = "";
-                 reformal_wdg_lsize = "";
-                 reformal_wdg_color = "#FFA000";
-                 reformal_wdg_bcolor = "#516683";
-                 reformal_wdg_tcolor = "#FFFFFF";
-                 reformal_wdg_align = "right";
-                 reformal_wdg_waction = 0;
-                 reformal_wdg_vcolor = "#9FCE54";
-                 reformal_wdg_cmline = "#E0E0E0";
-                 reformal_wdg_glcolor = "#105895";
-                 reformal_wdg_tbcolor = "#FFFFFF";
+    <script type="text/javascript">
+        reformal_wdg_domain = "kanjiNav";
+        reformal_wdg_mode = 0;
+        reformal_wdg_title = "Kanji Navigator";
+        reformal_wdg_ltitle = "Leave feedback";
+        reformal_wdg_lfont = "";
+        reformal_wdg_lsize = "";
+        reformal_wdg_color = "#FFA000";
+        reformal_wdg_bcolor = "#516683";
+        reformal_wdg_tcolor = "#FFFFFF";
+        reformal_wdg_align = "right";
+        reformal_wdg_waction = 0;
+        reformal_wdg_vcolor = "#9FCE54";
+        reformal_wdg_cmline = "#E0E0E0";
+        reformal_wdg_glcolor = "#105895";
+        reformal_wdg_tbcolor = "#FFFFFF";
 
-                 reformal_wdg_bimage = "8489db229aa0a66ab6b80ebbe0bb26cd.png";
+        reformal_wdg_bimage = "8489db229aa0a66ab6b80ebbe0bb26cd.png";
+    </script>
 
-</script>
+    <script>
+        (function(i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function() {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
 
-<script>
-    (function (i, s, o, g, r, a, m) {
-    i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
-        (i[r].q = i[r].q || []).push(arguments)
-    }, i[r].l = 1 * new Date(); a = s.createElement(o),
-        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
-    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-91206532-1', 'auto');
+        ga('send', 'pageview');
+    </script>
 
-    ga('create', 'UA-91206532-1', 'auto');
-    ga('send', 'pageview');
-
-</script>
-
-<script type="text/javascript" language="JavaScript" src="http://idea.informer.com/tab6.js?domain=kanjiNav"></script>
-<noscript><a href="http://kanjiNav.idea.informer.com">Kanji Navigator feedback </a>
+    <script type="text/javascript" language="JavaScript" src="http://idea.informer.com/tab6.js?domain=kanjiNav"></script>
+    <noscript><a href="http://kanjiNav.idea.informer.com">Kanji Navigator feedback </a>
     <a href="http://idea.informer.com"><img src="http://widget.idea.informer.com/tmpl/images/widget_logo.jpg" /></a>
 </noscript>
 
