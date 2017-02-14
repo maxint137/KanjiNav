@@ -287,6 +287,7 @@
 
             var mouseDownEvent = {};
             var mouseUpEvent = {};
+            var touchmoveEvent = 0;
 
             var nodeEnter = node.enter().append("g")
                 .attr("id", function(d) {
@@ -302,7 +303,8 @@
                     nodeMouseDown = false;
                 })
                 .on("touchmove", function() {
-                    d3.event.preventDefault()
+                    d3.event.preventDefault();
+                    touchmoveEvent = d3.event.timeStamp;
                 })
                 .on("mouseenter", function(d) {
                     hintNeighbours(d)
@@ -317,7 +319,9 @@
                     }
                 })
                 .on("touchend", function(d) {
-                    click(d)
+                    if (d3.event.timeStamp - touchmoveEvent < 100) {
+                        click(d)
+                    }
                 })
                 .call(d3cola.drag);
 
