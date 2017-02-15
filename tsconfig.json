@@ -1,8 +1,19 @@
+// http://www.typescriptlang.org/docs/handbook/tsconfig-json.html
+// https://www.typescriptlang.org/docs/handbook/compiler-options.html
 {
     "compileOnSave": true,
     "compilerOptions": {
+        // Run the compiler in watch mode. Watch input files and trigger recompilation on changes.
+        "watch": true,
+
+        // Specify ECMAScript target version: "ES3" (default), "ES5", "ES6"/"ES2015", "ES2016", "ES2017" "ESNext". 
         "target": "es5",
+
+        //Specify module code generation: "None", "CommonJS", "AMD", "System", "UMD", "ES6", or "ES2015".
+        // ► Only "AMD" and "System" can be used in conjunction with --outFile.
+        // ► "ES6" and "ES2015" values may not be used when targeting "ES5" or lower.
         "module": "commonjs",
+
         "sourceMap": true
     },
     "files": ["./views/kanjiNav.ts"]
