@@ -65,7 +65,7 @@
     <button type="button" class="btn btn-default btn-sm" onclick="clearAll()">Clear</button>
     <script src="../extern/fullscreen.js"></script>
 
-    <button onclick="fullScreen(fe.outer[0][0], fe.fullScreenCancel);fe.zoomToFit()">Full screen</button>
+    <button onclick="fullScreen(fe.outer[0][0], () => fe.fullScreenCancel());fe.zoomToFit()">Full screen</button>
     <button onclick="fe.zoomToFit()">Zoom to fit (or double click)</button>
 
     <!-- Google analytics and the feedback stuff -->
