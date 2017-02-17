@@ -61,12 +61,12 @@
     <div class="col-xs-2" style="margin-bottom: 5px;">
         <input type="text" class="form-control input-sm" style="display: inline" id="word" placeholder="Enter a word here" value="楽しい">
     </div>
-    <button type="button" class="btn btn-default btn-sm" onclick="navigateToWord()">Add</button>
-    <button type="button" class="btn btn-default btn-sm" onclick="clearAll()">Clear</button>
+    <button type="button" class="btn btn-default btn-sm" onclick="fe.navigateToWord($('#word').val())">Add</button>
+    <button type="button" class="btn btn-default btn-sm" onclick="fe.clearAll()">Clear</button>
     <script src="../extern/fullscreen.js"></script>
 
-    <button onclick="fullScreen(fe.outer[0][0], () => fe.fullScreenCancel());fe.zoomToFit()">Full screen</button>
-    <button onclick="fe.zoomToFit()">Zoom to fit (or double click)</button>
+    <button type="button" class="btn btn-default btn-sm" onclick="fullScreen(fe.outer[0][0], () => fe.fullScreenCancel());fe.zoomToFit()">Full screen</button>
+    <button type="button" class="btn btn-default btn-sm" onclick="fe.zoomToFit()">Zoom to fit (or double click)</button>
 
     <!-- Google analytics and the feedback stuff -->
     <script type="text/javascript">

@@ -23,7 +23,4 @@ require(['js/kanjiNav', 'js/frontend', 'cola'], function(kanjiNav, frontend, col
 
     // get first node
     fe.main(fe.getParameterByName('start') || '楽しい');
-
-    //navigateToWord($("#word").val()) {
-
 });
