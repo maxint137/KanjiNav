@@ -37,6 +37,9 @@ define(["require", "exports", "jquery"], function (require, exports, $) {
                 return d.promise();
             };
             Node.prototype.copyData = function (data) {
+                if (data == null) {
+                    return;
+                }
                 this.jlpt = data.JLPT;
                 this.english = data.english;
                 this.hiragana = data.hiragana;

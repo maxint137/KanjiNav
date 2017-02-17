@@ -1,8 +1,11 @@
 {
     "dependencies": {
-        "underscore": "latest",
+        "@types/d3": "^3.5.17",
         "@types/jquery": "latest",
-        "@types/d3": "latest",
-        "@types/webcola": "latest"
+        "@types/js-cookie": "latest",
+        "@types/webcola": "latest",
+        "d3": "^3.5.17",
+        "js-cookie": "^2.1.3",
+        "underscore": "latest"
     }
 }

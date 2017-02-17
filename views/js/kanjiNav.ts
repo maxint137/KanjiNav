@@ -26,15 +26,23 @@ module kanjiNav {
     export let Char = new NodeType("kanji", "character", 'words');
 
     export class Node {
+
+        // these are actually for the frontend only        
+        viewgraphid: number;
+        colour: string;
+        x: number;
+        y: number;
+        
         cast: any[];
         jlpt: number;
         english: string[];
         hiragana: string;
         onyomi: string[];
         kunyomi: string[];
-
+                
         degree: number = 0;
         constructor(public type: NodeType, public id: string) { }
+                
         name(): string { return this.type + this.id; }
         getImage(): JQueryPromise<Node> {
             var d = $.Deferred<Node>();
@@ -43,6 +51,10 @@ module kanjiNav {
         }
 
         copyData(data: any): Node {
+            if(data == null) {
+                return;
+            }
+            
             this.jlpt = data.JLPT;
             this.english = data.english;
             this.hiragana = data.hiragana;

@@ -1,11 +1,23 @@
 /// <reference path="../node_modules/@types/webcola/index.d.ts" />.
+/// <reference path="../node_modules/@types/js-cookie/index.d.ts" />.
 define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, exports, $, d3, kanjiNav) {
     "use strict";
     var Frontend;
     (function (Frontend_1) {
+        var FELink = (function () {
+            function FELink() {
+            }
+            return FELink;
+        }());
+        var ViewGraph = (function () {
+            function ViewGraph() {
+            }
+            return ViewGraph;
+        }());
         var Frontend = (function () {
-            function Frontend(modelgraph, cola) {
+            function Frontend(modelgraph, cola, cookies) {
                 this.modelgraph = modelgraph; // new kanjiNav.Graph(getParameterByName('JLPT'));
+                this.cookies = cookies;
                 this.width = 960;
                 this.height = 500;
                 this.red = "rgb(125, 0, 0)";
@@ -16,7 +28,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     links: []
                 };
                 this.cola = cola;
-                this.d3cola = cola.d3adaptor() //.d3adaptor(d3)
+                this.d3cola = cola.d3adaptor(d3)
                     .linkDistance(80)
                     .avoidOverlaps(true)
                     .size([this.width, this.height]);
@@ -25,14 +37,14 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 //     .charge(-520)
                 //     .linkDistance(80)
                 //     .size([width, height]);
-                // the D3 engine
-                this.outer = d3.select("body").append("svg")
+                this.outer = d3.select("#mydiv").append("svg")
                     .attr("width", this.width)
                     .attr("height", this.height)
                     .attr("pointer-events", "all");
                 this.nodeMouseDown = false;
                 this.setupZooming();
                 this.defineGradients();
+                this.setupJlptChecks();
             }
             // add layers and zooming to the outer SVG
             Frontend.prototype.setupZooming = function () {
@@ -139,7 +151,8 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 // drop the links from the viewgraph first
                 this.viewgraph.links = [];
                 // set the color of each node in the viewgraph, based on the fully-expanded status
-                this.viewgraph.nodes.forEach(function (v) {
+                this.viewgraph.nodes
+                    .forEach(function (v) {
                     var fullyExpanded = _this.modelgraph.fullyExpanded(v);
                     v.colour = fullyExpanded ? "black" : _this.red;
                 });
@@ -245,8 +258,8 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     _this.nodeMouseDown = false;
                 })
                     .on("touchmove", function () {
-                    d3.event.preventDefault();
-                    touchmoveEvent = d3.event.timeStamp;
+                    event.preventDefault();
+                    touchmoveEvent = event.timeStamp;
                 })
                     .on("mouseenter", function (d) {
                     _this.hintNeighbours(d);
@@ -265,7 +278,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     }
                 })
                     .on("touchend", function (d) {
-                    if (d3.event.timeStamp - touchmoveEvent < 100) {
+                    if (event.timeStamp - touchmoveEvent < 100) {
                         _this.click(d);
                     }
                 })
@@ -390,8 +403,27 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     return '';
                 return decodeURIComponent(results[2].replace(/\+/g, " "));
             };
+            Frontend.prototype.filterGraphByJLPT = function (jlpts) {
+            };
+            Frontend.prototype.setupJlptChecks = function () {
+                var curSel = this.cookies.get(Frontend.jlptSelectedLevelsCookieName);
+                curSel.split('').forEach(function (n) {
+                    $('#JLPT' + n).prop('checked', true);
+                    $('#JLPT' + n).parents('label').addClass('active');
+                });
+            };
+            Frontend.prototype.jlptSelect = function (n) {
+                var curSel = this.cookies.get(Frontend.jlptSelectedLevelsCookieName);
+                curSel = curSel ? curSel : '';
+                // we land here before the control has reflected the new status
+                var willBecomeChecked = !$('#JLPT' + n).is(':checked');
+                var newCookie = curSel.replace(new RegExp(n.toString(), 'g'), '') + (willBecomeChecked ? n.toString() : '');
+                this.cookies.set(Frontend.jlptSelectedLevelsCookieName, newCookie);
+                this.filterGraphByJLPT(newCookie);
+            };
             return Frontend;
         }());
+        Frontend.jlptSelectedLevelsCookieName = "jlptSelectedLevels";
         Frontend_1.Frontend = Frontend;
     })(Frontend || (Frontend = {}));
     function zoomToFit() {

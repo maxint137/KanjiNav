@@ -1,4 +1,5 @@
 /// <reference path="../node_modules/@types/webcola/index.d.ts" />.
+/// <reference path="../node_modules/@types/js-cookie/index.d.ts" />.
 
 import * as $ from 'jquery'
 import * as d3 from 'd3'
@@ -6,8 +7,21 @@ import kanjiNav = require("./kanjiNav");
 
 
 module Frontend {
+            
+        class FELink {
+            source: kanjiNav.Node;
+            target: kanjiNav.Node;
+        }
+    
+        class ViewGraph {
+            
+            nodes: kanjiNav.Node[];
+            links: FELink[];
+        }
     
     export class Frontend {
+        static readonly jlptSelectedLevelsCookieName = "jlptSelectedLevels";
+        
         
         // canvas size
         width: number;
@@ -18,6 +32,9 @@ module Frontend {
         nodeHeight: number;
         
         red: string;
+        
+        // cookie monster
+        cookies: Cookies.CookiesStatic;
         
         // the engine
         cola: any;
@@ -30,7 +47,7 @@ module Frontend {
         modelgraph: kanjiNav.Graph;
         
         // WebCola will render that graph, and we'll try to keep it updated with the modelgraph
-        viewgraph: any;
+        viewgraph: ViewGraph;
         
         // the SVG to play with
         outer: any;
@@ -43,9 +60,10 @@ module Frontend {
         // ??
         nodeMouseDown: boolean;
         
-        constructor(modelgraph: kanjiNav.Graph, cola: any) {
+        constructor(modelgraph: kanjiNav.Graph, cola: any, cookies: Cookies.CookiesStatic) {
             
             this.modelgraph = modelgraph; // new kanjiNav.Graph(getParameterByName('JLPT'));
+            this.cookies = cookies;
 
             this.width = 960;
             this.height = 500;
@@ -61,7 +79,7 @@ module Frontend {
             };
             
             this.cola = cola;
-            this.d3cola = cola.d3adaptor()//.d3adaptor(d3)
+            this.d3cola = cola.d3adaptor(d3)
             .linkDistance(80)
             .avoidOverlaps(true)
             //  computes ideal lengths on each link to make extra space around high-degree nodes, using 5 as the basic length.
@@ -69,14 +87,13 @@ module Frontend {
             //.symmetricDiffLinkLengths(15)
             .size([this.width, this.height]);
             
-        // alternatively just use the D3 built-in force layout
-        // var d3cola = d3.layout.force()
-        //     .charge(-520)
-        //     .linkDistance(80)
-        //     .size([width, height]);
+            // alternatively just use the D3 built-in force layout
+            // var d3cola = d3.layout.force()
+            //     .charge(-520)
+            //     .linkDistance(80)
+            //     .size([width, height]);
 
-        // the D3 engine
-            this.outer = d3.select("body").append("svg")
+            this.outer = d3.select("#mydiv").append("svg")
             .attr("width", this.width)
             .attr("height", this.height)
             .attr("pointer-events", "all");
@@ -85,6 +102,8 @@ module Frontend {
             
             this.setupZooming();
             this.defineGradients();
+
+            this.setupJlptChecks();
         }
 
 
@@ -93,7 +112,7 @@ module Frontend {
         {
             // https://github.com/d3/d3-3.x-api-reference/blob/master/Zoom-Behavior.md
             // Construct a new zoom behavior:
-            this.zoom = (d3 as any).behavior.zoom();
+            this.zoom = d3.behavior.zoom();
             this.outer.append('rect')
                 .attr('class', 'background')
                 .attr('width', "100%")
@@ -151,9 +170,10 @@ module Frontend {
             $.when(d).then((startNode) => {this.refocus(startNode)});
         }
 
-    // adds the node to the viewgraph, picks the initial position based on the startpos and assignes viewgraphid
-    // used to schedule the images rendering
-        addViewNode(v: any, startpos?: any) {
+        // adds the node to the viewgraph, picks the initial position based on the startpos and assignes viewgraphid
+        // used to schedule the images rendering
+        addViewNode(v: kanjiNav.Node, startpos?: any) {
+            
             v.viewgraphid = this.viewgraph.nodes.length;
 
             if (typeof startpos !== 'undefined') {
@@ -213,12 +233,14 @@ module Frontend {
         refreshViewGraph() {
             // drop the links from the viewgraph first
             this.viewgraph.links = [];
-
+            
             // set the color of each node in the viewgraph, based on the fully-expanded status
-            this.viewgraph.nodes.forEach((v) => {
-                var fullyExpanded = this.modelgraph.fullyExpanded(v);
-                v.colour = fullyExpanded ? "black" : this.red;
-            });
+            this.viewgraph.nodes
+                //.filter(n=>5 <= n.jlpt)
+                .forEach((v) => {
+                    var fullyExpanded = this.modelgraph.fullyExpanded(v);
+                    v.colour = fullyExpanded ? "black" : this.red;
+                });
 
             // create a link in the view for each edge in the model
             Object.keys(this.modelgraph.edges).forEach((e) => {
@@ -346,8 +368,8 @@ module Frontend {
                     this.nodeMouseDown = false;
                 })
                 .on("touchmove", () => {
-                    d3.event.preventDefault();
-                    touchmoveEvent = d3.event.timeStamp;
+                    event.preventDefault();
+                    touchmoveEvent = event.timeStamp;
                 })
                 .on("mouseenter", (d) => {
                     this.hintNeighbours(d)
@@ -366,7 +388,7 @@ module Frontend {
                     }
                 })
                 .on("touchend", (d) => {
-                    if (d3.event.timeStamp - touchmoveEvent < 100) {
+                    if (event.timeStamp - touchmoveEvent < 100) {
                         this.click(d)
                     }
                 })
@@ -522,6 +544,35 @@ module Frontend {
             if (!results[2]) return '';
             return decodeURIComponent(results[2].replace(/\+/g, " "));
         }
+        
+        filterGraphByJLPT(jlpts: string) {
+            
+        }
+        
+        setupJlptChecks() {
+            
+             let curSel: string = this.cookies.get(Frontend.jlptSelectedLevelsCookieName);
+             
+             curSel.split('').forEach(n => {
+                 
+                 $('#JLPT' + n).prop('checked', true);
+                 $('#JLPT' + n).parents('label').addClass('active');
+             });
+        }
+        
+        jlptSelect(n: number) {
+             
+             let curSel: string = this.cookies.get(Frontend.jlptSelectedLevelsCookieName);
+             curSel = curSel ? curSel : '';
+             
+             // we land here before the control has reflected the new status
+             let willBecomeChecked: boolean = !$('#JLPT' + n).is(':checked');
+             let newCookie: string = curSel.replace(new RegExp(n.toString(), 'g'),'') + (willBecomeChecked?n.toString():'');
+
+             this.cookies.set(Frontend.jlptSelectedLevelsCookieName, newCookie);
+             
+             this.filterGraphByJLPT(newCookie);
+         }
 	}	
 }
 
