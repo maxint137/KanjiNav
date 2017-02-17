@@ -63,14 +63,10 @@
     </div>
     <button type="button" class="btn btn-default btn-sm" onclick="navigateToWord()">Add</button>
     <button type="button" class="btn btn-default btn-sm" onclick="clearAll()">Clear</button>
-    <!--<script src="../extern/d3.v3.js"></script>
-    <script src="../extern/jquery-1.10.2.min.js"></script>
-    <script src="../extern/cola.js"></script>-->
     <script src="../extern/fullscreen.js"></script>
-    <!--<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>-->
 
-    <button onclick="fullScreen(outer[0][0], fullScreenCancel);zoomToFit()">Full screen</button>
-    <button onclick="zoomToFit()">Zoom to fit (or double click)</button>
+    <button onclick="fullScreen(fe.outer[0][0], fe.fullScreenCancel);fe.zoomToFit()">Full screen</button>
+    <button onclick="fe.zoomToFit()">Zoom to fit (or double click)</button>
 
     <!-- Google analytics and the feedback stuff -->
     <script type="text/javascript">

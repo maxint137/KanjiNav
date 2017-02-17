@@ -14,12 +14,12 @@ require(['jquery', 'bootstrap'], function($) {
     });
 });
 
+
+var fe = {};
 // the variables that manage everything, basically
 require(['js/kanjiNav', 'js/frontend', 'cola'], function(kanjiNav, frontend, cola) {
 
-    var graph = new kanjiNav.Graph(); //getParameterByName('JLPT'));
-
-    var fe = new frontend(graph, cola);
+    fe = new frontend(new kanjiNav.Graph(), cola);
 
     // get first node
     fe.main(fe.getParameterByName('start') || '楽しい');

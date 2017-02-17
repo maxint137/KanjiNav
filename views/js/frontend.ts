@@ -99,9 +99,9 @@ module Frontend {
                 .attr('width', "100%")
                 .attr('height', "100%")
                 // apply the behavior to selected element:
-                .call(this.zoom.on("zoom", this.redraw))
+                .call(this.zoom.on("zoom", ()=>this.redraw()))
                 // enable the zoom behavior’s dblclick event listener
-                .on("dblclick.zoom", this.zoomToFit);
+                .on("dblclick.zoom", ()=>this.zoomToFit());
 
             // the layers in play
             this.vis = this.outer.append('g');
@@ -184,14 +184,12 @@ module Frontend {
         }
 
         // setup the transiation based on the move/zoom, as it comes from 
-        redraw(transition: any) {
+        redraw(transition?: boolean) {
             // if mouse down then we are dragging not panning
             if (this.nodeMouseDown) {
                 debugger;
                 return;
             }
-            
-            debugger;
 
             // read the current zoom translation vector and the current zoom scale
             (transition ? this.vis.transition() : this.vis)
@@ -527,4 +525,8 @@ module Frontend {
 	}	
 }
 
+function zoomToFit() {
+    
+    Frontend.Frontend.prototype.zoomToFit();
+}
 export = Frontend.Frontend;

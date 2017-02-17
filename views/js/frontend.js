@@ -36,6 +36,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
             }
             // add layers and zooming to the outer SVG
             Frontend.prototype.setupZooming = function () {
+                var _this = this;
                 // https://github.com/d3/d3-3.x-api-reference/blob/master/Zoom-Behavior.md
                 // Construct a new zoom behavior:
                 this.zoom = d3.behavior.zoom();
@@ -43,8 +44,8 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     .attr('class', 'background')
                     .attr('width', "100%")
                     .attr('height', "100%")
-                    .call(this.zoom.on("zoom", this.redraw))
-                    .on("dblclick.zoom", this.zoomToFit);
+                    .call(this.zoom.on("zoom", function () { return _this.redraw(); }))
+                    .on("dblclick.zoom", function () { return _this.zoomToFit(); });
                 // the layers in play
                 this.vis = this.outer.append('g');
                 this.edgesLayer = this.vis.append("g");
@@ -117,7 +118,6 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     debugger;
                     return;
                 }
-                debugger;
                 // read the current zoom translation vector and the current zoom scale
                 (transition ? this.vis.transition() : this.vis)
                     .attr("transform", "translate(" + this.zoom.translate() + ") scale(" + this.zoom.scale() + ")");
@@ -394,6 +394,9 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
         }());
         Frontend_1.Frontend = Frontend;
     })(Frontend || (Frontend = {}));
+    function zoomToFit() {
+        Frontend.Frontend.prototype.zoomToFit();
+    }
     return Frontend.Frontend;
 });
 //# sourceMappingURL=frontend.js.map
