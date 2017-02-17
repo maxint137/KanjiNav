@@ -4,13 +4,12 @@
 //
 // 'bootstrap' does not return an object. Must appear at the end
 
-require(['jquery', 'bootstrap'], function($) {
+require(['jquery', 'bootstrap', 'bootstrap-combobox'], function($) {
 
     // DOM ready
     $(function() {
 
-        // Twitter Bootstrap 3 carousel plugin
-        //$("#element").carousel();
+        $('.combobox').combobox();
     });
 });
 

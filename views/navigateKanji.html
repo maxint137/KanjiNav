@@ -9,6 +9,7 @@
 
     <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/extern/bootstrap-combobox.css">
 
     <script type="text/javascript" src="js/require-setup.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.3.2/require.js"></script>
@@ -58,11 +59,17 @@
 
 
 <body>
-    <div class="col-xs-2" style="margin-bottom: 5px;">
-        <input type="text" class="form-control input-sm" style="display: inline" id="word" placeholder="Enter a word here" value="楽しい">
-    </div>
-    <button type="button" class="btn btn-default btn-sm" onclick="fe.navigateToWord($('#word').val())">Add</button>
-    <button type="button" class="btn btn-default btn-sm" onclick="fe.clearAll()">Clear</button>
+    <form class="form-inline">
+        <select class="combobox" id="word">
+            <option></option>
+            <option value="楽しい">楽しい</option>
+            <option value="産業">産業</option>
+        </select>
+
+        <button type="button" class="btn btn-default btn-sm" onclick="fe.navigateToWord($('#word').val())">Add</button>
+        <button type="button" class="btn btn-default btn-sm" onclick="fe.clearAll()">Clear</button>
+    </form>
+
     <script src="../extern/fullscreen.js"></script>
 
     <button type="button" class="btn btn-default btn-sm" onclick="fullScreen(fe.outer[0][0], () => fe.fullScreenCancel());fe.zoomToFit()">Full screen</button>
