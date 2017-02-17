@@ -1,4 +1,5 @@
-///<reference path="../extern/jquery.d.ts"/>
+import * as $ from 'jquery'
+
 module kanjiNav {
     export class NodeType {
         constructor(
@@ -21,8 +22,8 @@ module kanjiNav {
         }
     }
 
-    export var Word = new NodeType("word", "word", 'kanjis');
-    export var Char = new NodeType("kanji", "character", 'words');
+    export let Word = new NodeType("word", "word", 'kanjis');
+    export let Char = new NodeType("kanji", "character", 'words');
 
     export class Node {
         cast: any[];
@@ -67,7 +68,7 @@ module kanjiNav {
             this.edges = {};
         }
 
-        getNode(type: NodeType, id: string, f: (v: Node) => void, parent?: Node): JQueryPromise<Node> {
+        getNode(type: NodeType, id: string, f?: (v: Node) => void, parent?: Node): JQueryPromise<Node> {
 
             var d = $.Deferred<Node>();
             var name: string = type + id.toString();
@@ -177,4 +178,10 @@ module kanjiNav {
 
         return $.get(query);
     }
+    
+
 }
+// https://www.typescriptlang.org/docs/handbook/modules.html
+// otherwise requre.js will not find it...
+export = kanjiNav;
+

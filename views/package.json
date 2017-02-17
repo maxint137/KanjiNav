@@ -1,6 +1,8 @@
 {
-  "dependencies": {
-    "underscore": "latest",
-    "webcola": "^3.3.0"
-  }
+    "dependencies": {
+        "underscore": "latest",
+        "@types/jquery": "latest",
+        "@types/d3": "latest",
+        "@types/webcola": "latest"
+    }
 }
