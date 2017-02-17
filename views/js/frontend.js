@@ -15,6 +15,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     nodes: [],
                     links: []
                 };
+                this.cola = cola;
                 this.d3cola = cola.d3adaptor() //.d3adaptor(d3)
                     .linkDistance(80)
                     .avoidOverlaps(true)
@@ -302,23 +303,23 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
             };
             // animates the mouse-over hint
             Frontend.prototype.hintNeighbours = function (v) {
+                var _this = this;
                 if (!v.cast)
                     return;
                 var hiddenEdges = v.cast.length + 1 - v.degree;
                 var r = 2 * Math.PI / hiddenEdges;
                 for (var i = 0; i < hiddenEdges; ++i) {
                     var w = this.nodeWidth - 6, h = this.nodeHeight - 6, x = w / 2 + 25 * Math.cos(r * i), y = h / 2 + 30 * Math.sin(r * i);
-                    //??rect = new cola.Rectangle(0, w, 0, h),
-                    //??vi = rect.rayIntersection(x, y);
+                    var rect = new this.cola.Rectangle(0, w, 0, h);
+                    var vi = rect.rayIntersection(x, y);
                     var dview = d3.select("#" + v.name() + "_spikes");
                     dview.append("rect")
                         .attr("class", "spike")
                         .attr("rx", 1).attr("ry", 1)
                         .attr("x", 0).attr("y", 0)
                         .attr("width", 10).attr("height", 2)
-                        .on("click", function () {
-                        //??this.click(v)
-                    });
+                        .attr("transform", "translate(" + vi.x + "," + vi.y + ") rotate(" + (360 * i / hiddenEdges) + ")")
+                        .on("click", function () { return _this.click(v); });
                 }
             };
             // stopping the hint

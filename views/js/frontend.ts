@@ -20,6 +20,7 @@ module Frontend {
         red: string;
         
         // the engine
+        cola: any;
         d3cola: any;
         // zooming behaviour
         zoom: any;
@@ -59,6 +60,7 @@ module Frontend {
                 links: []
             };
             
+            this.cola = cola;
             this.d3cola = cola.d3adaptor()//.d3adaptor(d3)
             .linkDistance(80)
             .avoidOverlaps(true)
@@ -420,9 +422,11 @@ module Frontend {
                 var w = this.nodeWidth - 6,
                     h = this.nodeHeight - 6,
                     x = w / 2 + 25 * Math.cos(r * i),
-                    y = h / 2 + 30 * Math.sin(r * i)
-                    //??rect = new cola.Rectangle(0, w, 0, h),
-                    //??vi = rect.rayIntersection(x, y);
+                    y = h / 2 + 30 * Math.sin(r * i);
+                    
+                let rect = new this.cola.Rectangle(0, w, 0, h);
+                let vi = rect.rayIntersection(x, y);
+                
                 var dview = d3.select("#" + v.name() + "_spikes");
 
                 dview.append("rect")
@@ -430,10 +434,8 @@ module Frontend {
                     .attr("rx", 1).attr("ry", 1)
                     .attr("x", 0).attr("y", 0)
                     .attr("width", 10).attr("height", 2)
-                    //??.attr("transform", "translate(" + vi.x + "," + vi.y + ") rotate(" + (360 * i / hiddenEdges) + ")")
-                    .on("click", () => {
-                        //??this.click(v)
-                    });
+                    .attr("transform", "translate(" + vi.x + "," + vi.y + ") rotate(" + (360 * i / hiddenEdges) + ")")
+                    .on("click", () => this.click(v));
             }
         }
 
