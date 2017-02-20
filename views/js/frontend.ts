@@ -28,8 +28,9 @@ module Frontend {
         height: number;
 
         // node size
-        nodeWidth: number;
-        nodeHeight: number;
+        static fontSize: number = 22;
+        static nodeWidth: number = 30;
+        static nodeHeight: number = Frontend.fontSize;
 
         red: string;
 
@@ -71,10 +72,7 @@ module Frontend {
             this.height = 500;
 
             this.red = "rgb(125, 0, 0)";
-
-            this.nodeWidth = 30;
-            this.nodeHeight = 35;
-
+            
             this.viewgraph = {
                 nodes: [],
                 links: []
@@ -182,25 +180,6 @@ module Frontend {
             }
 
             this.viewgraph.nodes.push(v);
-
-            // var d = v.getImage();
-            // $.when(d).then(function(node) {
-
-            //     d3.select("#" + node.name()).append("image")
-            //         .attr("transform", "translate(2,2)")
-            //         .attr("xlink:href", function(v) {
-            //             var url = v.imgurl;
-            //             var simg = this;
-            //             var img = new Image();
-            //             img.onload = function() {
-            //                 simg.setAttribute("width", this.nodeWidth - 4);
-            //                 simg.setAttribute("height", nodeHeight - 4);
-            //             }
-            //             return img.src = url;
-            //         }).on("click", function() {
-            //             click(node)
-            //         })
-            // });
         }
 
         // setup the transiation based on the move/zoom, as it comes from 
@@ -287,8 +266,6 @@ module Frontend {
             this.d3cola
                 .nodes(this.filteredNodes())
                 .links(this.filteredLinks())
-                //.nodes(this.viewgraph.nodes)
-                //.links(this.viewgraph.links)
                 .start();
 
             var node = this.updateNodes();
@@ -299,7 +276,11 @@ module Frontend {
                 // setting the transform attribute to the array will result in syncronous calls to the callback provided for each node/link
                 // so that these will move to the designated positions
                 node.attr("transform", (d) => {
-                    return "translate(" + (d.x - this.nodeWidth / 2) + "," + (d.y - this.nodeHeight / 2) + ")";
+                    
+                    if(!d.id || '' == d.id)
+                        return "translate(" + (d.x - Frontend.nodeWidth / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
+                    else
+                        return "translate(" + (d.x - d.id.length * Frontend.fontSize / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
                 });
 
                 link.attr("transform", (d) => {
@@ -433,19 +414,14 @@ module Frontend {
 
             nodeEnter.append("text")
                 .attr('class', 'text')
-                //.attr("dx", "0.7em")
-                //.attr("dy", "1.0em")
                 .text((d) => d.id);
 
             nodeEnter.append("text")
                 .attr('class', 'furigana')
-                .attr("dx", "-1.0em")
-                .attr("dy", "0.0em")
+                .attr("dx", (d)=> -10 * d.hiragana / 2 + "px", )
                 .text((d) => d.hiragana ? d.hiragana : '');
 
             nodeEnter.append("text")
-                .attr('class', 'english')
-                .attr("dx", "1.5em")
                 .attr("dy", "3.2em")
                 .text((d) => d.english && 0 in d.english ? d.english[0] : '?');
 
@@ -463,8 +439,8 @@ module Frontend {
             var hiddenEdges = v.cast.length + 1 - v.degree;
             var r = 2 * Math.PI / hiddenEdges;
             for (var i = 0; i < hiddenEdges; ++i) {
-                var w = this.nodeWidth - 6,
-                    h = this.nodeHeight - 6,
+                var w = Frontend.nodeWidth - 6,
+                    h = Frontend.nodeHeight - 6,
                     x = w / 2 + 25 * Math.cos(r * i),
                     y = h / 2 + 30 * Math.sin(r * i);
 
@@ -517,10 +493,10 @@ module Frontend {
                 y = Number.POSITIVE_INFINITY,
                 Y = Number.NEGATIVE_INFINITY;
             this.nodesLayer.selectAll(".node").each((v) => {
-                x = Math.min(x, v.x - this.nodeWidth / 2);
-                X = Math.max(X, v.x + this.nodeWidth / 2);
-                y = Math.min(y, v.y - this.nodeHeight / 2);
-                Y = Math.max(Y, v.y + this.nodeHeight / 2);
+                x = Math.min(x, v.x - Frontend.nodeWidth / 2);
+                X = Math.max(X, v.x + Frontend.nodeWidth / 2);
+                y = Math.min(y, v.y - Frontend.nodeHeight / 2);
+                Y = Math.max(Y, v.y + Frontend.nodeHeight / 2);
             });
             return {
                 x: x,

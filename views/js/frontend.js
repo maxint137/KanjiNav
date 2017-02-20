@@ -21,8 +21,6 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 this.width = 960;
                 this.height = 500;
                 this.red = "rgb(125, 0, 0)";
-                this.nodeWidth = 30;
-                this.nodeHeight = 35;
                 this.viewgraph = {
                     nodes: [],
                     links: []
@@ -105,23 +103,6 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     v.y = startpos.y;
                 }
                 this.viewgraph.nodes.push(v);
-                // var d = v.getImage();
-                // $.when(d).then(function(node) {
-                //     d3.select("#" + node.name()).append("image")
-                //         .attr("transform", "translate(2,2)")
-                //         .attr("xlink:href", function(v) {
-                //             var url = v.imgurl;
-                //             var simg = this;
-                //             var img = new Image();
-                //             img.onload = function() {
-                //                 simg.setAttribute("width", this.nodeWidth - 4);
-                //                 simg.setAttribute("height", nodeHeight - 4);
-                //             }
-                //             return img.src = url;
-                //         }).on("click", function() {
-                //             click(node)
-                //         })
-                // });
             };
             // setup the transiation based on the move/zoom, as it comes from 
             Frontend.prototype.redraw = function (transition) {
@@ -191,7 +172,6 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
             };
             // pushes the viewgraph data into the adapter and starts rendering process
             Frontend.prototype.update = function () {
-                var _this = this;
                 this.d3cola
                     .nodes(this.filteredNodes())
                     .links(this.filteredLinks())
@@ -202,7 +182,10 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     // setting the transform attribute to the array will result in syncronous calls to the callback provided for each node/link
                     // so that these will move to the designated positions
                     node.attr("transform", function (d) {
-                        return "translate(" + (d.x - _this.nodeWidth / 2) + "," + (d.y - _this.nodeHeight / 2) + ")";
+                        if (!d.id || '' == d.id)
+                            return "translate(" + (d.x - Frontend.nodeWidth / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
+                        else
+                            return "translate(" + (d.x - d.id.length * Frontend.fontSize / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
                     });
                     link.attr("transform", function (d) {
                         var dx = d.source.x - d.target.x, dy = d.source.y - d.target.y;
@@ -319,12 +302,9 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     .text(function (d) { return d.id; });
                 nodeEnter.append("text")
                     .attr('class', 'furigana')
-                    .attr("dx", "-1.0em")
-                    .attr("dy", "0.0em")
+                    .attr("dx", function (d) { return -10 * d.hiragana / 2 + "px"; })
                     .text(function (d) { return d.hiragana ? d.hiragana : ''; });
                 nodeEnter.append("text")
-                    .attr('class', 'english')
-                    .attr("dx", "1.5em")
                     .attr("dy", "3.2em")
                     .text(function (d) { return d.english && 0 in d.english ? d.english[0] : '?'; });
                 nodeEnter.append("title")
@@ -340,7 +320,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 var hiddenEdges = v.cast.length + 1 - v.degree;
                 var r = 2 * Math.PI / hiddenEdges;
                 for (var i = 0; i < hiddenEdges; ++i) {
-                    var w = this.nodeWidth - 6, h = this.nodeHeight - 6, x = w / 2 + 25 * Math.cos(r * i), y = h / 2 + 30 * Math.sin(r * i);
+                    var w = Frontend.nodeWidth - 6, h = Frontend.nodeHeight - 6, x = w / 2 + 25 * Math.cos(r * i), y = h / 2 + 30 * Math.sin(r * i);
                     var rect = new this.cola.Rectangle(0, w, 0, h);
                     var vi = rect.rayIntersection(x, y);
                     var dview = d3.select("#" + v.name() + "_spikes");
@@ -373,13 +353,12 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 $.when(d).then(function (focus) { _this.refocus(focus); });
             };
             Frontend.prototype.graphBounds = function () {
-                var _this = this;
                 var x = Number.POSITIVE_INFINITY, X = Number.NEGATIVE_INFINITY, y = Number.POSITIVE_INFINITY, Y = Number.NEGATIVE_INFINITY;
                 this.nodesLayer.selectAll(".node").each(function (v) {
-                    x = Math.min(x, v.x - _this.nodeWidth / 2);
-                    X = Math.max(X, v.x + _this.nodeWidth / 2);
-                    y = Math.min(y, v.y - _this.nodeHeight / 2);
-                    Y = Math.max(Y, v.y + _this.nodeHeight / 2);
+                    x = Math.min(x, v.x - Frontend.nodeWidth / 2);
+                    X = Math.max(X, v.x + Frontend.nodeWidth / 2);
+                    y = Math.min(y, v.y - Frontend.nodeHeight / 2);
+                    Y = Math.max(Y, v.y + Frontend.nodeHeight / 2);
                 });
                 return {
                     x: x,
@@ -454,6 +433,10 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
             return Frontend;
         }());
         Frontend.jlptSelectedLevelsCookieName = "jlptSelectedLevels";
+        // node size
+        Frontend.fontSize = 22;
+        Frontend.nodeWidth = 30;
+        Frontend.nodeHeight = Frontend.fontSize;
         Frontend_1.Frontend = Frontend;
     })(Frontend || (Frontend = {}));
     function zoomToFit() {
