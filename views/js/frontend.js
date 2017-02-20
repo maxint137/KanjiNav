@@ -279,31 +279,53 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     }
                 })
                     .call(this.d3cola.drag);
+                nodeEnter
+                    .append(function (n) { return document.createElementNS('http://www.w3.org/2000/svg', n.type == kanjiNav.Word ? "rect" : "circle"); })
+                    .attr('class', 'rectTest')
+                    .attr('rx', '5px')
+                    .attr('ry', '5px')
+                    .attr('cx', '0.5em')
+                    .attr('cy', '0.5em')
+                    .attr('r', '0.7em')
+                    .attr('height', '2.0em')
+                    .attr('y', '-10px')
+                    .attr('width', function (d) { return d.id.length + '.0em'; })
+                    .attr('style', function (d) { return "fill: " + _this.jlpt2color(d.jlpt); });
+                nodeEnter
+                    .append("circle")
+                    .attr('class', 'rectTest')
+                    .attr('style', function (n) { return "fill: " + _this.jlpt2color(n.jlpt); })
+                    .attr("r", function (n) { return (n.type == kanjiNav.Word ? "10px" : "0px"); })
+                    .attr('cx', function (n) { return n.id.length + '.0em'; })
+                    .attr('cy', '-0.4em');
+                nodeEnter.append("text")
+                    .attr("font-family", "FontAwesome")
+                    .attr("font-size", "15px")
+                    .attr("dx", function (n) { return (0.91 * 22 * n.id.length) + 'px'; })
+                    .attr("dy", '-4px')
+                    .text(function (n) { return (n.type == kanjiNav.Word ? "\uf00d" : ""); }); //\uf02e
                 nodeEnter.append("g")
-                    .attr("id", function (d) {
-                    return d.name() + "_spikes";
+                    .attr("id", function (n) {
+                    return n.name() + "_spikes";
                 })
-                    .attr("transform", "translate(3,3)");
+                    .attr("transform", "translate(0,3)");
                 // nodeEnter.append("rect")
                 //     .attr("rx", 5).attr("ry", 5)
                 //     .style("stroke-width", "0")
                 //     .attr("width", this.nodeWidth).attr("height", nodeHeight)
                 //     .on("click", function (d) { click(d) })
                 //     .on("touchend", function (d) { click(d) });
-                nodeEnter.append("rect")
-                    .attr('class', 'rectTest')
-                    .attr('rx', '5px')
-                    .attr('ry', '5px')
-                    .attr('height', '1.0em')
-                    .attr('width', function (d) { return d.id.length + '.0em'; })
-                    .attr('style', function (d) { return "fill: " + _this.jlpt2color(d.jlpt); });
+                // <circle cx="10" cy="10" style="fill: red;font-size: 22px;" r="0.7em"></circle>
+                //                 .append((n)=>n.type == kanjiNav.Word ? "rect" : "circle")
                 nodeEnter.append("text")
                     .attr('class', 'text')
                     .text(function (d) { return d.id; });
                 nodeEnter.append("text")
-                    .attr('class', 'furigana')
+                    .attr('fill', 'azure')
+                    .attr("font-family", "FontAwesome")
                     .attr("dx", function (d) { return -10 * d.hiragana / 2 + "px"; })
-                    .text(function (d) { return d.hiragana ? d.hiragana : ''; });
+                    .attr("dy", "-1px")
+                    .text(function (n) { return (n.hiragana ? n.hiragana : '') + " \uf097"; }); //\uf02e
                 nodeEnter.append("text")
                     .attr("dy", "3.2em")
                     .text(function (d) { return d.english && 0 in d.english ? d.english[0] : '?'; });

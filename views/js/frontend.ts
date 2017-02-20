@@ -72,7 +72,7 @@ module Frontend {
             this.height = 500;
 
             this.red = "rgb(125, 0, 0)";
-            
+
             this.viewgraph = {
                 nodes: [],
                 links: []
@@ -276,8 +276,8 @@ module Frontend {
                 // setting the transform attribute to the array will result in syncronous calls to the callback provided for each node/link
                 // so that these will move to the designated positions
                 node.attr("transform", (d) => {
-                    
-                    if(!d.id || '' == d.id)
+
+                    if (!d.id || '' == d.id)
                         return "translate(" + (d.x - Frontend.nodeWidth / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
                     else
                         return "translate(" + (d.x - d.id.length * Frontend.fontSize / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
@@ -351,6 +351,7 @@ module Frontend {
 
             // insert a group that tracks the user interaction
             var nodeEnter = node.enter().append("g")
+
                 .attr("id", (d) => {
                     return d.name()
                 })
@@ -390,11 +391,46 @@ module Frontend {
                 })
                 .call(this.d3cola.drag);
 
+
+
+
+            nodeEnter
+                .append((n) => document.createElementNS('http://www.w3.org/2000/svg', n.type == kanjiNav.Word ? "rect" : "circle"))
+                //.append(("rect"))
+                .attr('class', 'rectTest')
+                .attr('rx', '5px')
+                .attr('ry', '5px')
+                .attr('cx', '0.5em')
+                .attr('cy', '0.5em')
+                .attr('r', '0.7em')
+                .attr('height', '2.0em')
+                .attr('y', '-10px')
+                .attr('width', (d) => d.id.length + '.0em')
+                .attr('style', (d) => "fill: " + this.jlpt2color(d.jlpt))
+                ;
+
+            nodeEnter
+                .append("circle")
+                .attr('class', 'rectTest')
+                .attr('style', (n) => "fill: " + this.jlpt2color(n.jlpt))
+                .attr("r", (n) => (n.type == kanjiNav.Word ? "10px" : "0px"))
+                .attr('cx', (n) => n.id.length + '.0em')
+                .attr('cy', '-0.4em')
+                ;
+
+            nodeEnter.append("text")
+                .attr("font-family", "FontAwesome")
+                .attr("font-size", "15px")
+                .attr("dx", (n) => (0.91*22*n.id.length) + 'px' )
+                .attr("dy", '-4px' )
+                .text((n) => (n.type == kanjiNav.Word ?"\uf00d":""));    //\uf02e
+
+
             nodeEnter.append("g")
-                .attr("id", (d) => {
-                    return d.name() + "_spikes"
+                .attr("id", (n) => {
+                    return n.name() + "_spikes"
                 })
-                .attr("transform", "translate(3,3)");
+                .attr("transform", "translate(0,3)");
 
             // nodeEnter.append("rect")
             //     .attr("rx", 5).attr("ry", 5)
@@ -403,23 +439,19 @@ module Frontend {
             //     .on("click", function (d) { click(d) })
             //     .on("touchend", function (d) { click(d) });
 
-            nodeEnter.append("rect")
-                .attr('class', 'rectTest')
-                .attr('rx', '5px')
-                .attr('ry', '5px')
-                .attr('height', '1.0em')
-                .attr('width', (d) => d.id.length + '.0em')
-                .attr('style', (d) => "fill: " + this.jlpt2color(d.jlpt))
-                ;
+            // <circle cx="10" cy="10" style="fill: red;font-size: 22px;" r="0.7em"></circle>
+            //                 .append((n)=>n.type == kanjiNav.Word ? "rect" : "circle")
 
             nodeEnter.append("text")
                 .attr('class', 'text')
                 .text((d) => d.id);
 
             nodeEnter.append("text")
-                .attr('class', 'furigana')
-                .attr("dx", (d)=> -10 * d.hiragana / 2 + "px", )
-                .text((d) => d.hiragana ? d.hiragana : '');
+                .attr('fill', 'azure')
+                .attr("font-family", "FontAwesome")
+                .attr("dx", (d) => -10 * d.hiragana / 2 + "px", )
+                .attr("dy", "-1px")
+                .text((n) => (n.hiragana ? n.hiragana : '') + " \uf097");    //\uf02e
 
             nodeEnter.append("text")
                 .attr("dy", "3.2em")
