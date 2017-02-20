@@ -127,7 +127,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
             Frontend.prototype.redraw = function (transition) {
                 // if mouse down then we are dragging not panning
                 if (this.nodeMouseDown) {
-                    debugger;
+                    //debugger;
                     return;
                 }
                 // read the current zoom translation vector and the current zoom scale
@@ -151,7 +151,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 // drop the links from the viewgraph first
                 this.viewgraph.links = [];
                 // set the color of each node in the viewgraph, based on the fully-expanded status
-                this.viewgraph.nodes
+                this.filteredNodes()
                     .forEach(function (v) {
                     var fullyExpanded = _this.modelgraph.fullyExpanded(v);
                     v.colour = fullyExpanded ? "black" : _this.red;
@@ -177,14 +177,27 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 });
                 this.update();
             };
+            Frontend.prototype.filteredNodes = function () {
+                var _this = this;
+                return this.viewgraph.nodes.filter(function (n) { return _this.isSelectedJlpt(n.jlpt); });
+            };
+            Frontend.prototype.isSelectedJlpt = function (level) {
+                return '' == this.jlpts || 0 <= this.jlpts.indexOf(level.toString());
+            };
+            Frontend.prototype.filteredLinks = function () {
+                var _this = this;
+                // only the links which connect to visible nodes
+                return this.viewgraph.links.filter(function (l) { return _this.isSelectedJlpt(l.source.jlpt) && _this.isSelectedJlpt(l.target.jlpt); });
+            };
             // pushes the viewgraph data into the adapter and starts rendering process
             Frontend.prototype.update = function () {
                 var _this = this;
-                this.d3cola.nodes(this.viewgraph.nodes)
-                    .links(this.viewgraph.links)
+                this.d3cola
+                    .nodes(this.filteredNodes())
+                    .links(this.filteredLinks())
                     .start();
-                var node = this.updateNodes(this.viewgraph);
-                var link = this.updateLinks(this.viewgraph);
+                var node = this.updateNodes();
+                var link = this.updateLinks();
                 this.d3cola.on("tick", function () {
                     // setting the transform attribute to the array will result in syncronous calls to the callback provided for each node/link
                     // so that these will move to the designated positions
@@ -203,11 +216,11 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 });
             };
             // re-populates edgesLayer with links
-            Frontend.prototype.updateLinks = function (viewgraph) {
+            Frontend.prototype.updateLinks = function () {
                 var _this = this;
                 // use the viewgrap's links to populate the edges-layer with objects based on the data:
                 var link = this.edgesLayer.selectAll(".link")
-                    .data(viewgraph.links);
+                    .data(this.filteredLinks());
                 // for every new entry insert a rect of class .link and initial height and position
                 link.enter().append("rect")
                     .attr("x", 0).attr("y", 0)
@@ -230,11 +243,11 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 });
                 return link;
             };
-            // re-populates the nodesLayer with nodes
-            Frontend.prototype.updateNodes = function (viewgraph) {
+            // re-populate the nodesLayer with nodes
+            Frontend.prototype.updateNodes = function () {
                 var _this = this;
                 var node = this.nodesLayer.selectAll(".node")
-                    .data(viewgraph.nodes, function (d) {
+                    .data(this.filteredNodes(), function (d) {
                     return d.viewgraphid;
                 });
                 // erase the nodes which aren't here anymore
@@ -269,7 +282,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 })
                     .on("wheel", function (d) {
                     // UF: need to send that event to the canvas, but how?!
-                    debugger;
+                    //debugger;
                 })
                     .on("click", function (d) {
                     if (Math.abs(mouseDownEvent.screenX - mouseUpEvent.screenX) +
@@ -294,10 +307,15 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 //     .attr("width", this.nodeWidth).attr("height", nodeHeight)
                 //     .on("click", function (d) { click(d) })
                 //     .on("touchend", function (d) { click(d) });
+                nodeEnter.append("rect")
+                    .attr('class', 'rectTest')
+                    .attr('rx', '5px')
+                    .attr('ry', '5px')
+                    .attr('height', '1.0em')
+                    .attr('width', function (d) { return d.id.length + '.0em'; })
+                    .attr('style', function (d) { return "fill: " + _this.jlpt2color(d.jlpt); });
                 nodeEnter.append("text")
                     .attr('class', 'text')
-                    .attr("dx", "0.7em")
-                    .attr("dy", "1.0em")
                     .text(function (d) { return d.id; });
                 nodeEnter.append("text")
                     .attr('class', 'furigana')
@@ -346,10 +364,13 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
             };
             // handle the mouse-click, tap
             Frontend.prototype.click = function (node) {
+                var _this = this;
                 if (node.colour !== this.red)
                     return;
-                var focus = this.modelgraph.getNode(node.type, node.id);
-                this.refocus(focus);
+                //var focus = this.modelgraph.getNode(node.type, node.id);
+                //this.refocus(focus);
+                var d = this.modelgraph.getNode(node.type, node.id);
+                $.when(d).then(function (focus) { _this.refocus(focus); });
             };
             Frontend.prototype.graphBounds = function () {
                 var _this = this;
@@ -403,11 +424,9 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     return '';
                 return decodeURIComponent(results[2].replace(/\+/g, " "));
             };
-            Frontend.prototype.filterGraphByJLPT = function (jlpts) {
-            };
             Frontend.prototype.setupJlptChecks = function () {
-                var curSel = this.cookies.get(Frontend.jlptSelectedLevelsCookieName);
-                curSel.split('').forEach(function (n) {
+                this.jlpts = this.cookies.get(Frontend.jlptSelectedLevelsCookieName);
+                this.jlpts.split('').forEach(function (n) {
                     $('#JLPT' + n).prop('checked', true);
                     $('#JLPT' + n).parents('label').addClass('active');
                 });
@@ -417,9 +436,20 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 curSel = curSel ? curSel : '';
                 // we land here before the control has reflected the new status
                 var willBecomeChecked = !$('#JLPT' + n).is(':checked');
-                var newCookie = curSel.replace(new RegExp(n.toString(), 'g'), '') + (willBecomeChecked ? n.toString() : '');
-                this.cookies.set(Frontend.jlptSelectedLevelsCookieName, newCookie);
-                this.filterGraphByJLPT(newCookie);
+                this.jlpts = curSel.replace(new RegExp(n.toString(), 'g'), '') + (willBecomeChecked ? n.toString() : '');
+                this.cookies.set(Frontend.jlptSelectedLevelsCookieName, this.jlpts);
+                this.refreshViewGraph();
+            };
+            Frontend.prototype.jlpt2color = function (level) {
+                switch (level) {
+                    case 1: return "#d43f3a";
+                    case 2: return "#f0ad4e";
+                    case 3: return "#337ab7";
+                    case 4: return "#eae548";
+                    case 5: return "#5cb85c";
+                    default:
+                        return "#cccccc";
+                }
             };
             return Frontend;
         }());

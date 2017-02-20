@@ -7,86 +7,88 @@ import kanjiNav = require("./kanjiNav");
 
 
 module Frontend {
-            
-        class FELink {
-            source: kanjiNav.Node;
-            target: kanjiNav.Node;
-        }
-    
-        class ViewGraph {
-            
-            nodes: kanjiNav.Node[];
-            links: FELink[];
-        }
-    
+
+    class FELink {
+        source: kanjiNav.Node;
+        target: kanjiNav.Node;
+    }
+
+    class ViewGraph {
+
+        nodes: kanjiNav.Node[];
+        links: FELink[];
+    }
+
     export class Frontend {
         static readonly jlptSelectedLevelsCookieName = "jlptSelectedLevels";
-        
-        
+
+
         // canvas size
         width: number;
         height: number;
-        
+
         // node size
         nodeWidth: number;
         nodeHeight: number;
-        
+
         red: string;
-        
+
         // cookie monster
         cookies: Cookies.CookiesStatic;
-        
+
         // the engine
         cola: any;
         d3cola: any;
         // zooming behaviour
         zoom: any;
 
-        
         // the object that communicates with the server to bring all the data
         modelgraph: kanjiNav.Graph;
-        
+
         // WebCola will render that graph, and we'll try to keep it updated with the modelgraph
         viewgraph: ViewGraph;
-        
+
         // the SVG to play with
         outer: any;
-        
+
         // the visuals group
         vis: any;
         edgesLayer: any;
         nodesLayer: any;
-        
+
+        // selected JLPTs
+        jlpts: string;
+
         // ??
         nodeMouseDown: boolean;
-        
+
         constructor(modelgraph: kanjiNav.Graph, cola: any, cookies: Cookies.CookiesStatic) {
-            
+
             this.modelgraph = modelgraph; // new kanjiNav.Graph(getParameterByName('JLPT'));
             this.cookies = cookies;
 
             this.width = 960;
             this.height = 500;
-            
+
             this.red = "rgb(125, 0, 0)";
 
             this.nodeWidth = 30;
             this.nodeHeight = 35;
-            
+
             this.viewgraph = {
                 nodes: [],
                 links: []
             };
-            
+
             this.cola = cola;
             this.d3cola = cola.d3adaptor(d3)
-            .linkDistance(80)
-            .avoidOverlaps(true)
-            //  computes ideal lengths on each link to make extra space around high-degree nodes, using 5 as the basic length.
-            // Alternately, you can pass your own function f into linkDistance(f) that returns a specific length for each link (e.g. based on your data).
-            //.symmetricDiffLinkLengths(15)
-            .size([this.width, this.height]);
-            
+                .linkDistance(80)
+                .avoidOverlaps(true)
+                //  computes ideal lengths on each link to make extra space around high-degree nodes, using 5 as the basic length.
+                // Alternately, you can pass your own function f into linkDistance(f) that returns a specific length for each link (e.g. based on your data).
+                //.symmetricDiffLinkLengths(15)
+                .size([this.width, this.height]);
+
             // alternatively just use the D3 built-in force layout
             // var d3cola = d3.layout.force()
             //     .charge(-520)
@@ -94,12 +96,12 @@ module Frontend {
             //     .size([width, height]);
 
             this.outer = d3.select("#mydiv").append("svg")
-            .attr("width", this.width)
-            .attr("height", this.height)
-            .attr("pointer-events", "all");
+                .attr("width", this.width)
+                .attr("height", this.height)
+                .attr("pointer-events", "all");
 
             this.nodeMouseDown = false;
-            
+
             this.setupZooming();
             this.defineGradients();
 
@@ -108,8 +110,7 @@ module Frontend {
 
 
         // add layers and zooming to the outer SVG
-        setupZooming()
-        {
+        setupZooming() {
             // https://github.com/d3/d3-3.x-api-reference/blob/master/Zoom-Behavior.md
             // Construct a new zoom behavior:
             this.zoom = d3.behavior.zoom();
@@ -118,9 +119,9 @@ module Frontend {
                 .attr('width', "100%")
                 .attr('height', "100%")
                 // apply the behavior to selected element:
-                .call(this.zoom.on("zoom", ()=>this.redraw()))
+                .call(this.zoom.on("zoom", () => this.redraw()))
                 // enable the zoom behavior’s dblclick event listener
-                .on("dblclick.zoom", ()=>this.zoomToFit());
+                .on("dblclick.zoom", () => this.zoomToFit());
 
             // the layers in play
             this.vis = this.outer.append('g');
@@ -130,8 +131,7 @@ module Frontend {
         }
 
         // define the gradients used down the road: SpikeGradient & (Reverse)EdgeGradient
-        defineGradients()
-        {
+        defineGradients() {
             var defs = this.outer.append("svg:defs");
 
             function addGradient(id, colour1, opacity1, colour2, opacity2) {
@@ -165,15 +165,15 @@ module Frontend {
             // Note: http://piotrwalat.net/arrow-function-expressions-in-typescript/
             // Standard functions will dynamically bind this depending on execution context (just like in JavaScript)
             // Arrow functions on the other hand will preserve this of enclosing context. 
-            var d = this.modelgraph.getNode(kanjiNav.Word, word, (v)=>this.addViewNode(v));
-            
-            $.when(d).then((startNode) => {this.refocus(startNode)});
+            var d = this.modelgraph.getNode(kanjiNav.Word, word, (v) => this.addViewNode(v));
+
+            $.when(d).then((startNode) => { this.refocus(startNode) });
         }
 
         // adds the node to the viewgraph, picks the initial position based on the startpos and assignes viewgraphid
         // used to schedule the images rendering
         addViewNode(v: kanjiNav.Node, startpos?: any) {
-            
+
             v.viewgraphid = this.viewgraph.nodes.length;
 
             if (typeof startpos !== 'undefined') {
@@ -207,13 +207,13 @@ module Frontend {
         redraw(transition?: boolean) {
             // if mouse down then we are dragging not panning
             if (this.nodeMouseDown) {
-                debugger;
+                //debugger;
                 return;
             }
 
             // read the current zoom translation vector and the current zoom scale
             (transition ? this.vis.transition() : this.vis)
-            .attr("transform", "translate(" + this.zoom.translate() + ") scale(" + this.zoom.scale() + ")");
+                .attr("transform", "translate(" + this.zoom.translate() + ") scale(" + this.zoom.scale() + ")");
         }
 
         // expands the selected node, renders the updated graph
@@ -226,17 +226,16 @@ module Frontend {
             // not sure why do we want to have it here in addition to the lines just below...
             this.refreshViewGraph();
 
-            $.when(neighboursExpanded).then(()=>this.refreshViewGraph());
+            $.when(neighboursExpanded).then(() => this.refreshViewGraph());
         }
 
         // sync the viewgraph with the modelgraph
         refreshViewGraph() {
             // drop the links from the viewgraph first
             this.viewgraph.links = [];
-            
+
             // set the color of each node in the viewgraph, based on the fully-expanded status
-            this.viewgraph.nodes
-                //.filter(n=>5 <= n.jlpt)
+            this.filteredNodes()
                 .forEach((v) => {
                     var fullyExpanded = this.modelgraph.fullyExpanded(v);
                     v.colour = fullyExpanded ? "black" : this.red;
@@ -270,14 +269,30 @@ module Frontend {
             this.update();
         }
 
+        filteredNodes(): kanjiNav.Node[] {
+            return this.viewgraph.nodes.filter(n => this.isSelectedJlpt(n.jlpt));
+        }
+
+        isSelectedJlpt(level: number) {
+            return '' == this.jlpts || 0 <= this.jlpts.indexOf(level.toString());
+        }
+
+        filteredLinks() {
+            // only the links which connect to visible nodes
+            return this.viewgraph.links.filter(l => this.isSelectedJlpt(l.source.jlpt) && this.isSelectedJlpt(l.target.jlpt));
+        }
+
         // pushes the viewgraph data into the adapter and starts rendering process
         update() {
-            this.d3cola.nodes(this.viewgraph.nodes)
-                .links(this.viewgraph.links)
+            this.d3cola
+                .nodes(this.filteredNodes())
+                .links(this.filteredLinks())
+                //.nodes(this.viewgraph.nodes)
+                //.links(this.viewgraph.links)
                 .start();
 
-            var node = this.updateNodes(this.viewgraph);
-            var link = this.updateLinks(this.viewgraph);
+            var node = this.updateNodes();
+            var link = this.updateLinks();
 
             this.d3cola.on("tick", () => {
 
@@ -288,13 +303,13 @@ module Frontend {
                 });
 
                 link.attr("transform", (d) => {
-                        var dx = d.source.x - d.target.x,
-                            dy = d.source.y - d.target.y;
+                    var dx = d.source.x - d.target.x,
+                        dy = d.source.y - d.target.y;
 
-                        var r = 180 * Math.atan2(dy, dx) / Math.PI;
+                    var r = 180 * Math.atan2(dy, dx) / Math.PI;
 
-                        return "translate(" + d.target.x + "," + d.target.y + ") rotate(" + r + ") ";
-                    })
+                    return "translate(" + d.target.x + "," + d.target.y + ") rotate(" + r + ") ";
+                })
                     .attr("width", (d) => {
                         var dx = d.source.x - d.target.x,
                             dy = d.source.y - d.target.y;
@@ -305,10 +320,10 @@ module Frontend {
         }
 
         // re-populates edgesLayer with links
-        updateLinks(viewgraph) {
+        updateLinks() {
             // use the viewgrap's links to populate the edges-layer with objects based on the data:
             var link = this.edgesLayer.selectAll(".link")
-                .data(viewgraph.links);
+                .data(this.filteredLinks());
 
             // for every new entry insert a rect of class .link and initial height and position
             link.enter().append("rect")
@@ -338,10 +353,10 @@ module Frontend {
             return link;
         }
 
-        // re-populates the nodesLayer with nodes
-        updateNodes(viewgraph) {
+        // re-populate the nodesLayer with nodes
+        updateNodes() {
             var node = this.nodesLayer.selectAll(".node")
-                .data(viewgraph.nodes, (d) => {
+                .data(this.filteredNodes(), (d) => {
                     return d.viewgraphid;
                 })
 
@@ -379,7 +394,7 @@ module Frontend {
                 })
                 .on("wheel", (d) => {
                     // UF: need to send that event to the canvas, but how?!
-                    debugger;
+                    //debugger;
                 })
                 .on("click", (d) => {
                     if (Math.abs(mouseDownEvent.screenX - mouseUpEvent.screenX) +
@@ -407,11 +422,20 @@ module Frontend {
             //     .on("click", function (d) { click(d) })
             //     .on("touchend", function (d) { click(d) });
 
+            nodeEnter.append("rect")
+                .attr('class', 'rectTest')
+                .attr('rx', '5px')
+                .attr('ry', '5px')
+                .attr('height', '1.0em')
+                .attr('width', (d) => d.id.length + '.0em')
+                .attr('style', (d) => "fill: " + this.jlpt2color(d.jlpt))
+                ;
+
             nodeEnter.append("text")
                 .attr('class', 'text')
-                .attr("dx", "0.7em")
-                .attr("dy", "1.0em")
-                .text((d) =>d.id);
+                //.attr("dx", "0.7em")
+                //.attr("dy", "1.0em")
+                .text((d) => d.id);
 
             nodeEnter.append("text")
                 .attr('class', 'furigana')
@@ -423,10 +447,10 @@ module Frontend {
                 .attr('class', 'english')
                 .attr("dx", "1.5em")
                 .attr("dy", "3.2em")
-                .text((d) =>d.english && 0 in d.english ? d.english[0] : '?');
+                .text((d) => d.english && 0 in d.english ? d.english[0] : '?');
 
             nodeEnter.append("title")
-                .text((d) =>d.id);
+                .text((d) => d.id);
 
             node.style("fill", (d) => d.colour);
 
@@ -443,10 +467,10 @@ module Frontend {
                     h = this.nodeHeight - 6,
                     x = w / 2 + 25 * Math.cos(r * i),
                     y = h / 2 + 30 * Math.sin(r * i);
-                    
+
                 let rect = new this.cola.Rectangle(0, w, 0, h);
                 let vi = rect.rayIntersection(x, y);
-                
+
                 var dview = d3.select("#" + v.name() + "_spikes");
 
                 dview.append("rect")
@@ -475,8 +499,16 @@ module Frontend {
             if (node.colour !== this.red)
                 return;
 
-            var focus = this.modelgraph.getNode(node.type, node.id);
-            this.refocus(focus);
+
+
+
+            //var focus = this.modelgraph.getNode(node.type, node.id);
+            //this.refocus(focus);
+
+            var d = this.modelgraph.getNode(node.type, node.id);
+
+            $.when(d).then((focus) => { this.refocus(focus) });
+
         }
 
         graphBounds() {
@@ -544,40 +576,48 @@ module Frontend {
             if (!results[2]) return '';
             return decodeURIComponent(results[2].replace(/\+/g, " "));
         }
-        
-        filterGraphByJLPT(jlpts: string) {
-            
-        }
-        
-        setupJlptChecks() {
-            
-             let curSel: string = this.cookies.get(Frontend.jlptSelectedLevelsCookieName);
-             
-             curSel.split('').forEach(n => {
-                 
-                 $('#JLPT' + n).prop('checked', true);
-                 $('#JLPT' + n).parents('label').addClass('active');
-             });
-        }
-        
-        jlptSelect(n: number) {
-             
-             let curSel: string = this.cookies.get(Frontend.jlptSelectedLevelsCookieName);
-             curSel = curSel ? curSel : '';
-             
-             // we land here before the control has reflected the new status
-             let willBecomeChecked: boolean = !$('#JLPT' + n).is(':checked');
-             let newCookie: string = curSel.replace(new RegExp(n.toString(), 'g'),'') + (willBecomeChecked?n.toString():'');
 
-             this.cookies.set(Frontend.jlptSelectedLevelsCookieName, newCookie);
-             
-             this.filterGraphByJLPT(newCookie);
-         }
-	}	
+        setupJlptChecks() {
+
+            this.jlpts = this.cookies.get(Frontend.jlptSelectedLevelsCookieName);
+
+            this.jlpts.split('').forEach(n => {
+
+                $('#JLPT' + n).prop('checked', true);
+                $('#JLPT' + n).parents('label').addClass('active');
+            });
+        }
+
+        jlptSelect(n: number) {
+
+            let curSel: string = this.cookies.get(Frontend.jlptSelectedLevelsCookieName);
+            curSel = curSel ? curSel : '';
+
+            // we land here before the control has reflected the new status
+            let willBecomeChecked: boolean = !$('#JLPT' + n).is(':checked');
+            this.jlpts = curSel.replace(new RegExp(n.toString(), 'g'), '') + (willBecomeChecked ? n.toString() : '');
+
+            this.cookies.set(Frontend.jlptSelectedLevelsCookieName, this.jlpts);
+
+            this.refreshViewGraph();
+        }
+
+        jlpt2color(level: number) {
+            switch (level) {
+                case 1: return "#d43f3a";
+                case 2: return "#f0ad4e";
+                case 3: return "#337ab7";
+                case 4: return "#eae548";
+                case 5: return "#5cb85c";
+                default:
+                    return "#cccccc";
+            }
+        }
+    }
 }
 
 function zoomToFit() {
-    
+
     Frontend.Frontend.prototype.zoomToFit();
 }
 export = Frontend.Frontend;
