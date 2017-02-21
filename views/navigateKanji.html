@@ -32,7 +32,6 @@
             font-weight: normal;
             line-height: 1;
             dominant-baseline: hanging;
-            /*text-anchor: middle;*/
         }
         
         .background {
@@ -43,8 +42,6 @@
         
         .node {
             background-color: white;
-            /*stroke: #fff;
-  stroke-width: 1.5px;*/
         }
         
         .spike {
@@ -79,11 +76,76 @@
         .rectTest {
             font-size: 22px;
         }
+        
+        .wordCard {
+            opacity: 0.7
+        }
     </style>
 </head>
 
 
 <body>
+    <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0">
+        <defs>
+            <filter id="a" color-interpolation-filters="sRGB">
+                <feFlood flood-opacity=".498" flood-color="#000" result="flood" />
+                <feComposite in="flood" in2="SourceGraphic" operator="in" result="composite1" />
+                <feGaussianBlur in="composite1" stdDeviation="3" result="blur" />
+                <feOffset dx="6" dy="6" result="offset" />
+                <feComposite in="SourceGraphic" in2="offset" result="composite2" />
+            </filter>
+            <g id='kanjiBG' transform="translate(0,10)">
+                <circle cx="21" cy="21" r="21" stroke-width=".025" style="paint-order:markers fill stroke; opacity: 1.0" />
+            </g>
+            <g filter="url(#a)" id="g124" transform="translate(5,-2)">
+                <g class="wordCard">
+                    <rect y="12" x="0" rx="5" ry="5" height="42" width="100" id="rect109" style="stroke-width:0.025;stroke-miterlimit:4;stroke-dasharray:none;paint-order:markers fill stroke" />
+                    <circle cx="100" cy="12" r="12" id="circle27" style="stroke-width:1;paint-order:markers fill stroke" />
+                </g>
+
+                <g transform="translate(95,7)" id="g926-9" />
+                <path inkscape:connector-curvature="0" id="path869" d="M 95,7 105,17" style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+                <path style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" d="M 105,7 95,17" id="path23" inkscape:connector-curvature="0" />
+            </g>
+
+            <g filter="url(#a)" id="g123" transform="translate(5,-2)">
+                <g class="wordCard">
+                    <rect y="12" x="0" rx="5" ry="5" height="42" width="75" id="rect109" style="stroke-width:0.025;stroke-miterlimit:4;stroke-dasharray:none;paint-order:markers fill stroke" />
+                    <circle cx="75" cy="12" r="12" id="circle27" style="stroke-width:1;paint-order:markers fill stroke" />
+                </g>
+
+                <g transform="translate(70,7)" id="g926-9" />
+                <path inkscape:connector-curvature="0" id="path869" d="M 70,7 80,17" style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+                <path style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" d="M 80,7 70,17" id="path23" inkscape:connector-curvature="0" />
+            </g>
+
+
+            <g filter="url(#a)" id="g122" transform="translate(5,-2)">
+                <g class="wordCard">
+                    <rect y="12" x="0" rx="5" ry="5" height="42" width="50" id="rect109" style="stroke-width:0.025;stroke-miterlimit:4;stroke-dasharray:none;paint-order:markers fill stroke" />
+                    <circle cx="50" cy="12" r="12" id="circle27" style="stroke-width:1;paint-order:markers fill stroke" />
+                </g>
+
+                <g transform="translate(70,7)" id="g926-9" />
+                <path inkscape:connector-curvature="0" id="path869" d="M 45,7 55,17" style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+                <path style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" d="M 55,7 45,17" id="path23" inkscape:connector-curvature="0" />
+            </g>
+
+            <g filter="url(#a)" id="g121" transform="translate(5,-2)">
+                <g class="wordCard">
+                    <rect y="12" x="0"  rx="5" ry="5" height="42" width="35" id="rect109" style="stroke-width:0.025;stroke-miterlimit:4;stroke-dasharray:none;paint-order:markers fill stroke" />
+                    <circle cx="35" cy="12" r="12" id="circle27" style="stroke-width:1;paint-order:markers fill stroke" />
+                </g>
+
+                <g transform="translate(70,7)" id="g926-9" />
+                <path inkscape:connector-curvature="0" id="path869" d="M 30,7 40,17" style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+                <path style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" d="M 40,7 30,17" id="path23" inkscape:connector-curvature="0" />
+            </g>
+
+        </defs>
+    </svg>
+
+
     <form class="form-inline">
         <select class="combobox" id="word">
             <option></option>
@@ -97,29 +159,29 @@
         <div class="btn-group" data-toggle="buttons">
 
             <label class="btn btn-xs btn-success" data-toggle="tooltip" title="JLPT5" onclick="fe.jlptSelect(5)">
-				<input id='JLPT5' type="checkbox" autocomplete="off">
-				<span class="glyphicon glyphicon-ok"></span>
-			</label>
+                <input id='JLPT5' type="checkbox" autocomplete="off">
+                <span class="glyphicon glyphicon-ok"></span>
+            </label>
 
             <label class="btn btn-xs btn-info yellow" data-toggle="tooltip" title="JLPT4" onclick="fe.jlptSelect(4)">
-				<input id='JLPT4' type="checkbox" autocomplete="off">
-				<span class="glyphicon glyphicon-ok"></span>
-			</label>
+                <input id='JLPT4' type="checkbox" autocomplete="off">
+                <span class="glyphicon glyphicon-ok"></span>
+            </label>
 
             <label class="btn btn-xs btn-primary" data-toggle="tooltip" title="JLPT3" onclick="fe.jlptSelect(3)">
-				<input id='JLPT3' type="checkbox" autocomplete="off">
-				<span class="glyphicon glyphicon-ok"></span>
-			</label>
+                <input id='JLPT3' type="checkbox" autocomplete="off">
+                <span class="glyphicon glyphicon-ok"></span>
+            </label>
 
             <label class="btn btn-xs btn-warning" data-toggle="tooltip" title="JLPT2" onclick="fe.jlptSelect(2)">
-				<input id='JLPT2' type="checkbox" autocomplete="off">
-				<span class="glyphicon glyphicon-ok"></span>
-			</label>
+                <input id='JLPT2' type="checkbox" autocomplete="off">
+                <span class="glyphicon glyphicon-ok"></span>
+            </label>
 
             <label class="btn btn-xs btn-danger" data-toggle="tooltip" title="JLPT1" onclick="fe.jlptSelect(1)">
                 <input id='JLPT1' type="checkbox" autocomplete="off">
                 <span class="glyphicon glyphicon-ok"></span>
-			</label>
+            </label>
 
         </div>
 
@@ -172,7 +234,7 @@
 
     <script type="text/javascript" language="JavaScript" src="http://idea.informer.com/tab6.js?domain=kanjiNav"></script>
     <noscript><a href="http://kanjiNav.idea.informer.com">Kanji Navigator feedback </a>
-    <a href="http://idea.informer.com"><img src="http://widget.idea.informer.com/tmpl/images/widget_logo.jpg" /></a>
+        <a href="http://idea.informer.com"><img src="http://widget.idea.informer.com/tmpl/images/widget_logo.jpg" /></a>
     </noscript>
 
 </body>

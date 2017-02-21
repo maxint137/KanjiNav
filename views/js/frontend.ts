@@ -68,8 +68,8 @@ module Frontend {
             this.modelgraph = modelgraph; // new kanjiNav.Graph(getParameterByName('JLPT'));
             this.cookies = cookies;
 
-            this.width = 960;
-            this.height = 500;
+            this.width = $(window).width();
+            this.height = $(window).height();
 
             this.red = "rgb(125, 0, 0)";
 
@@ -130,7 +130,7 @@ module Frontend {
 
         // define the gradients used down the road: SpikeGradient & (Reverse)EdgeGradient
         defineGradients() {
-            var defs = this.outer.append("svg:defs");
+            let defs = this.outer.append("svg:defs");
 
             function addGradient(id, colour1, opacity1, colour2, opacity2) {
                 var gradient = defs.append("svg:linearGradient")
@@ -249,7 +249,8 @@ module Frontend {
         }
 
         filteredNodes(): kanjiNav.Node[] {
-            return this.viewgraph.nodes.filter(n => this.isSelectedJlpt(n.jlpt));
+            return this.viewgraph.nodes.filter(n => this.isSelectedJlpt(n.jlpt) &&
+             false == n.hidden);
         }
 
         isSelectedJlpt(level: number) {
@@ -258,7 +259,10 @@ module Frontend {
 
         filteredLinks() {
             // only the links which connect to visible nodes
-            return this.viewgraph.links.filter(l => this.isSelectedJlpt(l.source.jlpt) && this.isSelectedJlpt(l.target.jlpt));
+            return this.viewgraph.links.filter(l => this.isSelectedJlpt(l.source.jlpt)
+            && !l.source.hidden && !l.target.hidden 
+            && this.isSelectedJlpt(l.target.jlpt)
+            );
         }
 
         // pushes the viewgraph data into the adapter and starts rendering process
@@ -349,7 +353,7 @@ module Frontend {
             let mouseUpEvent: any;
             let touchmoveEvent: number;
 
-            // insert a group that tracks the user interaction
+            // insert the parent group - it  tracks the user interaction
             var nodeEnter = node.enter().append("g")
 
                 .attr("id", (d) => {
@@ -378,89 +382,73 @@ module Frontend {
                     // UF: need to send that event to the canvas, but how?!
                     //debugger;
                 })
-                .on("click", (d) => {
-                    if (Math.abs(mouseDownEvent.screenX - mouseUpEvent.screenX) +
-                        Math.abs(mouseDownEvent.screenY - mouseUpEvent.screenY) < 2) {
-                        this.click(d);
-                    }
-                })
+                // .on("click", (d) => {
+                //     if (Math.abs(mouseDownEvent.screenX - mouseUpEvent.screenX) +
+                //         Math.abs(mouseDownEvent.screenY - mouseUpEvent.screenY) < 2) {
+                //         this.click(d);
+                //     }
+                // })
                 .on("touchend", (d) => {
                     if (event.timeStamp - touchmoveEvent < 100) {
                         this.click(d)
                     }
                 })
                 .call(this.d3cola.drag);
+            
 
 
-
-
-            nodeEnter
-                .append((n) => document.createElementNS('http://www.w3.org/2000/svg', n.type == kanjiNav.Word ? "rect" : "circle"))
-                //.append(("rect"))
-                .attr('class', 'rectTest')
-                .attr('rx', '5px')
-                .attr('ry', '5px')
-                .attr('cx', '0.5em')
-                .attr('cy', '0.5em')
-                .attr('r', '0.7em')
-                .attr('height', '2.0em')
-                .attr('y', '-10px')
-                .attr('width', (d) => d.id.length + '.0em')
-                .attr('style', (d) => "fill: " + this.jlpt2color(d.jlpt))
-                ;
-
-            nodeEnter
-                .append("circle")
-                .attr('class', 'rectTest')
+            // the background for the word/kangi
+            let wordCard = nodeEnter
+                .append("g")
                 .attr('style', (n) => "fill: " + this.jlpt2color(n.jlpt))
-                .attr("r", (n) => (n.type == kanjiNav.Word ? "10px" : "0px"))
-                .attr('cx', (n) => n.id.length + '.0em')
-                .attr('cy', '-0.4em')
+                .attr('transform', 'translate(-10, -20)')
+                // create a reference to the <g> id sections defined in the existing svg markup exported from Inkscape
+                .append("use")
+                .attr("xlink:href", (n) => n.type == kanjiNav.Word ? '#g12' + n.id.length : '#kanjiBG')
                 ;
+                
+            wordCard
+                .on("click", (n: kanjiNav.Node) =>{ this.hideNode(n); } );                
 
-            nodeEnter.append("text")
-                .attr("font-family", "FontAwesome")
-                .attr("font-size", "15px")
-                .attr("dx", (n) => (0.91*22*n.id.length) + 'px' )
-                .attr("dy", '-4px' )
-                .text((n) => (n.type == kanjiNav.Word ?"\uf00d":""));    //\uf02e
-
-
+            // the spikes
             nodeEnter.append("g")
                 .attr("id", (n) => {
                     return n.name() + "_spikes"
                 })
                 .attr("transform", "translate(0,3)");
-
-            // nodeEnter.append("rect")
-            //     .attr("rx", 5).attr("ry", 5)
-            //     .style("stroke-width", "0")
-            //     .attr("width", this.nodeWidth).attr("height", nodeHeight)
-            //     .on("click", function (d) { click(d) })
-            //     .on("touchend", function (d) { click(d) });
-
-            // <circle cx="10" cy="10" style="fill: red;font-size: 22px;" r="0.7em"></circle>
-            //                 .append((n)=>n.type == kanjiNav.Word ? "rect" : "circle")
-
-            nodeEnter.append("text")
+            
+            // the word itself
+            let text = nodeEnter.append("text")
                 .attr('class', 'text')
-                .text((d) => d.id);
+                // .attr('dx', (n) => n.type == kanjiNav.Word ? '-0.2em' : '0.0em')
+                // .attr('dy', (n) => n.type == kanjiNav.Word ? '-0.2em' : '0.0em')
+                .text((d) => d.id)
+                ;
+            text
+                .on("click", (d) => {
+                    if (Math.abs(mouseDownEvent.screenX - mouseUpEvent.screenX) +
+                        Math.abs(mouseDownEvent.screenY - mouseUpEvent.screenY) < 2) {
+                        this.click(d);
+                    }
+                })
 
+            // the rubi
             nodeEnter.append("text")
-                .attr('fill', 'azure')
-                .attr("font-family", "FontAwesome")
-                .attr("dx", (d) => -10 * d.hiragana / 2 + "px", )
                 .attr("dy", "-1px")
-                .text((n) => (n.hiragana ? n.hiragana : '') + " \uf097");    //\uf02e
+                .text((n: kanjiNav.Node) => n.hiragana ? n.hiragana : ''); 
 
+            // the english translation
             nodeEnter.append("text")
-                .attr("dy", "3.2em")
-                .text((d) => d.english && 0 in d.english ? d.english[0] : '?');
+                .attr("dy", "3.0em")
+                .text((n: kanjiNav.Node) => n.english && 0 in n.english ? n.english[0] : '?')
+                ;
 
+            // the tooltip
             nodeEnter.append("title")
-                .text((d) => d.id);
+                .text((d) => d.english && 0 in d.english ? d.english[0] : '?')
+                ;
 
-            node.style("fill", (d) => d.colour);
+            node.style("fill", (n: kanjiNav.Node) => n.colour);
 
             return node;
         }
@@ -495,6 +483,13 @@ module Frontend {
         unhintNeighbours(v) {
             var dview = d3.select("#" + v.name() + "_spikes");
             dview.selectAll(".spike").remove();
+        }
+        
+        hideNode(n: kanjiNav.Node) {
+            
+            n.hidden = true;
+            
+            this.update();
         }
 
         // was the viewnode added?

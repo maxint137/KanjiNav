@@ -18,8 +18,8 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
             function Frontend(modelgraph, cola, cookies) {
                 this.modelgraph = modelgraph; // new kanjiNav.Graph(getParameterByName('JLPT'));
                 this.cookies = cookies;
-                this.width = 960;
-                this.height = 500;
+                this.width = $(window).width();
+                this.height = $(window).height();
                 this.red = "rgb(125, 0, 0)";
                 this.viewgraph = {
                     nodes: [],
@@ -160,7 +160,8 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
             };
             Frontend.prototype.filteredNodes = function () {
                 var _this = this;
-                return this.viewgraph.nodes.filter(function (n) { return _this.isSelectedJlpt(n.jlpt); });
+                return this.viewgraph.nodes.filter(function (n) { return _this.isSelectedJlpt(n.jlpt) &&
+                    false == n.hidden; });
             };
             Frontend.prototype.isSelectedJlpt = function (level) {
                 return '' == this.jlpts || 0 <= this.jlpts.indexOf(level.toString());
@@ -168,7 +169,9 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
             Frontend.prototype.filteredLinks = function () {
                 var _this = this;
                 // only the links which connect to visible nodes
-                return this.viewgraph.links.filter(function (l) { return _this.isSelectedJlpt(l.source.jlpt) && _this.isSelectedJlpt(l.target.jlpt); });
+                return this.viewgraph.links.filter(function (l) { return _this.isSelectedJlpt(l.source.jlpt)
+                    && !l.source.hidden && !l.target.hidden
+                    && _this.isSelectedJlpt(l.target.jlpt); });
             };
             // pushes the viewgraph data into the adapter and starts rendering process
             Frontend.prototype.update = function () {
@@ -239,7 +242,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 var mouseDownEvent;
                 var mouseUpEvent;
                 var touchmoveEvent;
-                // insert a group that tracks the user interaction
+                // insert the parent group - it  tracks the user interaction
                 var nodeEnter = node.enter().append("g")
                     .attr("id", function (d) {
                     return d.name();
@@ -267,71 +270,50 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     // UF: need to send that event to the canvas, but how?!
                     //debugger;
                 })
-                    .on("click", function (d) {
-                    if (Math.abs(mouseDownEvent.screenX - mouseUpEvent.screenX) +
-                        Math.abs(mouseDownEvent.screenY - mouseUpEvent.screenY) < 2) {
-                        _this.click(d);
-                    }
-                })
                     .on("touchend", function (d) {
                     if (event.timeStamp - touchmoveEvent < 100) {
                         _this.click(d);
                     }
                 })
                     .call(this.d3cola.drag);
-                nodeEnter
-                    .append(function (n) { return document.createElementNS('http://www.w3.org/2000/svg', n.type == kanjiNav.Word ? "rect" : "circle"); })
-                    .attr('class', 'rectTest')
-                    .attr('rx', '5px')
-                    .attr('ry', '5px')
-                    .attr('cx', '0.5em')
-                    .attr('cy', '0.5em')
-                    .attr('r', '0.7em')
-                    .attr('height', '2.0em')
-                    .attr('y', '-10px')
-                    .attr('width', function (d) { return d.id.length + '.0em'; })
-                    .attr('style', function (d) { return "fill: " + _this.jlpt2color(d.jlpt); });
-                nodeEnter
-                    .append("circle")
-                    .attr('class', 'rectTest')
+                // the background for the word/kangi
+                var wordCard = nodeEnter
+                    .append("g")
                     .attr('style', function (n) { return "fill: " + _this.jlpt2color(n.jlpt); })
-                    .attr("r", function (n) { return (n.type == kanjiNav.Word ? "10px" : "0px"); })
-                    .attr('cx', function (n) { return n.id.length + '.0em'; })
-                    .attr('cy', '-0.4em');
-                nodeEnter.append("text")
-                    .attr("font-family", "FontAwesome")
-                    .attr("font-size", "15px")
-                    .attr("dx", function (n) { return (0.91 * 22 * n.id.length) + 'px'; })
-                    .attr("dy", '-4px')
-                    .text(function (n) { return (n.type == kanjiNav.Word ? "\uf00d" : ""); }); //\uf02e
+                    .attr('transform', 'translate(-10, -20)')
+                    .append("use")
+                    .attr("xlink:href", function (n) { return n.type == kanjiNav.Word ? '#g12' + n.id.length : '#kanjiBG'; });
+                wordCard
+                    .on("click", function (n) { _this.hideNode(n); });
+                // the spikes
                 nodeEnter.append("g")
                     .attr("id", function (n) {
                     return n.name() + "_spikes";
                 })
                     .attr("transform", "translate(0,3)");
-                // nodeEnter.append("rect")
-                //     .attr("rx", 5).attr("ry", 5)
-                //     .style("stroke-width", "0")
-                //     .attr("width", this.nodeWidth).attr("height", nodeHeight)
-                //     .on("click", function (d) { click(d) })
-                //     .on("touchend", function (d) { click(d) });
-                // <circle cx="10" cy="10" style="fill: red;font-size: 22px;" r="0.7em"></circle>
-                //                 .append((n)=>n.type == kanjiNav.Word ? "rect" : "circle")
-                nodeEnter.append("text")
+                // the word itself
+                var text = nodeEnter.append("text")
                     .attr('class', 'text')
                     .text(function (d) { return d.id; });
+                text
+                    .on("click", function (d) {
+                    if (Math.abs(mouseDownEvent.screenX - mouseUpEvent.screenX) +
+                        Math.abs(mouseDownEvent.screenY - mouseUpEvent.screenY) < 2) {
+                        _this.click(d);
+                    }
+                });
+                // the rubi
                 nodeEnter.append("text")
-                    .attr('fill', 'azure')
-                    .attr("font-family", "FontAwesome")
-                    .attr("dx", function (d) { return -10 * d.hiragana / 2 + "px"; })
                     .attr("dy", "-1px")
-                    .text(function (n) { return (n.hiragana ? n.hiragana : '') + " \uf097"; }); //\uf02e
+                    .text(function (n) { return n.hiragana ? n.hiragana : ''; });
+                // the english translation
                 nodeEnter.append("text")
-                    .attr("dy", "3.2em")
-                    .text(function (d) { return d.english && 0 in d.english ? d.english[0] : '?'; });
+                    .attr("dy", "3.0em")
+                    .text(function (n) { return n.english && 0 in n.english ? n.english[0] : '?'; });
+                // the tooltip
                 nodeEnter.append("title")
-                    .text(function (d) { return d.id; });
-                node.style("fill", function (d) { return d.colour; });
+                    .text(function (d) { return d.english && 0 in d.english ? d.english[0] : '?'; });
+                node.style("fill", function (n) { return n.colour; });
                 return node;
             };
             // animates the mouse-over hint
@@ -359,6 +341,10 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
             Frontend.prototype.unhintNeighbours = function (v) {
                 var dview = d3.select("#" + v.name() + "_spikes");
                 dview.selectAll(".spike").remove();
+            };
+            Frontend.prototype.hideNode = function (n) {
+                n.hidden = true;
+                this.update();
             };
             // was the viewnode added?
             Frontend.prototype.inView = function (v) {

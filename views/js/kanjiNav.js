@@ -29,6 +29,7 @@ define(["require", "exports", "jquery"], function (require, exports, $) {
                 this.type = type;
                 this.id = id;
                 this.degree = 0;
+                this.hidden = false;
             }
             Node.prototype.name = function () { return this.type + this.id; };
             Node.prototype.getImage = function () {

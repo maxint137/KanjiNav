@@ -30,6 +30,7 @@ module kanjiNav {
         // these are actually for the frontend only        
         viewgraphid: number;
         colour: string;
+        hidden: boolean;
         x: number;
         y: number;
         
@@ -41,7 +42,9 @@ module kanjiNav {
         kunyomi: string[];
                 
         degree: number = 0;
-        constructor(public type: NodeType, public id: string) { }
+        constructor(public type: NodeType, public id: string) {
+            this.hidden = false;
+        }
                 
         name(): string { return this.type + this.id; }
         getImage(): JQueryPromise<Node> {
@@ -73,7 +76,7 @@ module kanjiNav {
         nodes: any = {};
         edges: any = {};
 
-        constructor(public jlptFilter: string) { }
+        constructor(public jlptFilter: string) {}
         
         reset() {
             this.nodes = {};
