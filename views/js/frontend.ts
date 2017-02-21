@@ -93,7 +93,7 @@ module Frontend {
             //     .linkDistance(80)
             //     .size([width, height]);
 
-            this.outer = d3.select("#mydiv").append("svg")
+            this.outer = d3.select("#kanjiMap").append("svg")
                 .attr("width", this.width)
                 .attr("height", this.height)
                 .attr("pointer-events", "all");
