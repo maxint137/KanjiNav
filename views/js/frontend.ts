@@ -250,7 +250,7 @@ module Frontend {
 
         filteredNodes(): kanjiNav.Node[] {
             return this.viewgraph.nodes.filter(n => this.isSelectedJlpt(n.jlpt) &&
-             false == n.hidden);
+                false == n.hidden);
         }
 
         isSelectedJlpt(level: number) {
@@ -260,8 +260,8 @@ module Frontend {
         filteredLinks() {
             // only the links which connect to visible nodes
             return this.viewgraph.links.filter(l => this.isSelectedJlpt(l.source.jlpt)
-            && !l.source.hidden && !l.target.hidden 
-            && this.isSelectedJlpt(l.target.jlpt)
+                && !l.source.hidden && !l.target.hidden
+                && this.isSelectedJlpt(l.target.jlpt)
             );
         }
 
@@ -390,11 +390,11 @@ module Frontend {
                 // })
                 .on("touchend", (d) => {
                     if (event.timeStamp - touchmoveEvent < 100) {
-                        this.click(d)
+                        this.dblclick(d)
                     }
                 })
                 .call(this.d3cola.drag);
-            
+
 
 
             // the background for the word/kangi
@@ -404,11 +404,11 @@ module Frontend {
                 .attr('transform', 'translate(-10, -20)')
                 // create a reference to the <g> id sections defined in the existing svg markup exported from Inkscape
                 .append("use")
-                .attr("xlink:href", (n) => n.type == kanjiNav.Word ? '#g12' + n.id.length : '#kanjiBG')
+                .attr("xlink:href", (n) => !n.isKanji() ? '#g12' + n.id.length : '#kanjiBG')
                 ;
-                
+
             wordCard
-                .on("click", (n: kanjiNav.Node) =>{ this.hideNode(n); } );                
+                .on("click", (n: kanjiNav.Node) => { this.hideNode(n); });
 
             // the spikes
             nodeEnter.append("g")
@@ -416,31 +416,31 @@ module Frontend {
                     return n.name() + "_spikes"
                 })
                 .attr("transform", "translate(0,3)");
-            
+
             // the word itself
             let text = nodeEnter.append("text")
                 .attr('class', 'text')
-                // .attr('dx', (n) => n.type == kanjiNav.Word ? '-0.2em' : '0.0em')
-                // .attr('dy', (n) => n.type == kanjiNav.Word ? '-0.2em' : '0.0em')
+                // .attr('dx', (n) => !n.isKanji() ? '-0.2em' : '0.0em')
+                // .attr('dy', (n) => !n.isKanji() ? '-0.2em' : '0.0em')
                 .text((d) => d.id)
                 ;
             text
-                .on("click", (d) => {
+                .on("dblclick", (d) => {
                     if (Math.abs(mouseDownEvent.screenX - mouseUpEvent.screenX) +
                         Math.abs(mouseDownEvent.screenY - mouseUpEvent.screenY) < 2) {
-                        this.click(d);
+                        this.dblclick(d);
                     }
                 })
 
             // the rubi
             nodeEnter.append("text")
                 .attr("dy", "-1px")
-                .text((n: kanjiNav.Node) => n.hiragana ? n.hiragana : ''); 
+                .text((n: kanjiNav.Node) => n.hiragana ? n.hiragana : '');
 
             // the english translation
             nodeEnter.append("text")
                 .attr("dy", "3.0em")
-                .text((n: kanjiNav.Node) => n.english && 0 in n.english ? n.english[0] : '?')
+                .text((n: kanjiNav.Node) => n.isKanji() ? '' : (n.english && 0 in n.english ? n.english[0] : '?'))
                 ;
 
             // the tooltip
@@ -475,7 +475,7 @@ module Frontend {
                     .attr("x", 0).attr("y", 0)
                     .attr("width", 10).attr("height", 2)
                     .attr("transform", "translate(" + vi.x + "," + vi.y + ") rotate(" + (360 * i / hiddenEdges) + ")")
-                    .on("click", () => this.click(v));
+                    .on("dblclick", () => this.dblclick(v));
             }
         }
 
@@ -484,11 +484,15 @@ module Frontend {
             var dview = d3.select("#" + v.name() + "_spikes");
             dview.selectAll(".spike").remove();
         }
-        
+
         hideNode(n: kanjiNav.Node) {
-            
+            // don't hide kanji
+            if (n.isKanji()) {
+                return;
+            }
+
             n.hidden = true;
-            
+
             this.update();
         }
 
@@ -497,8 +501,8 @@ module Frontend {
             return typeof v.viewgraphid !== 'undefined';
         }
 
-        // handle the mouse-click, tap
-        click(node: any) {
+        // handle the mouse-dblclick, tap
+        dblclick(node: any) {
             if (node.colour !== this.red)
                 return;
 
@@ -583,9 +587,9 @@ module Frontend {
         setupJlptChecks() {
 
             this.jlpts = this.cookies.get(Frontend.jlptSelectedLevelsCookieName);
-            if(!this.jlpts) {
-                 this.jlptSelect(5);
-                 this.jlptSelect(4);
+            if (!this.jlpts) {
+                this.jlptSelect(5);
+                this.jlptSelect(4);
             }
 
             this.jlpts.split('').forEach(n => {

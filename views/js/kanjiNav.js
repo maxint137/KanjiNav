@@ -32,10 +32,8 @@ define(["require", "exports", "jquery"], function (require, exports, $) {
                 this.hidden = false;
             }
             Node.prototype.name = function () { return this.type + this.id; };
-            Node.prototype.getImage = function () {
-                var d = $.Deferred();
-                d.resolve(this);
-                return d.promise();
+            Node.prototype.isKanji = function () {
+                return this.type == kanjiNav.Char;
             };
             Node.prototype.copyData = function (data) {
                 if (data == null) {

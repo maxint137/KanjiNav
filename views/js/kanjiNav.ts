@@ -47,10 +47,9 @@ module kanjiNav {
         }
                 
         name(): string { return this.type + this.id; }
-        getImage(): JQueryPromise<Node> {
-            var d = $.Deferred<Node>();
-            d.resolve(this);
-            return d.promise();
+        
+        isKanji(): boolean {
+            return this.type == kanjiNav.Char
         }
 
         copyData(data: any): Node {

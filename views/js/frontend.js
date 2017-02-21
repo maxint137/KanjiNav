@@ -272,7 +272,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 })
                     .on("touchend", function (d) {
                     if (event.timeStamp - touchmoveEvent < 100) {
-                        _this.click(d);
+                        _this.dblclick(d);
                     }
                 })
                     .call(this.d3cola.drag);
@@ -282,7 +282,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     .attr('style', function (n) { return "fill: " + _this.jlpt2color(n.jlpt); })
                     .attr('transform', 'translate(-10, -20)')
                     .append("use")
-                    .attr("xlink:href", function (n) { return n.type == kanjiNav.Word ? '#g12' + n.id.length : '#kanjiBG'; });
+                    .attr("xlink:href", function (n) { return !n.isKanji() ? '#g12' + n.id.length : '#kanjiBG'; });
                 wordCard
                     .on("click", function (n) { _this.hideNode(n); });
                 // the spikes
@@ -296,10 +296,10 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     .attr('class', 'text')
                     .text(function (d) { return d.id; });
                 text
-                    .on("click", function (d) {
+                    .on("dblclick", function (d) {
                     if (Math.abs(mouseDownEvent.screenX - mouseUpEvent.screenX) +
                         Math.abs(mouseDownEvent.screenY - mouseUpEvent.screenY) < 2) {
-                        _this.click(d);
+                        _this.dblclick(d);
                     }
                 });
                 // the rubi
@@ -309,7 +309,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 // the english translation
                 nodeEnter.append("text")
                     .attr("dy", "3.0em")
-                    .text(function (n) { return n.english && 0 in n.english ? n.english[0] : '?'; });
+                    .text(function (n) { return n.isKanji() ? '' : (n.english && 0 in n.english ? n.english[0] : '?'); });
                 // the tooltip
                 nodeEnter.append("title")
                     .text(function (d) { return d.english && 0 in d.english ? d.english[0] : '?'; });
@@ -334,7 +334,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                         .attr("x", 0).attr("y", 0)
                         .attr("width", 10).attr("height", 2)
                         .attr("transform", "translate(" + vi.x + "," + vi.y + ") rotate(" + (360 * i / hiddenEdges) + ")")
-                        .on("click", function () { return _this.click(v); });
+                        .on("dblclick", function () { return _this.dblclick(v); });
                 }
             };
             // stopping the hint
@@ -343,6 +343,10 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 dview.selectAll(".spike").remove();
             };
             Frontend.prototype.hideNode = function (n) {
+                // don't hide kanji
+                if (n.isKanji()) {
+                    return;
+                }
                 n.hidden = true;
                 this.update();
             };
@@ -350,8 +354,8 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
             Frontend.prototype.inView = function (v) {
                 return typeof v.viewgraphid !== 'undefined';
             };
-            // handle the mouse-click, tap
-            Frontend.prototype.click = function (node) {
+            // handle the mouse-dblclick, tap
+            Frontend.prototype.dblclick = function (node) {
                 var _this = this;
                 if (node.colour !== this.red)
                     return;
