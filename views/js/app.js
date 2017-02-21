@@ -4,7 +4,7 @@
 //
 // 'bootstrap' does not return an object. Must appear at the end
 
-require(['jquery', "jquery-ui", 'bootstrap'], function($) {
+require(['jquery', 'jquery-ui'], function($) {
 
     // DOM ready
     $(function() {
@@ -164,15 +164,16 @@ require(['jquery', "jquery-ui", 'bootstrap'], function($) {
             $("#combobox").toggle();
         });
     });
+
+    // the variables that manage everything, basically
+    require(['jquery', 'js/kanjiNav', 'js/frontend', 'cola', 'js-cookie', 'bootstrap'], function($, kanjiNav, frontend, cola, js_cookie) {
+
+        fe = new frontend(new kanjiNav.Graph(), cola, js_cookie);
+
+        // get first node
+        fe.main(fe.getParameterByName('start') || '楽しい');
+    });
 });
 
 
 var fe = {};
-// the variables that manage everything, basically
-require(['jquery', 'js/kanjiNav', 'js/frontend', 'cola', 'js-cookie'], function($, kanjiNav, frontend, cola, js_cookie) {
-
-    fe = new frontend(new kanjiNav.Graph(), cola, js_cookie);
-
-    // get first node
-    fe.main(fe.getParameterByName('start') || '楽しい');
-});
