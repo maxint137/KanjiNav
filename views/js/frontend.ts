@@ -583,6 +583,10 @@ module Frontend {
         setupJlptChecks() {
 
             this.jlpts = this.cookies.get(Frontend.jlptSelectedLevelsCookieName);
+            if(!this.jlpts) {
+                 this.jlptSelect(5);
+                 this.jlptSelect(4);
+            }
 
             this.jlpts.split('').forEach(n => {
 

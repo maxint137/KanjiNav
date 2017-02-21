@@ -413,6 +413,10 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
             };
             Frontend.prototype.setupJlptChecks = function () {
                 this.jlpts = this.cookies.get(Frontend.jlptSelectedLevelsCookieName);
+                if (!this.jlpts) {
+                    this.jlptSelect(5);
+                    this.jlptSelect(4);
+                }
                 this.jlpts.split('').forEach(function (n) {
                     $('#JLPT' + n).prop('checked', true);
                     $('#JLPT' + n).parents('label').addClass('active');
