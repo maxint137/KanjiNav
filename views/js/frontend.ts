@@ -606,7 +606,7 @@ module Frontend {
 
         removeWord(selectBoxId: string, word: string) {
             
-            // both from the dropdown
+            // delete it from the dropdown
             $('#' + selectBoxId + " option[value='" + word + "']").remove();
 
             // and the history

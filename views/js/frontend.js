@@ -429,7 +429,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 });
             };
             Frontend.prototype.removeWord = function (selectBoxId, word) {
-                // both from the dropdown
+                // delete it from the dropdown
                 $('#' + selectBoxId + " option[value='" + word + "']").remove();
                 // and the history
                 this.updateWordInHistory(word, false);
