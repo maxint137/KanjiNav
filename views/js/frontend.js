@@ -350,6 +350,11 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 }
                 n.hidden = true;
                 this.update();
+                $('#hiddenWordsCombo').append($('<option>', {
+                    value: n.id,
+                    text: n.id
+                }));
+                //$('#hiddenWordsCombo option[value="' + n.id + '"]').prop('selected', true);
             };
             // was the viewnode added?
             Frontend.prototype.inView = function (v) {
@@ -486,6 +491,10 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     default:
                         return "#cccccc";
                 }
+            };
+            Frontend.prototype.unhideWord = function (word) {
+                this.viewgraph.nodes.filter(function (n) { return n.id == word; })[0].hidden = false;
+                this.update();
             };
             return Frontend;
         }());

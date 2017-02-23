@@ -497,6 +497,13 @@ module Frontend {
             n.hidden = true;
 
             this.update();
+
+            $('#hiddenWordsCombo').append($('<option>', {
+                value: n.id,
+                text: n.id
+            }));
+
+            //$('#hiddenWordsCombo option[value="' + n.id + '"]').prop('selected', true);
         }
 
         // was the viewnode added?
@@ -605,7 +612,7 @@ module Frontend {
         }
 
         removeWord(selectBoxId: string, word: string) {
-            
+
             // delete it from the dropdown
             $('#' + selectBoxId + " option[value='" + word + "']").remove();
 
@@ -616,7 +623,7 @@ module Frontend {
         loadWordHistory(selectBoxId: string) {
 
             let selectBox = $(selectBoxId);
-            
+
             selectBox
                 .find('option')
                 .remove()
@@ -681,6 +688,12 @@ module Frontend {
                 default:
                     return "#cccccc";
             }
+        }
+
+        unhideWord(word: string) {
+            
+            this.viewgraph.nodes.filter((n)=>n.id == word)[0].hidden = false;
+            this.update();
         }
     }
 }

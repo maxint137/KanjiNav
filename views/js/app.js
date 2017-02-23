@@ -175,7 +175,6 @@ require(['jquery', 'jquery-ui'], function($) {
         $("#toggle").on("click", function() {
             $("#combobox").toggle();
         });
-
     });
 
     // the variables that manage everything, basically
@@ -184,6 +183,17 @@ require(['jquery', 'jquery-ui'], function($) {
         fe = new frontend(new kanjiNav.Graph(), cola, js_cookie);
 
         fe.loadWordHistory('#wordHistoryCombo');
+
+        $("#hiddenWordsCombo").change(() => {
+
+            var wordSelected = $("#hiddenWordsCombo").val();
+            if (wordSelected) {
+
+                fe.unhideWord(wordSelected);
+                $("#hiddenWordsCombo option[value='" + wordSelected + "']").remove();
+            }
+        });
+
 
         // get first node
         fe.main(fe.getParameterByName('start') || '楽しい');
