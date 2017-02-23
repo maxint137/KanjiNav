@@ -189,7 +189,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                         if (!d.id || '' == d.id)
                             return "translate(" + (d.x - Frontend.nodeWidth / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
                         else
-                            return "translate(" + (d.x - d.id.length * Frontend.fontSize / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
+                            return "translate(" + (d.x - 1.5 * d.id.length * Frontend.fontSize / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
                     });
                     link.attr("transform", function (d) {
                         var dx = d.source.x - d.target.x, dy = d.source.y - d.target.y;
@@ -389,6 +389,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 this.modelgraph.reset();
             };
             Frontend.prototype.navigateToWord = function (word) {
+                this.updateWordInHistory(word);
                 this.main(word);
             };
             Frontend.prototype.fullScreenCancel = function () {
@@ -427,6 +428,45 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     $('#JLPT' + n).parents('label').addClass('active');
                 });
             };
+            Frontend.prototype.removeWord = function (selectBoxId, word) {
+                // both from the dropdown
+                $('#' + selectBoxId + " option[value='" + word + "']").remove();
+                // and the history
+                this.updateWordInHistory(word, false);
+            };
+            Frontend.prototype.loadWordHistory = function (selectBoxId) {
+                var selectBox = $(selectBoxId);
+                selectBox
+                    .find('option')
+                    .remove()
+                    .end();
+                var oldHistory = this.cookies.get(Frontend.wordsHistoryCookieName);
+                if (!oldHistory || '' === oldHistory) {
+                    oldHistory = '楽しい 普通 産業';
+                }
+                var oldHistoryArray = oldHistory.split(' ');
+                oldHistoryArray.forEach(function (word) {
+                    selectBox.append($('<option>', {
+                        value: word,
+                        text: word
+                    }));
+                });
+            };
+            Frontend.prototype.updateWordInHistory = function (word, add) {
+                if (add === void 0) { add = true; }
+                var oldHistory = this.cookies.get(Frontend.wordsHistoryCookieName);
+                var oldHistoryArray = oldHistory ? oldHistory.split(' ') : [];
+                var foundIndex = oldHistoryArray.indexOf(word);
+                // to add, and wasn't found?
+                if (add && foundIndex < 0) {
+                    oldHistoryArray.push(word);
+                }
+                // to delete, and was found?
+                if (!add && 0 <= foundIndex) {
+                    oldHistoryArray.splice(foundIndex, 1);
+                }
+                this.cookies.set(Frontend.wordsHistoryCookieName, oldHistoryArray.join(' '));
+            };
             Frontend.prototype.jlptSelect = function (n) {
                 var curSel = this.cookies.get(Frontend.jlptSelectedLevelsCookieName);
                 curSel = curSel ? curSel : '';
@@ -450,6 +490,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
             return Frontend;
         }());
         Frontend.jlptSelectedLevelsCookieName = "jlptSelectedLevels";
+        Frontend.wordsHistoryCookieName = "wordsHistory";
         // node size
         Frontend.fontSize = 22;
         Frontend.nodeWidth = 30;

@@ -29,6 +29,7 @@ require(['jquery', 'jquery-ui'], function($) {
                     .attr("id", "word")
                     .attr("title", "")
                     .addClass("custom-combobox-input ui-widget ui-widget-content ui-state-default ui-corner-left")
+                    // create the widget
                     .autocomplete({
                         delay: 0,
                         minLength: 0,
@@ -39,6 +40,17 @@ require(['jquery', 'jquery-ui'], function($) {
                             "ui-tooltip": "ui-state-highlight"
                         }
                     });
+
+                this.input.keyup(function(e) {
+                    // Enter works as the Add button
+                    if (e.keyCode == $.ui.keyCode.ENTER) {
+                        return $("#addButton").trigger("click");
+                    }
+                    // ^Delete removes the word from the list
+                    if (e.keyCode == $.ui.keyCode.DELETE && e.ctrlKey) {
+                        return $("#delButton").trigger("click");
+                    }
+                });
 
                 this._on(this.input, {
                     autocompleteselect: function(event, ui) {
@@ -159,16 +171,19 @@ require(['jquery', 'jquery-ui'], function($) {
             }
         });
 
-        $("#addToMapCombobox").combobox();
+        $("#wordHistoryCombo").combobox();
         $("#toggle").on("click", function() {
             $("#combobox").toggle();
         });
+
     });
 
     // the variables that manage everything, basically
     require(['jquery', 'js/kanjiNav', 'js/frontend', 'cola', 'js-cookie', 'bootstrap'], function($, kanjiNav, frontend, cola, js_cookie) {
 
         fe = new frontend(new kanjiNav.Graph(), cola, js_cookie);
+
+        fe.loadWordHistory('#wordHistoryCombo');
 
         // get first node
         fe.main(fe.getParameterByName('start') || '楽しい');

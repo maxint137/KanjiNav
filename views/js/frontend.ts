@@ -21,6 +21,7 @@ module Frontend {
 
     export class Frontend {
         static readonly jlptSelectedLevelsCookieName = "jlptSelectedLevels";
+        static readonly wordsHistoryCookieName = "wordsHistory";
 
 
         // canvas size
@@ -255,7 +256,7 @@ module Frontend {
         }
 
         filteredNodes(): kanjiNav.Node[] {
-            return this.viewgraph.nodes.filter((n)=> {return this.nodeIsNotFilteredOut(n);});
+            return this.viewgraph.nodes.filter((n) => { return this.nodeIsNotFilteredOut(n); });
         }
 
         isSelectedJlpt(level: number) {
@@ -264,7 +265,7 @@ module Frontend {
 
         filteredLinks() {
             // only the links which connect to visible nodes
-            return this.viewgraph.links.filter(l => { return this.nodeIsNotFilteredOut(l.source) && this.nodeIsNotFilteredOut(l.target);});
+            return this.viewgraph.links.filter(l => { return this.nodeIsNotFilteredOut(l.source) && this.nodeIsNotFilteredOut(l.target); });
         }
 
         // pushes the viewgraph data into the adapter and starts rendering process
@@ -286,7 +287,7 @@ module Frontend {
                     if (!d.id || '' == d.id)
                         return "translate(" + (d.x - Frontend.nodeWidth / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
                     else
-                        return "translate(" + (d.x - d.id.length * Frontend.fontSize / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
+                        return "translate(" + (d.x - 1.5 * d.id.length * Frontend.fontSize / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
                 });
 
                 link.attr("transform", (d) => {
@@ -553,6 +554,8 @@ module Frontend {
 
         navigateToWord(word: string) {
 
+            this.updateWordInHistory(word);
+
             this.main(word);
         }
 
@@ -600,6 +603,59 @@ module Frontend {
                 $('#JLPT' + n).parents('label').addClass('active');
             });
         }
+
+        removeWord(selectBoxId: string, word: string) {
+            
+            // both from the dropdown
+            $('#' + selectBoxId + " option[value='" + word + "']").remove();
+
+            // and the history
+            this.updateWordInHistory(word, false);
+        }
+
+        loadWordHistory(selectBoxId: string) {
+
+            let selectBox = $(selectBoxId);
+            
+            selectBox
+                .find('option')
+                .remove()
+                .end()
+                ;
+
+            let oldHistory: string = this.cookies.get(Frontend.wordsHistoryCookieName);
+            if (!oldHistory || '' === oldHistory) {
+                oldHistory = '楽しい 普通 産業';
+            }
+
+            let oldHistoryArray: Array<string> = oldHistory.split(' ');
+            oldHistoryArray.forEach(word => {
+                selectBox.append($('<option>', {
+                    value: word,
+                    text: word
+                }));
+            });
+        }
+
+        updateWordInHistory(word: string, add: boolean = true) {
+            let oldHistory: string = this.cookies.get(Frontend.wordsHistoryCookieName);
+            let oldHistoryArray: Array<string> = oldHistory ? oldHistory.split(' ') : [];
+
+            let foundIndex: number = oldHistoryArray.indexOf(word);
+
+            // to add, and wasn't found?
+            if (add && foundIndex < 0) {
+                oldHistoryArray.push(word);
+            }
+
+            // to delete, and was found?
+            if (!add && 0 <= foundIndex) {
+                oldHistoryArray.splice(foundIndex, 1);
+            }
+
+            this.cookies.set(Frontend.wordsHistoryCookieName, oldHistoryArray.join(' '));
+        }
+
 
         jlptSelect(n: number) {
 
