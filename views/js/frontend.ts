@@ -248,9 +248,14 @@ module Frontend {
             this.update();
         }
 
+        nodeIsNotFilteredOut(n: kanjiNav.Node) {
+
+            return n.isKanji()
+                || (this.isSelectedJlpt(n.jlpt) && false == n.hidden);
+        }
+
         filteredNodes(): kanjiNav.Node[] {
-            return this.viewgraph.nodes.filter(n => this.isSelectedJlpt(n.jlpt) &&
-                false == n.hidden);
+            return this.viewgraph.nodes.filter((n)=> {return this.nodeIsNotFilteredOut(n);});
         }
 
         isSelectedJlpt(level: number) {
@@ -259,10 +264,7 @@ module Frontend {
 
         filteredLinks() {
             // only the links which connect to visible nodes
-            return this.viewgraph.links.filter(l => this.isSelectedJlpt(l.source.jlpt)
-                && !l.source.hidden && !l.target.hidden
-                && this.isSelectedJlpt(l.target.jlpt)
-            );
+            return this.viewgraph.links.filter(l => { return this.nodeIsNotFilteredOut(l.source) && this.nodeIsNotFilteredOut(l.target);});
         }
 
         // pushes the viewgraph data into the adapter and starts rendering process

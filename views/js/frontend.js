@@ -158,10 +158,13 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 });
                 this.update();
             };
+            Frontend.prototype.nodeIsNotFilteredOut = function (n) {
+                return n.isKanji()
+                    || (this.isSelectedJlpt(n.jlpt) && false == n.hidden);
+            };
             Frontend.prototype.filteredNodes = function () {
                 var _this = this;
-                return this.viewgraph.nodes.filter(function (n) { return _this.isSelectedJlpt(n.jlpt) &&
-                    false == n.hidden; });
+                return this.viewgraph.nodes.filter(function (n) { return _this.nodeIsNotFilteredOut(n); });
             };
             Frontend.prototype.isSelectedJlpt = function (level) {
                 return '' == this.jlpts || 0 <= this.jlpts.indexOf(level.toString());
@@ -169,9 +172,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
             Frontend.prototype.filteredLinks = function () {
                 var _this = this;
                 // only the links which connect to visible nodes
-                return this.viewgraph.links.filter(function (l) { return _this.isSelectedJlpt(l.source.jlpt)
-                    && !l.source.hidden && !l.target.hidden
-                    && _this.isSelectedJlpt(l.target.jlpt); });
+                return this.viewgraph.links.filter(function (l) { return _this.nodeIsNotFilteredOut(l.source) && _this.nodeIsNotFilteredOut(l.target); });
             };
             // pushes the viewgraph data into the adapter and starts rendering process
             Frontend.prototype.update = function () {
