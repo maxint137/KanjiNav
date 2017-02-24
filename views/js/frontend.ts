@@ -498,12 +498,14 @@ module Frontend {
 
             this.update();
 
-            $('#hiddenWordsCombo').append($('<option>', {
-                value: n.id,
-                text: n.id
-            }));
-
-            //$('#hiddenWordsCombo option[value="' + n.id + '"]').prop('selected', true);
+            // add the word to the combo, if it's not there yet
+            let hiddenWordsCombo: JQuery = $('#hiddenWordsCombo');
+            if (0 == hiddenWordsCombo.find('option[value="' + n.id + '"]').length) {
+                hiddenWordsCombo.append($('<option>', {
+                    value: n.id,
+                    text: n.id
+                }));
+            }
         }
 
         // was the viewnode added?
@@ -511,20 +513,61 @@ module Frontend {
             return typeof v.viewgraphid !== 'undefined';
         }
 
+        collapseNode(node: kanjiNav.Node) {
+
+            // for each linked node
+            node.cast.forEach(c => {
+                // see how many links it has at the moment:
+                let neighbour: kanjiNav.Node = this.filteredNodes().filter((nn) => nn.id == c.word)[0];
+                if (neighbour) {
+                    let links = this.viewgraph.links.filter((l) => l.source == neighbour || l.target == neighbour);
+
+                    if (links.length == 1) {
+                        // this node is only connected with one link - hide it
+                        this.hideNode(neighbour);
+                    }
+                }
+            });
+
+            this.update();
+        }
+
+        uncollapseNode(node: kanjiNavNode) {
+            
+            this.viewgraph.links
+                .filter((l) => l.target == node)
+                .map((l) => l.source)
+                .forEach((n) => this.unhideWord(n.id))
+                ;
+
+            this.viewgraph.links
+                .filter((l) => l.source == node)
+                .map((l) => l.target)
+                .forEach((n) => this.unhideWord(n.id))
+                ;
+
+        }
+
         // handle the mouse-dblclick, tap
-        dblclick(node: any) {
-            if (node.colour !== this.red)
+        dblclick(node: kanjiNav.Node) {
+            if (node.colour !== this.red) {
+                // collapse the node
+                this.collapseNode(node);
+
+                // paint it red
+                node.colour = this.red;
+
                 return;
+            }
+            else {
+                // uncollapse the node
+                this.uncollapseNode(node);
 
+                var d = this.modelgraph.getNode(node.type, node.id);
 
+                $.when(d).then((focus) => { this.refocus(focus) });
+            }
 
-
-            //var focus = this.modelgraph.getNode(node.type, node.id);
-            //this.refocus(focus);
-
-            var d = this.modelgraph.getNode(node.type, node.id);
-
-            $.when(d).then((focus) => { this.refocus(focus) });
 
         }
 
@@ -611,7 +654,7 @@ module Frontend {
             });
         }
 
-        removeWord(selectBoxId: string, word: string) {
+        removeWordFromHistory(selectBoxId: string, word: string) {
 
             // delete it from the dropdown
             $('#' + selectBoxId + " option[value='" + word + "']").remove();
@@ -691,8 +734,10 @@ module Frontend {
         }
 
         unhideWord(word: string) {
-            
-            this.viewgraph.nodes.filter((n)=>n.id == word)[0].hidden = false;
+
+            $("#hiddenWordsCombo option[value='" + word + "']").remove();
+
+            this.viewgraph.nodes.filter((n) => n.id == word)[0].hidden = false;
             this.update();
         }
     }

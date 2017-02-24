@@ -190,7 +190,6 @@ require(['jquery', 'jquery-ui'], function($) {
             if (wordSelected) {
 
                 fe.unhideWord(wordSelected);
-                $("#hiddenWordsCombo option[value='" + wordSelected + "']").remove();
             }
         });
 

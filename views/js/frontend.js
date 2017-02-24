@@ -350,25 +350,62 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 }
                 n.hidden = true;
                 this.update();
-                $('#hiddenWordsCombo').append($('<option>', {
-                    value: n.id,
-                    text: n.id
-                }));
-                //$('#hiddenWordsCombo option[value="' + n.id + '"]').prop('selected', true);
+                // add the word to the combo, if it's not there yet
+                var hiddenWordsCombo = $('#hiddenWordsCombo');
+                if (0 == hiddenWordsCombo.find('option[value="' + n.id + '"]').length) {
+                    hiddenWordsCombo.append($('<option>', {
+                        value: n.id,
+                        text: n.id
+                    }));
+                }
             };
             // was the viewnode added?
             Frontend.prototype.inView = function (v) {
                 return typeof v.viewgraphid !== 'undefined';
             };
+            Frontend.prototype.collapseNode = function (node) {
+                var _this = this;
+                // for each linked node
+                node.cast.forEach(function (c) {
+                    // see how many links it has at the moment:
+                    var neighbour = _this.filteredNodes().filter(function (nn) { return nn.id == c.word; })[0];
+                    if (neighbour) {
+                        var links = _this.viewgraph.links.filter(function (l) { return l.source == neighbour || l.target == neighbour; });
+                        if (links.length == 1) {
+                            // this node is only connected with one link - hide it
+                            _this.hideNode(neighbour);
+                        }
+                    }
+                });
+                this.update();
+            };
+            Frontend.prototype.uncollapseNode = function (node) {
+                var _this = this;
+                this.viewgraph.links
+                    .filter(function (l) { return l.target == node; })
+                    .map(function (l) { return l.source; })
+                    .forEach(function (n) { return _this.unhideWord(n.id); });
+                this.viewgraph.links
+                    .filter(function (l) { return l.source == node; })
+                    .map(function (l) { return l.target; })
+                    .forEach(function (n) { return _this.unhideWord(n.id); });
+            };
             // handle the mouse-dblclick, tap
             Frontend.prototype.dblclick = function (node) {
                 var _this = this;
-                if (node.colour !== this.red)
+                if (node.colour !== this.red) {
+                    // collapse the node
+                    this.collapseNode(node);
+                    // paint it red
+                    node.colour = this.red;
                     return;
-                //var focus = this.modelgraph.getNode(node.type, node.id);
-                //this.refocus(focus);
-                var d = this.modelgraph.getNode(node.type, node.id);
-                $.when(d).then(function (focus) { _this.refocus(focus); });
+                }
+                else {
+                    // uncollapse the node
+                    this.uncollapseNode(node);
+                    var d = this.modelgraph.getNode(node.type, node.id);
+                    $.when(d).then(function (focus) { _this.refocus(focus); });
+                }
             };
             Frontend.prototype.graphBounds = function () {
                 var x = Number.POSITIVE_INFINITY, X = Number.NEGATIVE_INFINITY, y = Number.POSITIVE_INFINITY, Y = Number.NEGATIVE_INFINITY;
@@ -433,7 +470,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     $('#JLPT' + n).parents('label').addClass('active');
                 });
             };
-            Frontend.prototype.removeWord = function (selectBoxId, word) {
+            Frontend.prototype.removeWordFromHistory = function (selectBoxId, word) {
                 // delete it from the dropdown
                 $('#' + selectBoxId + " option[value='" + word + "']").remove();
                 // and the history
@@ -493,6 +530,7 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 }
             };
             Frontend.prototype.unhideWord = function (word) {
+                $("#hiddenWordsCombo option[value='" + word + "']").remove();
                 this.viewgraph.nodes.filter(function (n) { return n.id == word; })[0].hidden = false;
                 this.update();
             };

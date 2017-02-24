@@ -24,6 +24,12 @@ define(["require", "exports", "jquery"], function (require, exports, $) {
         kanjiNav.NodeType = NodeType;
         kanjiNav.Word = new NodeType("word", "word", 'kanjis');
         kanjiNav.Char = new NodeType("kanji", "character", 'words');
+        var ApiNode = (function () {
+            function ApiNode() {
+            }
+            return ApiNode;
+        }());
+        ;
         var Node = (function () {
             function Node(type, id) {
                 this.type = type;

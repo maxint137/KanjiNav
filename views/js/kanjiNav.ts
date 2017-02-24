@@ -25,6 +25,15 @@ module kanjiNav {
     export let Word = new NodeType("word", "word", 'kanjis');
     export let Char = new NodeType("kanji", "character", 'words');
 
+    class ApiNode {
+        JLPT: number;
+        _id: string;
+        english: string[];
+        hiragana: string;
+        kanjis: string[];
+        word: string;
+    };
+
     export class Node {
 
         // these are actually for the frontend only        
@@ -33,30 +42,30 @@ module kanjiNav {
         hidden: boolean;
         x: number;
         y: number;
-        
-        cast: any[];
+
+        cast: ApiNode[];
         jlpt: number;
         english: string[];
         hiragana: string;
         onyomi: string[];
         kunyomi: string[];
-                
+
         degree: number = 0;
         constructor(public type: NodeType, public id: string) {
             this.hidden = false;
         }
-                
+
         name(): string { return this.type + this.id; }
-        
+
         isKanji(): boolean {
             return this.type == kanjiNav.Char
         }
 
         copyData(data: any): Node {
-            if(data == null) {
+            if (data == null) {
                 return;
             }
-            
+
             this.jlpt = data.JLPT;
             this.english = data.english;
             this.hiragana = data.hiragana;
@@ -75,8 +84,8 @@ module kanjiNav {
         nodes: any = {};
         edges: any = {};
 
-        constructor(public jlptFilter: string) {}
-        
+        constructor(public jlptFilter: string) { }
+
         reset() {
             this.nodes = {};
             this.edges = {};
@@ -133,12 +142,12 @@ module kanjiNav {
 
             // fetch the nodes listed in the cast, bridge edges to these, and call back the client (so it can addViewNode)
             var dn = node.cast
-                    //.filter(c => null != c)
-                    .map(c => this.getNode(node.type.next(), c[node.type.next().id], v => {
-                        //v.label = c[v.type.label];
-                        this.addEdge(node, v);
-                        f(v);
-                    }, node));
+                //.filter(c => null != c)
+                .map(c => this.getNode(node.type.next(), c[node.type.next().id], v => {
+                    //v.label = c[v.type.label];
+                    this.addEdge(node, v);
+                    f(v);
+                }, node));
 
             var d = $.Deferred<Node[]>();
             $.when.apply($, dn)
@@ -192,7 +201,7 @@ module kanjiNav {
 
         return $.get(query);
     }
-    
+
 
 }
 // https://www.typescriptlang.org/docs/handbook/modules.html
