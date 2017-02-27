@@ -242,7 +242,8 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                 // remember the last place/time the mouse/touch event has occured, so we can distinguish between a move and a click/tap
                 var mouseDownEvent;
                 var mouseUpEvent;
-                var touchmoveEvent;
+                var touchstartEvent;
+                var doubleTap;
                 // insert the parent group - it  tracks the user interaction
                 var nodeEnter = node.enter().append("g")
                     .attr("id", function (d) {
@@ -257,9 +258,12 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     mouseUpEvent = d3.event;
                     _this.nodeMouseDown = false;
                 })
+                    .on("touchstart", function () {
+                    doubleTap = event.timeStamp - touchstartEvent < 500;
+                    touchstartEvent = event.timeStamp;
+                })
                     .on("touchmove", function () {
                     event.preventDefault();
-                    touchmoveEvent = event.timeStamp;
                 })
                     .on("mouseenter", function (d) {
                     _this.hintNeighbours(d);
@@ -272,7 +276,8 @@ define(["require", "exports", "jquery", "d3", "./kanjiNav"], function (require, 
                     //debugger;
                 })
                     .on("touchend", function (d) {
-                    if (event.timeStamp - touchmoveEvent < 100) {
+                    if (doubleTap) {
+                        doubleTap = false;
                         _this.dblclick(d);
                     }
                 })

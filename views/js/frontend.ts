@@ -354,7 +354,8 @@ module Frontend {
             // remember the last place/time the mouse/touch event has occured, so we can distinguish between a move and a click/tap
             let mouseDownEvent: any;
             let mouseUpEvent: any;
-            let touchmoveEvent: number;
+            let touchstartEvent: number;
+            let doubleTap: boolean;
 
             // insert the parent group - it  tracks the user interaction
             var nodeEnter = node.enter().append("g")
@@ -371,9 +372,12 @@ module Frontend {
                     mouseUpEvent = d3.event;
                     this.nodeMouseDown = false;
                 })
+                .on("touchstart", () => {
+                    doubleTap = event.timeStamp - touchstartEvent < 500;                    
+                    touchstartEvent = event.timeStamp;
+                })
                 .on("touchmove", () => {
                     event.preventDefault();
-                    touchmoveEvent = event.timeStamp;
                 })
                 .on("mouseenter", (d) => {
                     this.hintNeighbours(d)
@@ -385,20 +389,14 @@ module Frontend {
                     // UF: need to send that event to the canvas, but how?!
                     //debugger;
                 })
-                // .on("click", (d) => {
-                //     if (Math.abs(mouseDownEvent.screenX - mouseUpEvent.screenX) +
-                //         Math.abs(mouseDownEvent.screenY - mouseUpEvent.screenY) < 2) {
-                //         this.click(d);
-                //     }
-                // })
                 .on("touchend", (d) => {
-                    if (event.timeStamp - touchmoveEvent < 100) {
-                        this.dblclick(d)
+                    if (doubleTap) {
+                        doubleTap = false;
+                        this.dblclick(d);
                     }
                 })
-                .call(this.d3cola.drag);
-
-
+                .call(this.d3cola.drag)
+                ;
 
             // the background for the word/kangi
             let wordCard = nodeEnter
@@ -532,8 +530,8 @@ module Frontend {
             this.update();
         }
 
-        uncollapseNode(node: kanjiNavNode) {
-            
+        uncollapseNode(node: kanjiNav.Node) {
+
             this.viewgraph.links
                 .filter((l) => l.target == node)
                 .map((l) => l.source)
