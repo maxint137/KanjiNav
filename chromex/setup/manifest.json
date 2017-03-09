@@ -1,0 +1,23 @@
+{
+    "manifest_version": 2,
+
+    "name": "Kanji Navigator",
+    "description": "Display the selected kanji on a map",
+    "version": "0.1",
+
+    "browser_action": {
+        "default_icon": "icon.png",
+		//"default_popup": "popup.html",
+		"default_popup": "views/navigateKanjiLocal.html",
+        "default_title": "Show selected text in KanjiNav"
+    },
+    "permissions": [
+        "activeTab",
+        "background"
+    ],
+    "background": {
+        "scripts": ["main.js"]
+    },
+	
+	"content_security_policy": "script-src 'self' https://www.google-analytics.com; object-src 'self'"
+}
