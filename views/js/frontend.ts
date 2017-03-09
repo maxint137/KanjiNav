@@ -373,7 +373,7 @@ module Frontend {
                     this.nodeMouseDown = false;
                 })
                 .on("touchstart", () => {
-                    doubleTap = event.timeStamp - touchstartEvent < 500;                    
+                    doubleTap = event.timeStamp - touchstartEvent < 500;
                     touchstartEvent = event.timeStamp;
                 })
                 .on("touchmove", () => {
@@ -402,9 +402,10 @@ module Frontend {
             let wordCard = nodeEnter
                 .append("g")
                 .attr('style', (n) => "fill: " + this.jlpt2color(n.jlpt))
-                .attr('transform', 'translate(-10, -20)')
+                .attr('transform', 'translate(-10, -20)')              
                 // create a reference to the <g> id sections defined in the existing svg markup exported from Inkscape
                 .append("use")
+                // g123 or kanjiBG
                 .attr("xlink:href", (n) => !n.isKanji() ? '#g12' + n.id.length : '#kanjiBG')
                 ;
 
