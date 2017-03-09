@@ -105,6 +105,7 @@ define(["require", "exports", "jquery"], function (require, exports, $) {
             Graph.prototype.expandNeighbours = function (node, f) {
                 var _this = this;
                 if (node.cast.filter(function (c) { return !c; }).length) {
+                    debugger;
                     console.log("Nulls for " + node.id);
                 }
                 // fetch the nodes listed in the cast, bridge edges to these, and call back the client (so it can addViewNode)
@@ -157,12 +158,57 @@ define(["require", "exports", "jquery"], function (require, exports, $) {
             return Edge;
         }());
         kanjiNav.Edge = Edge;
+        function loadKanji(word) {
+            return kanjis.filter(function (k) { return 0 <= word.indexOf(k.character); })
+                .map(function (k) {
+                var kwords = k.words.map(function (kw) { return words.filter(function (w) { return w["_id"]["$oid"] == kw["$oid"]; })[0]; });
+                return {
+                    __v: 1,
+                    JLPT: parseInt(k.JLPT),
+                    character: k.character,
+                    _id: "58883418e46ff154dc7-" + k["_id"]["$oid"],
+                    words: kwords
+                };
+            });
+        }
         function request(type, id, jlptFilter) {
             var d = $.Deferred();
             // http://localhost:3000/api/v1/word/食品
             // http://localhost:3000/api/v1/kanji/品
-            var query = "/api/v1/" + type.type + "/" + id + (jlptFilter ? '?JLPT=' + jlptFilter : '');
-            return $.get(query);
+            // var query = "/api/v1/" + type.type + "/" + id + (jlptFilter ? '?JLPT=' + jlptFilter : '');
+            // return $.get(query);
+            var defer = $.Deferred();
+            if (type.type == kanjiNav.Word.type) {
+                var word = words.filter(function (w) { return w.word == id; })[0];
+                if (word) {
+                    var wordApiRes_1 = {
+                        _id: "5882353f4df6c031640-" + word["_id"]["$oid"],
+                        word: word.word,
+                        hiragana: word.hiragana,
+                        JLPT: parseInt(word.JLPT),
+                        english: word.english,
+                        kanjis: loadKanji(word.word),
+                    };
+                    setTimeout(function () { return defer.resolve(wordApiRes_1); }, 1);
+                }
+            }
+            else if (type.type == kanjiNav.Char.type) {
+                var kanji = kanjis.filter(function (k) { return k.character == id; })[0];
+                var kanjiApiRes_1 = {
+                    _id: "58883418e46ff154dc7-" + kanji["_id"]["$oid"],
+                    character: kanji.character,
+                    JLPT: kanji.JLPT,
+                    words: loadKanji(id)[0].words,
+                    english: kanji.english,
+                    kunyomi: kanji.kunyomi,
+                    onyomi: kanji.onyomi
+                };
+                setTimeout(function () { return defer.resolve(kanjiApiRes_1); }, 1);
+            }
+            else {
+                debugger;
+            }
+            return defer;
         }
     })(kanjiNav || (kanjiNav = {}));
     return kanjiNav;
