@@ -7,16 +7,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link rel="icon" type="image/png" href="favicon.png" />
 
-    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="../extern/font-awesome.css" rel="stylesheet">
+    <link rel="stylesheet" href="../extern/bootstrap.min.css">
 
     <script type="text/javascript" src="js/require-setup.js"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.2/require.js"></script>
+    <script src="../extern/require.js"></script>
     <script type="text/javascript" src="js/app.js"></script>
 
-    <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="../extern/jquery-ui.css">
 
-    <script type="text/javascript" src="data.js"></script>
+    <script type="text/javascript" src="js/data.js"></script>
 
 
     <style>
@@ -66,6 +66,7 @@
         
         body {
             background-color: gray;
+            height: 350px;
         }
         
         .text {
@@ -144,12 +145,74 @@
             stroke-dasharray: none;
             stroke-opacity: 1;
         }
+        
+        .helpText {
+            text-align: right;
+            background-color: yellow;
+            float: right;
+            padding: 5px;
+            margin: 0;
+        }
+        
+        .helpDiv {
+            display: none;
+        }
+        
+        .mainDiv {
+            display: none;
+        }
     </style>
 </head>
 
 
 <body>
-    <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0">
+    <div id="helpDiv">
+        <p class="helpText">Select a Japanese word on the page, then press the button.</p>
+    </div>
+    <div id="mainDiv">
+        <select id="wordHistoryCombo">
+            <option value="楽しい">楽しい</option>
+            <option value="産業">産業</option>
+        </select>
+
+        <button id="addButton" type="button" class="btn btn-default btn-xs" style="margin-left: 30px" id="addButton">Add</button>
+        <button id="delButton" type="button" class="btn btn-default btn-xs" id="delButton">Del</button>
+        <button id="clearButton" type="button" class="btn btn-default btn-xs">Clear Map</button>
+
+        <div class="btn-group" data-toggle="buttons">
+
+            <label class="jlptBtn btn btn-xs btn-success" data-toggle="tooltip" title="JLPT5">
+            <input id='JLPT5' type="checkbox" autocomplete="off">
+            <span class="glyphicon glyphicon-ok"></span>
+        </label>
+
+            <label class="jlptBtn btn btn-xs btn-info yellow" data-toggle="tooltip" title="JLPT4">
+            <input id='JLPT4' type="checkbox" autocomplete="off">
+            <span class="glyphicon glyphicon-ok"></span>
+        </label>
+
+            <label class="jlptBtn btn btn-xs btn-primary" data-toggle="tooltip" title="JLPT3">
+            <input id='JLPT3' type="checkbox" autocomplete="off">
+            <span class="glyphicon glyphicon-ok"></span>
+        </label>
+
+            <label class="jlptBtn btn btn-xs btn-warning" data-toggle="tooltip" title="JLPT2">
+            <input id='JLPT2' type="checkbox" autocomplete="off">
+            <span class="glyphicon glyphicon-ok"></span>
+        </label>
+
+            <label class="jlptBtn btn btn-xs btn-danger" data-toggle="tooltip" title="JLPT1">
+            <input id='JLPT1' type="checkbox" autocomplete="off">
+            <span class="glyphicon glyphicon-ok"></span>
+        </label>
+        </div>
+        <select id="hiddenWordsCombo" style="display:inline-block">
+            <option></option>
+        </select>
+
+        <div id='kanjiMap'></div>
+
+        <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0">
         <defs>
             <filter id="wcShadow" color-interpolation-filters="sRGB">
                 <feFlood flood-opacity=".5" flood-color="#000" result="flood" />
@@ -224,100 +287,10 @@
 
         </defs>
     </svg>
-
-    <img style="display:none" src="tanoshi.png"></img>
-
-    <select id="wordHistoryCombo">
-        <option value="楽しい">楽しい</option>
-        <option value="産業">産業</option>
-    </select>
-
-    <button type="button" class="btn btn-default btn-xs" style="margin-left: 30px" id="addButton" onclick="fe.navigateToWord($('#word').val())">Add</button>
-    <button type="button" class="btn btn-default btn-xs" id="delButton" onclick="fe.removeWord('wordHistoryCombo', $('#word').val()); $('#word').val('')">Del</button>
-    <button type="button" class="btn btn-default btn-xs" onclick="fe.clearAll()">Clear Map</button>
-
-    <div class="btn-group" data-toggle="buttons">
-
-        <label class="btn btn-xs btn-success" data-toggle="tooltip" title="JLPT5" onclick="fe.jlptSelect(5)">
-            <input id='JLPT5' type="checkbox" autocomplete="off">
-            <span class="glyphicon glyphicon-ok"></span>
-        </label>
-
-        <label class="btn btn-xs btn-info yellow" data-toggle="tooltip" title="JLPT4" onclick="fe.jlptSelect(4)">
-            <input id='JLPT4' type="checkbox" autocomplete="off">
-            <span class="glyphicon glyphicon-ok"></span>
-        </label>
-
-        <label class="btn btn-xs btn-primary" data-toggle="tooltip" title="JLPT3" onclick="fe.jlptSelect(3)">
-            <input id='JLPT3' type="checkbox" autocomplete="off">
-            <span class="glyphicon glyphicon-ok"></span>
-        </label>
-
-        <label class="btn btn-xs btn-warning" data-toggle="tooltip" title="JLPT2" onclick="fe.jlptSelect(2)">
-            <input id='JLPT2' type="checkbox" autocomplete="off">
-            <span class="glyphicon glyphicon-ok"></span>
-        </label>
-
-        <label class="btn btn-xs btn-danger" data-toggle="tooltip" title="JLPT1" onclick="fe.jlptSelect(1)">
-            <input id='JLPT1' type="checkbox" autocomplete="off">
-            <span class="glyphicon glyphicon-ok"></span>
-        </label>
     </div>
-    <select id="hiddenWordsCombo" style="display:inline-block">
-        <option></option>
-    </select>
-
-    <div id='kanjiMap'></div>
 
 
-
-    <script src="../extern/fullscreen.js"></script>
-    <button type="button" class="btn btn-default btn-xs" onclick="fullScreen(fe.outer[0][0], () => fe.fullScreenCancel());fe.zoomToFit()">Full screen</button>
-    <button type="button" class="btn btn-default btn-xs" onclick="fe.zoomToFit()">Zoom to fit (or double click)</button>
-
-    <!-- Google analytics and the feedback stuff -->
-    <script type="text/javascript">
-        reformal_wdg_domain = "kanjiNav";
-        reformal_wdg_mode = 0;
-        reformal_wdg_title = "Kanji Navigator";
-        reformal_wdg_ltitle = "Leave feedback";
-        reformal_wdg_lfont = "";
-        reformal_wdg_lsize = "";
-        reformal_wdg_color = "#FFA000";
-        reformal_wdg_bcolor = "#516683";
-        reformal_wdg_tcolor = "#FFFFFF";
-        reformal_wdg_align = "right";
-        reformal_wdg_waction = 0;
-        reformal_wdg_vcolor = "#9FCE54";
-        reformal_wdg_cmline = "#E0E0E0";
-        reformal_wdg_glcolor = "#105895";
-        reformal_wdg_tbcolor = "#FFFFFF";
-
-        reformal_wdg_bimage = "8489db229aa0a66ab6b80ebbe0bb26cd.png";
-    </script>
-
-    <script>
-        (function(i, s, o, g, r, a, m) {
-            i['GoogleAnalyticsObject'] = r;
-            i[r] = i[r] || function() {
-                (i[r].q = i[r].q || []).push(arguments)
-            }, i[r].l = 1 * new Date();
-            a = s.createElement(o),
-                m = s.getElementsByTagName(o)[0];
-            a.async = 1;
-            a.src = g;
-            m.parentNode.insertBefore(a, m)
-        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
-
-        ga('create', 'UA-91206532-1', 'auto');
-        ga('send', 'pageview');
-    </script>
-
-    <script type="text/javascript" language="JavaScript" src="http://idea.informer.com/tab6.js?domain=kanjiNav"></script>
-    <noscript><a href="http://kanjiNav.idea.informer.com">Kanji Navigator feedback </a>
-        <a href="http://idea.informer.com"><img src="http://widget.idea.informer.com/tmpl/images/widget_logo.jpg" /></a>
-    </noscript>
-
+    <script type="text/javascript" src="js/google-analytics.js"></script>
 </body>
 
 </html>

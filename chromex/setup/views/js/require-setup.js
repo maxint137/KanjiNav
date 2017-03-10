@@ -9,11 +9,11 @@ var require = {
         "js-cookie": {}
     },
     paths: {
-        "jquery": "http://code.jquery.com/jquery-2.1.1.min",
-        "jquery-ui": "http://code.jquery.com/ui/1.12.1/jquery-ui",
+        "jquery": "../../extern/jquery-2.2.4.min",
+        "jquery-ui": "../../extern/jquery-ui.min",
         "d3": "./node_modules/d3/d3",
         "cola": "./node_modules/webcola/WebCola/cola",
-        "bootstrap": "http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min",
+        "bootstrap": "../../extern/bootstrap.min",
         "js-cookie": "./node_modules/js-cookie/src/js.cookie"
     }
 };

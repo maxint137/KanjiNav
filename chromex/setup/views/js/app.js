@@ -175,29 +175,78 @@ require(['jquery', 'jquery-ui'], function($) {
         $("#toggle").on("click", function() {
             $("#combobox").toggle();
         });
-    });
 
-    // the variables that manage everything, basically
-    require(['jquery', 'js/kanjiNav', 'js/frontend', 'cola', 'js-cookie', 'bootstrap'], function($, kanjiNav, frontend, cola, js_cookie) {
-
-        fe = new frontend(new kanjiNav.Graph(), cola, js_cookie);
-
-        fe.loadWordHistory('#wordHistoryCombo');
-
-        $("#hiddenWordsCombo").change(() => {
-
-            var wordSelected = $("#hiddenWordsCombo").val();
-            if (wordSelected) {
-
-                fe.unhideWord(wordSelected);
-            }
+        // connect the buttons        
+        $("#fullScreenButton").on("click", function() {
+            fullScreen(fe.outer[0][0], () => fe.fullScreenCancel());
+            fe.zoomToFit();
         });
 
+        $("#zoomToFitButton").on("click", function() {
+            fe.zoomToFit();
+        });
 
-        // get first node
-        fe.main(fe.getParameterByName('start') || '楽しい');
+        $(".jlptBtn").on("click", function() {
+            fe.jlptSelect(this.title.slice(-1));
+        });
+
+        $("#delButton").on("click", function() {
+            fe.removeWord('wordHistoryCombo', $('#word').val());
+            $('#word').val('');
+        });
+
+        $("#addButton").on("click", function() {
+            fe.navigateToWord($('#word').val());
+        });
+
+        $("#clearButton").on("click", function() {
+            fe.clearAll();
+        });
     });
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    chrome.tabs.executeScript({
+        code: "window.getSelection().toString();"
+    }, function(selection) {
+
+        // the variables that manage everything, basically
+        require(['jquery', 'js/kanjiNav', 'js/frontend', 'cola', 'js-cookie', 'bootstrap'], function($, kanjiNav, frontend, cola, js_cookie) {
+
+            if (!selection || "" === selection[0]) {
+                $("#mainDiv").hide();
+                $("#helpDiv").show();
+                $("html").css("min-width", "200px");
+                $("body").css("height", "30px");
+            } else {
+                $("#helpDiv").hide();
+                $("#mainDiv").show();
+                $("html").css("min-width", "800px");
+                $("body").css("height", "350px");
+            }
+
+            fe = new frontend(new kanjiNav.Graph(), cola, js_cookie);
+
+            fe.loadWordHistory('#wordHistoryCombo');
+
+            $("#hiddenWordsCombo").change(() => {
+
+                var wordSelected = $("#hiddenWordsCombo").val();
+                if (wordSelected) {
+
+                    fe.unhideWord(wordSelected);
+                }
+            });
+
+            // get first node
+            fe.main(selection[0].trim());
+        });
+
+    });
+});
+
+
 
 
 var fe = {};
