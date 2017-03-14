@@ -13,6 +13,11 @@ var require = {
         "jquery-ui": "http://code.jquery.com/ui/1.12.1/jquery-ui",
         "d3": "./node_modules/d3/d3",
         "cola": "./node_modules/webcola/WebCola/cola",
+        "kanjiNavBase": "./js/kanjiNavBase",
+        "localDictionary": "./js/localDictionary",
+        "serverDictionary": "./js/serverDictionary",
+        "frontend": "./js/frontend",
+        "kanjiNav": "./js/kanjiNav",
         "bootstrap": "http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min",
         "js-cookie": "./node_modules/js-cookie/src/js.cookie"
     }

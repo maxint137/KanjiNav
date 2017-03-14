@@ -12,12 +12,21 @@
         //Specify module code generation: "None", "CommonJS", "AMD", "System", "UMD", "ES6", or "ES2015".
         // ► Only "AMD" and "System" can be used in conjunction with --outFile.
         // ► "ES6" and "ES2015" values may not be used when targeting "ES5" or lower.
+        // For Node.js, use --module commonjs; for require.js, use --module amd
+        // see https://www.typescriptlang.org/docs/handbook/modules.html
         "module": "amd",
+
+        "outDir": "./views/js",
+        //"outFile": "kanjiNav.js",
 
         "sourceMap": true
     },
     "files": [
-        "./views/js/kanjiNav.ts",
-        "./views/js/frontend.ts"
+        "./views/scripts/fe.ts",
+        "./views/scripts/kanjiNavBase.ts",
+        "./views/scripts/localDictionary.ts",
+        "./views/scripts/serverDictionary.ts",
+        "./views/scripts/kanjiNav.ts",
+        "./views/scripts/frontend.ts"
     ]
 }

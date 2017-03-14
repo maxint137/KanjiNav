@@ -178,26 +178,38 @@ require(['jquery', 'jquery-ui'], function($) {
     });
 
     // the variables that manage everything, basically
-    require(['jquery', 'js/kanjiNav', 'js/frontend', 'cola', 'js-cookie', 'bootstrap'], function($, kanjiNav, frontend, cola, js_cookie) {
+    require(['jquery',
+            'localDictionary',
+            //'serverDictionary',
+            'kanjiNav', 'frontend',
+            'cola', 'js-cookie', 'bootstrap'
+        ],
+        function($, lookupEngine, kanjiNav, fe, cola, js_cookie) {
+            fe = new fe.Frontend(new kanjiNav.Graph(lookupEngine.Dictionary), cola, js_cookie);
 
-        fe = new frontend(new kanjiNav.Graph(), cola, js_cookie);
+            fe.loadWordHistory('#wordHistoryCombo');
 
-        fe.loadWordHistory('#wordHistoryCombo');
+            $("#hiddenWordsCombo").change(() => {
 
-        $("#hiddenWordsCombo").change(() => {
+                var wordSelected = $("#hiddenWordsCombo").val();
+                if (wordSelected) {
 
-            var wordSelected = $("#hiddenWordsCombo").val();
-            if (wordSelected) {
+                    fe.unhideWord(wordSelected);
+                }
+            });
 
-                fe.unhideWord(wordSelected);
-            }
+            // get first node
+            fe.main(fe.getParameterByName('start') || '楽しい');
         });
 
 
-        // get first node
-        fe.main(fe.getParameterByName('start') || '楽しい');
-    });
 });
 
 
 var fe = {};
+
+
+function zoomToFit() {
+
+    Frontend.Frontend.prototype.zoomToFit();
+}
