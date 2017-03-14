@@ -9,16 +9,16 @@ var require = {
         "js-cookie": {}
     },
     paths: {
-        "jquery": "http://code.jquery.com/jquery-2.1.1.min",
-        "jquery-ui": "http://code.jquery.com/ui/1.12.1/jquery-ui",
-        "d3": "./node_modules/d3/d3",
+        "jquery": "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min",
+        "jquery-ui": "https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min",
+        "d3": "https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min",
+        "bootstrap": "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min",
+        "js-cookie": "https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.3/js.cookie.min",
         "cola": "./node_modules/webcola/WebCola/cola",
         "kanjiNavBase": "./js/kanjiNavBase",
         "localDictionary": "./js/localDictionary",
         "serverDictionary": "./js/serverDictionary",
         "frontend": "./js/frontend",
-        "kanjiNav": "./js/kanjiNav",
-        "bootstrap": "http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min",
-        "js-cookie": "./node_modules/js-cookie/src/js.cookie"
+        "kanjiNav": "./js/kanjiNav"
     }
 };

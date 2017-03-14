@@ -4,8 +4,8 @@ import * as $ from 'jquery'
 import * as d3 from 'd3'
 
 //import kanjiNav = require("./kanjiNav");
-import {JLPTDictionary, NodeType, ApiNode} from 'kanjiNavBase'
-import {Graph, Node} from 'kanjiNav'
+import { JLPTDictionary, NodeType, ApiNode } from 'kanjiNavBase'
+import { Graph, Node } from 'kanjiNav'
 
 class ViewNode extends Node implements cola.Node {
     constructor(kn: Node) {
@@ -430,11 +430,12 @@ export class Frontend {
         let wordCard = nodeEnter
             .append("g")
             .attr('style', n => "fill: " + this.jlpt2color(n.JLPT))
-            .attr('transform', 'translate(-10, -20)')
+            .attr('transform', n => n.isKanji() ? 'translate(-5, -20)' : 'translate(-10, -20)')
+
             // create a reference to the <g> id sections defined in the existing svg markup exported from Inkscape
             .append("use")
             // g123 or kanjiBG
-            .attr("xlink:href", n => !n.isKanji() ? '#g12' + n.id.length : '#kanjiBG')
+            .attr("xlink:href", n => n.isKanji() ? '#kanjiBG' : '#g12' + n.id.length)
             ;
 
         wordCard
@@ -450,17 +451,17 @@ export class Frontend {
         // the word itself
         let text = nodeEnter.append("text")
             .attr('class', 'text')
-            // .attr('dx', n => !n.isKanji() ? '-0.2em' : '0.0em')
-            // .attr('dy', n => !n.isKanji() ? '-0.2em' : '0.0em')
+            .attr('dx', n => n.isKanji() ? '0.2em' : '0.0em')
+            .attr('dy', n => n.isKanji() ? '-0.0em' : '0.0em')
             .text(d => d.id)
             ;
-        text
-            .on("dblclick", d => {
-                if (Math.abs(mouseDownEvent.screenX - mouseUpEvent.screenX) +
-                    Math.abs(mouseDownEvent.screenY - mouseUpEvent.screenY) < 2) {
-                    this.dblclick(d);
-                }
-            })
+
+        text.on("dblclick", d => {
+            if (Math.abs(mouseDownEvent.screenX - mouseUpEvent.screenX) +
+                Math.abs(mouseDownEvent.screenY - mouseUpEvent.screenY) < 2) {
+                this.dblclick(d);
+            }
+        })
 
         // the rubi
         nodeEnter.append("text")

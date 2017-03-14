@@ -308,9 +308,9 @@ define(["require", "exports", "jquery", "d3", "kanjiNavBase", "kanjiNav"], funct
             var wordCard = nodeEnter
                 .append("g")
                 .attr('style', function (n) { return "fill: " + _this.jlpt2color(n.JLPT); })
-                .attr('transform', 'translate(-10, -20)')
+                .attr('transform', function (n) { return n.isKanji() ? 'translate(-5, -20)' : 'translate(-10, -20)'; })
                 .append("use")
-                .attr("xlink:href", function (n) { return !n.isKanji() ? '#g12' + n.id.length : '#kanjiBG'; });
+                .attr("xlink:href", function (n) { return n.isKanji() ? '#kanjiBG' : '#g12' + n.id.length; });
             wordCard
                 .on("click", function (n) { _this.hideNode(n); });
             // the spikes
@@ -322,9 +322,10 @@ define(["require", "exports", "jquery", "d3", "kanjiNavBase", "kanjiNav"], funct
             // the word itself
             var text = nodeEnter.append("text")
                 .attr('class', 'text')
+                .attr('dx', function (n) { return n.isKanji() ? '0.2em' : '0.0em'; })
+                .attr('dy', function (n) { return n.isKanji() ? '-0.0em' : '0.0em'; })
                 .text(function (d) { return d.id; });
-            text
-                .on("dblclick", function (d) {
+            text.on("dblclick", function (d) {
                 if (Math.abs(mouseDownEvent.screenX - mouseUpEvent.screenX) +
                     Math.abs(mouseDownEvent.screenY - mouseUpEvent.screenY) < 2) {
                     _this.dblclick(d);

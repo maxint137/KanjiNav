@@ -1,0 +1,98 @@
+body {
+    background-color: gray;
+}
+
+.text {
+    /*http://jisho.org/search/%E5%8B%95%20%23kanji*/
+    font-family: "HiraKakuPro-W3", "Hiragino Kaku Gothic Pro W3", "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", "メイリオ", Meiryo, "游ゴシック", YuGothic, "ＭＳ Ｐゴシック", "MS PGothic", "ＭＳ ゴシック", "MS Gothic", sans-serif;
+    font-size: 22px;
+    text-align: left;
+    text-decoration: none;
+    font-weight: normal;
+    line-height: 1;
+    dominant-baseline: hanging;
+}
+
+.background {
+    stroke: white;
+    stroke-width: 1px;
+    fill: gray;
+}
+
+.node {
+    background-color: white;
+}
+
+.spike {
+    fill: url(#SpikeGradient);
+    stroke-width: 0;
+}
+
+.btn-info.yellow {
+    background-color: #eae548;
+    border-color: #eae548;
+}
+
+.btn.yellow:active:hover,
+.btn.yellow.active:hover {
+    background-color: #dbd643;
+    border-color: #dbd643;
+}
+
+.btn.yellow.active {
+    background-color: #d1cc3c;
+    border-color: #d1cc3c;
+}
+
+.btn span.glyphicon {
+    opacity: 0;
+}
+
+.btn.active span.glyphicon {
+    opacity: 1;
+}
+
+.rectTest {
+    font-size: 22px;
+}
+
+rect .wordCard {
+    stroke-width: 0.025;
+    stroke-miterlimit: 4;
+    stroke-dasharray: none;
+    paint-order: markers fill stroke;
+}
+
+circle {
+    stroke-width: 1;
+    paint-order: markers fill stroke;
+}
+
+.x-sign {
+    fill: none;
+    stroke: #000000;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: miter;
+    stroke-miterlimit: 4;
+    stroke-dasharray: none;
+    stroke-opacity: 1;
+}
+
+.custom-combobox {
+    position: relative;
+    display: inline-block;
+}
+
+.custom-combobox-toggle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin-left: -1px;
+    padding: 0;
+}
+
+.custom-combobox-input {
+    margin: 0;
+    padding: 5px 10px;
+}

@@ -175,17 +175,45 @@ require(['jquery', 'jquery-ui'], function($) {
         $("#toggle").on("click", function() {
             $("#combobox").toggle();
         });
+
+        // connect the buttons        
+        $("#fullScreenButton").on("click", function() {
+            fullScreen(fe.outer[0][0], () => fe.fullScreenCancel());
+            fe.zoomToFit();
+        });
+
+        $("#zoomToFitButton").on("click", function() {
+            fe.zoomToFit();
+        });
+
+        $(".jlptBtn").on("click", function() {
+            fe.jlptSelect(this.title.slice(-1));
+        });
+
+        $("#delButton").on("click", function() {
+            fe.removeWord('wordHistoryCombo', $('#word').val());
+            $('#word').val('');
+        });
+
+        $("#addButton").on("click", function() {
+            fe.navigateToWord($('#word').val());
+        });
+
+        $("#clearButton").on("click", function() {
+            fe.clearAll();
+        });
+
     });
 
     // the variables that manage everything, basically
     require(['jquery',
             'localDictionary',
-            //'serverDictionary',
+            //'serverDictionary',,l
             'kanjiNav', 'frontend',
             'cola', 'js-cookie', 'bootstrap'
         ],
-        function($, lookupEngine, kanjiNav, fe, cola, js_cookie) {
-            fe = new fe.Frontend(new kanjiNav.Graph(lookupEngine.Dictionary), cola, js_cookie);
+        function($, lookupEngine, kanjiNav, frontend, cola, js_cookie) {
+            fe = new frontend.Frontend(new kanjiNav.Graph(lookupEngine.Dictionary), cola, js_cookie);
 
             fe.loadWordHistory('#wordHistoryCombo');
 
@@ -201,10 +229,7 @@ require(['jquery', 'jquery-ui'], function($) {
             // get first node
             fe.main(fe.getParameterByName('start') || '楽しい');
         });
-
-
 });
-
 
 var fe = {};
 

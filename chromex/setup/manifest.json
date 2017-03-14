@@ -12,7 +12,7 @@
 
     "browser_action": {
         "default_icon": "icon.png",
-        "default_popup": "views/navigateKanjiLocal.html",
+        "default_popup": "views/navigateKanji.html",
         "default_title": "Show selected JLPT word on a map"
     },
 

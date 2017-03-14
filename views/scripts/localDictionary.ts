@@ -1,7 +1,6 @@
 import { ApiNode, JLPTDictionary, NodeType } from './kanjiNavBase'
 
-
-
+// defined in data.js
 declare var kanjis;
 declare var words;
 
@@ -41,7 +40,7 @@ class LocalDictionary implements JLPTDictionary {
                     kanjis: LocalDictionary.loadKanji(word.word),
                 };
 
-                setTimeout(() => defer.resolve(wordApiRes), 1);
+                setTimeout(() => defer.resolve(wordApiRes), 137);
             }
         }
         else if (type.type == NodeType.Char.type) {
@@ -58,7 +57,7 @@ class LocalDictionary implements JLPTDictionary {
                 onyomi: kanji.onyomi
             };
 
-            setTimeout(() => defer.resolve(kanjiApiRes), 1);
+            setTimeout(() => defer.resolve(kanjiApiRes), 137);
         }
         else {
             debugger;

@@ -17,7 +17,7 @@ define(["require", "exports", "./kanjiNavBase"], function (require, exports, kan
                         english: word.english,
                         kanjis: LocalDictionary.loadKanji(word.word),
                     };
-                    setTimeout(function () { return defer.resolve(wordApiRes_1); }, 1);
+                    setTimeout(function () { return defer.resolve(wordApiRes_1); }, 137);
                 }
             }
             else if (type.type == kanjiNavBase_1.NodeType.Char.type) {
@@ -31,7 +31,7 @@ define(["require", "exports", "./kanjiNavBase"], function (require, exports, kan
                     kunyomi: kanji.kunyomi,
                     onyomi: kanji.onyomi
                 };
-                setTimeout(function () { return defer.resolve(kanjiApiRes_1); }, 1);
+                setTimeout(function () { return defer.resolve(kanjiApiRes_1); }, 137);
             }
             else {
                 debugger;
