@@ -1,11 +1,12 @@
 html {
-    min-width: 1040px;
+    min-width: 800px;
 }
 
 body {
     font-family: "Helvetica Neue", Helvetica, sans-serif;
     /*margin: 1em auto 4em auto;*/
     /*width: 960px;*/
+    height: 350px;
 }
 
 #body {
@@ -168,4 +169,26 @@ blockquote:before {
 
 blockquote:after {
     position: absolute;
+}
+
+#toolbarRight {
+    float: right;
+    margin-top: 5px;
+    margin-right: 5px;
+}
+
+#helpDiv {
+    display: none;
+}
+
+.helpText {
+    text-align: right;
+    background-color: #ffef8c;
+    float: right;
+    padding: 5px;
+    margin: 0;
+}
+
+#addButton {
+    margin-left: 33px;
 }

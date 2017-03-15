@@ -4,7 +4,15 @@
 //
 // 'bootstrap' does not return an object. Must appear at the end
 
+
 require(['jquery', 'jquery-ui'], function($) {
+
+    if (location.protocol !== "chrome-extension:") {
+        $("html").css("min-width", "0px");
+        $("#toolbarRight").show();
+    } else {
+        $("#toolbarRight").hide();
+    }
 
     // DOM ready
     $(function() {
@@ -205,14 +213,40 @@ require(['jquery', 'jquery-ui'], function($) {
 
     });
 
-    // the variables that manage everything, basically
-    require(['jquery',
-            'localDictionary',
-            //'serverDictionary',,l
-            'kanjiNav', 'frontend',
-            'cola', 'js-cookie', 'bootstrap'
-        ],
+});
+
+var fe = {};
+
+
+function zoomToFit() {
+
+    Frontend.Frontend.prototype.zoomToFit();
+}
+
+
+function fly(asExtension, word) {
+
+    var dictioanry = asExtension ? 'localDictionary' : 'serverDictionary';
+
+    require(['jquery', dictioanry, 'kanjiNav', 'frontend', 'cola', 'js-cookie', 'bootstrap'],
         function($, lookupEngine, kanjiNav, frontend, cola, js_cookie) {
+
+            if (asExtension) {
+                if (!word || "" == word) {
+                    $("#mainDiv").hide();
+                    $("#helpDiv").show();
+                    $("html").css("min-width", "230px");
+                    $("body").css("height", "30px");
+
+                    return;
+                } else {
+                    $("#helpDiv").hide();
+                    $("#mainDiv").show();
+                    $("html").css("min-width", "800px");
+                    $("body").css("height", "350px");
+                }
+            }
+
             fe = new frontend.Frontend(new kanjiNav.Graph(lookupEngine.Dictionary), cola, js_cookie);
 
             fe.loadWordHistory('#wordHistoryCombo');
@@ -227,14 +261,119 @@ require(['jquery', 'jquery-ui'], function($) {
             });
 
             // get first node
-            fe.main(fe.getParameterByName('start') || '楽しい');
+            fe.main(word || fe.getParameterByName('start') || '楽しい');
         });
+}
+
+
+// using the "native" api, somehow require-api comes too late for the chrome extension to take off
+document.addEventListener('DOMContentLoaded', function() {
+
+    if (!chrome.tabs) {
+
+        fly(false);
+
+    } else {
+        chrome.tabs.executeScript({
+            code: "window.getSelection().toString();"
+        }, function(selection) {
+
+            var word = !selection || "" === selection[0] ? "" : selection[0].trim();
+
+            fly(true, word);
+        });
+    }
+
+    return;
+
+    chrome.tabs.executeScript({
+        code: "window.getSelection().toString();"
+    }, function(selection) {
+
+        var word = !selection || "" === selection[0] ? "" : selection[0].trim();
+
+        fly(word, true);
+
+        return;
+
+        // the variables that manage everything, basically
+        require(['jquery', 'localDictionary', 'kanjiNav', 'frontend', 'cola', 'js-cookie', 'bootstrap'],
+            function($, lookupEngine, kanjiNav, frontend, cola, js_cookie) {
+
+                if (!selection || "" === selection[0]) {
+                    $("#mainDiv").hide();
+                    $("#helpDiv").show();
+                    $("html").css("min-width", "230px");
+                    $("body").css("height", "30px");
+
+                    return;
+                } else {
+                    $("#helpDiv").hide();
+                    $("#mainDiv").show();
+                    $("html").css("min-width", "800px");
+                    $("body").css("height", "350px");
+                }
+
+                fe = new frontend.Frontend(new kanjiNav.Graph(lookupEngine.Dictionary), cola, js_cookie);
+
+                fe.loadWordHistory('#wordHistoryCombo');
+
+                $("#hiddenWordsCombo").change(() => {
+
+                    var wordSelected = $("#hiddenWordsCombo").val();
+                    if (wordSelected) {
+
+                        fe.unhideWord(wordSelected);
+                    }
+                });
+
+                // get first node
+                fe.main(selection[0].trim());
+            });
+
+    });
 });
 
-var fe = {};
 
 
-function zoomToFit() {
+// document.addEventListener('DOMContentLoaded', function() {
 
-    Frontend.Frontend.prototype.zoomToFit();
-}
+//     //var asdf = chrome.tabs.executeScript;
+
+//     debugger;
+
+//     // the variables that manage everything, basically
+//     require(['jquery',
+//             'localDictionary',
+//             //'serverDictionary',,l
+//             'kanjiNav', 'frontend',
+//             'cola', 'js-cookie', 'bootstrap'
+//         ],
+//         function($, lookupEngine, kanjiNav, frontend, cola, js_cookie) {
+
+
+//             // chrome.tabs.executeScript({
+//             //     code: "window.getSelection().toString();"
+//             // }, function(selection) {
+//             //     alert("sel=" + selection);
+//             // });
+
+
+//             fe = new frontend.Frontend(new kanjiNav.Graph(lookupEngine.Dictionary), cola, js_cookie);
+
+//             fe.loadWordHistory('#wordHistoryCombo');
+
+//             $("#hiddenWordsCombo").change(() => {
+
+//                 var wordSelected = $("#hiddenWordsCombo").val();
+//                 if (wordSelected) {
+
+//                     fe.unhideWord(wordSelected);
+//                 }
+//             });
+
+//             // get first node
+//             fe.main(fe.getParameterByName('start') || '楽しい');
+//         });
+
+// });

@@ -92,8 +92,10 @@ export class Frontend {
         this.modelgraph = modelgraph; // new Graph(getParameterByName('JLPT'));
         this.cookies = cookies;
 
-        this.width = $(window).width();
-        this.height = $(window).height();
+        // take into account th eheight of the toolbar
+        this.height = $(window).height() - 37;
+        // somehow we can't avoid a margin, so make it symmetric at least
+        this.width = $(window).width() - 7;
 
         this.red = "rgb(125, 0, 0)";
 

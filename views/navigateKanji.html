@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
 
+    <script src="../extern/fullscreen.js"></script>
+
     <script type="text/javascript" src="scripts/require-setup.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.3/require.min.js"></script>
@@ -21,13 +23,68 @@
     <title>Kanji Navigator</title>
     <style>
         @import url(style.css);
-        @import url(festyle.css);
+        @import url(feStyle.css);
     </style>
 </head>
 
 
 <body>
-    <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0">
+    <img style="display:none" src="tanoshi.png"></img>
+
+    <div id="helpDiv">
+        <p class="helpText">Highlight a word in Japanese on the page, then press this button.</p>
+    </div>
+
+    <div id="mainDiv">
+
+        <select id="wordHistoryCombo">
+        <option value="楽しい">楽しい</option>
+        <option value="産業">産業</option>
+    </select>
+
+        <button title="Add to map" id="addButton" type="button" class="btn btn-default btn-xs" id="addButton"><i class="fa fa-plus-square-o" aria-hidden="true"></i></button>
+        <button title="Clear Map" id="clearButton" type="button" class="btn btn-default btn-xs"><i class="fa fa-eraser" aria-hidden="true"></i></button>
+
+        <div class="btn-group" data-toggle="buttons">
+
+            <label class="jlptBtn btn btn-xs btn-success" data-toggle="tooltip" title="JLPT5">
+            <input id='JLPT5' type="checkbox" autocomplete="off">
+            <span class="glyphicon glyphicon-ok"></span>
+        </label>
+
+            <label class="jlptBtn btn btn-xs btn-info yellow" data-toggle="tooltip" title="JLPT4">
+            <input id='JLPT4' type="checkbox" autocomplete="off">
+            <span class="glyphicon glyphicon-ok"></span>
+        </label>
+
+            <label class="jlptBtn btn btn-xs btn-primary" data-toggle="tooltip" title="JLPT3">
+            <input id='JLPT3' type="checkbox" autocomplete="off">
+            <span class="glyphicon glyphicon-ok"></span>
+        </label>
+
+            <label class="jlptBtn btn btn-xs btn-warning" data-toggle="tooltip" title="JLPT2">
+            <input id='JLPT2' type="checkbox" autocomplete="off">
+            <span class="glyphicon glyphicon-ok"></span>
+        </label>
+
+            <label class="jlptBtn btn btn-xs btn-danger" data-toggle="tooltip" title="JLPT1">
+            <input id='JLPT1' type="checkbox" autocomplete="off">
+            <span class="glyphicon glyphicon-ok"></span>
+        </label>
+        </div>
+        <select title="Add removed word to map" id="hiddenWordsCombo" style="display:inline-block">
+        <option></option>
+    </select>
+        <div id="toolbarRight">
+            <button title="Switch to full screen mode" id="fullScreenButton" type="button" class="btn btn-default btn-xs"><i class="fa fa-arrows-alt" aria-hidden="true"></i></button>
+            <button title="Zoom to fit" id="zoomToFitButton" type="button" class="btn btn-default btn-xs"><i class="fa fa-search-plus" aria-hidden="true"></i></button>
+        </div>
+
+        <div id='kanjiMap'></div>
+    </div>
+
+    <div style="position: absolute;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0">
         <defs>
             <filter id="wcShadow" color-interpolation-filters="sRGB">
                 <feFlood flood-opacity=".5" flood-color="#000" result="flood" />
@@ -102,60 +159,14 @@
 
         </defs>
     </svg>
-
-    <img style="display:none" src="tanoshi.png"></img>
-
-    <select id="wordHistoryCombo">
-        <option value="楽しい">楽しい</option>
-        <option value="産業">産業</option>
-    </select>
-
-    <button id="addButton" type="button" class="btn btn-default btn-xs" style="margin-left: 30px" id="addButton">Add</button>
-    <button id="delButton" type="button" class="btn btn-default btn-xs" id="delButton">Del</button>
-    <button id="clearButton" type="button" class="btn btn-default btn-xs">Clear Map</button>
-
-    <div class="btn-group" data-toggle="buttons">
-
-        <label class="jlptBtn btn btn-xs btn-success" data-toggle="tooltip" title="JLPT5">
-            <input id='JLPT5' type="checkbox" autocomplete="off">
-            <span class="glyphicon glyphicon-ok"></span>
-        </label>
-
-        <label class="jlptBtn btn btn-xs btn-info yellow" data-toggle="tooltip" title="JLPT4">
-            <input id='JLPT4' type="checkbox" autocomplete="off">
-            <span class="glyphicon glyphicon-ok"></span>
-        </label>
-
-        <label class="jlptBtn btn btn-xs btn-primary" data-toggle="tooltip" title="JLPT3">
-            <input id='JLPT3' type="checkbox" autocomplete="off">
-            <span class="glyphicon glyphicon-ok"></span>
-        </label>
-
-        <label class="jlptBtn btn btn-xs btn-warning" data-toggle="tooltip" title="JLPT2">
-            <input id='JLPT2' type="checkbox" autocomplete="off">
-            <span class="glyphicon glyphicon-ok"></span>
-        </label>
-
-        <label class="jlptBtn btn btn-xs btn-danger" data-toggle="tooltip" title="JLPT1">
-            <input id='JLPT1' type="checkbox" autocomplete="off">
-            <span class="glyphicon glyphicon-ok"></span>
-        </label>
     </div>
-    <select id="hiddenWordsCombo" style="display:inline-block">
-        <option></option>
-    </select>
 
-    <div id='kanjiMap'></div>
 
-    <script src="../extern/fullscreen.js"></script>
-
-    <button id="fullScreenButton" type="button" class="btn btn-default btn-xs">Full screen</button>
-    <button id="zoomToFitButton" type="button" class="btn btn-default btn-xs">Zoom to fit (or double click)</button>
 
     <script type="text/javascript" src="js/google-analytics.js"></script>
 
     <!-- the feedback stuff -->
-    <script type="text/javascript">
+    <!--<script type="text/javascript">
         reformal_wdg_domain = "kanjiNav";
         reformal_wdg_mode = 0;
         reformal_wdg_title = "Kanji Navigator";
@@ -178,7 +189,7 @@
     <script type="text/javascript" language="JavaScript" src="http://idea.informer.com/tab6.js?domain=kanjiNav"></script>
     <noscript><a href="http://kanjiNav.idea.informer.com">Kanji Navigator feedback </a>
         <a href="http://idea.informer.com"><img src="http://widget.idea.informer.com/tmpl/images/widget_logo.jpg" /></a>
-    </noscript>
+    </noscript>-->
 
 </body>
 

@@ -22,7 +22,6 @@
         "sourceMap": true
     },
     "files": [
-        "./views/scripts/fe.ts",
         "./views/scripts/kanjiNavBase.ts",
         "./views/scripts/localDictionary.ts",
         "./views/scripts/serverDictionary.ts",

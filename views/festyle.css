@@ -96,3 +96,8 @@ circle {
     margin: 0;
     padding: 5px 10px;
 }
+
+#kanjiMap {
+    margin-left: 3px;
+    margin-right: 3px;
+}
