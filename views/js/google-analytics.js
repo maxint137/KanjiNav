@@ -11,6 +11,7 @@
     m.parentNode.insertBefore(a, m)
 })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
 
-ga('create', 'UA-91206532-1', 'auto');
+var gaId = 'UA-91206532-' + (location.protocol === "chrome-extension:" ? '2' : '1');
+ga('create', gaId, 'auto');
 ga('send', 'pageview');
 ga('require', 'displayfeatures');

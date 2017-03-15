@@ -14,7 +14,7 @@ var require = {
         "d3": "https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min",
         "bootstrap": "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min",
         "js-cookie": "https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.3/js.cookie.min",
-        "cola": "./node_modules/webcola/WebCola/cola",
+        "cola": "./node_modules/webcola/WebCola/cola.min",
         "kanjiNavBase": "./js/kanjiNavBase",
         "localDictionary": "./js/localDictionary",
         "serverDictionary": "./js/serverDictionary",

@@ -38,7 +38,7 @@ gulp.task('copy_views', function() {
             './views/node_modules/js-cookie/src/js.cookie.js',
             './views/favicon.png',
             './views/tanoshi.png',
-            './views/node_modules/webcola/WebCola/cola*js'
+            './views/node_modules/webcola/WebCola/cola.min.js'
 
         ], { base: 'views', ignoreInitial: false })
         .pipe(gulp.dest(setupRoot + '/chromexDebug/views'));
@@ -48,14 +48,13 @@ gulp.task('copy_views', function() {
 gulp.task('copy_extern', function() {
     return gulp.src([
             './extern/fullscreen.js',
-            './node_modules/requirejs/require.js',
             './node_modules/jquery/dist/jquery.min.js',
             "./node_modules/font-awesome/css/font-awesome.css",
             './node_modules/jqueryui/jquery-ui.css',
             './node_modules/jqueryui/jquery-ui.min.js',
             './node_modules/bootstrap/dist/js/bootstrap.min.js',
             './node_modules/bootstrap/dist/css/bootstrap.min.css',
-            './views/node_modules/d3/d3*.js'
+            './views/node_modules/d3/d3.min.js'
         ])
         .pipe(gulp.dest(setupRoot + '/chromexDebug/extern'))
 });
