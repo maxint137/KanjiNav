@@ -226,9 +226,9 @@ function zoomToFit() {
 
 function fly(asExtension, word) {
 
-    var dictioanry = asExtension ? 'localDictionary' : 'serverDictionary';
+    var dictionary = asExtension ? 'localDictionary' : 'serverDictionary';
 
-    require(['jquery', dictioanry, 'kanjiNav', 'frontend', 'cola', 'js-cookie', 'bootstrap'],
+    require(['jquery', dictionary, 'kanjiNav', 'frontend', 'cola', 'js-cookie', 'bootstrap'],
         function($, lookupEngine, kanjiNav, frontend, cola, js_cookie) {
 
             if (asExtension) {

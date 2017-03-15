@@ -189,7 +189,7 @@ export class Frontend {
         // Note: http://piotrwalat.net/arrow-function-expressions-in-typescript/
         // Standard functions will dynamically bind this depending on execution context (just like in JavaScript)
         // Arrow functions on the other hand will preserve this of enclosing context. 
-        var d = this.modelgraph.getNode(NodeType.Word, word, v => this.addViewNode(new ViewNode(v)));
+        var d = this.modelgraph.getNode(word.length == 1 ? NodeType.Char : NodeType.Word, word, v => this.addViewNode(new ViewNode(v)));
 
         $.when(d).then(startNode => { this.refocus(startNode) });
     }

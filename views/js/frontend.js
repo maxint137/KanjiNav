@@ -110,7 +110,7 @@ define(["require", "exports", "jquery", "d3", "kanjiNavBase", "kanjiNav"], funct
             // Note: http://piotrwalat.net/arrow-function-expressions-in-typescript/
             // Standard functions will dynamically bind this depending on execution context (just like in JavaScript)
             // Arrow functions on the other hand will preserve this of enclosing context. 
-            var d = this.modelgraph.getNode(kanjiNavBase_1.NodeType.Word, word, function (v) { return _this.addViewNode(new ViewNode(v)); });
+            var d = this.modelgraph.getNode(word.length == 1 ? kanjiNavBase_1.NodeType.Char : kanjiNavBase_1.NodeType.Word, word, function (v) { return _this.addViewNode(new ViewNode(v)); });
             $.when(d).then(function (startNode) { _this.refocus(startNode); });
         };
         // adds the node to the viewgraph, picks the initial position based on the startpos and assignes viewgraphid
