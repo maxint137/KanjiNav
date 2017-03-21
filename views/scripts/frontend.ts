@@ -16,7 +16,7 @@ class ViewNode extends Node implements cola.Node {
     constructor(kn: Node) {
         super(kn.type, kn.id);
         this.copyData(kn);
-        
+
         this.cast = kn.cast;
 
         this.hidden = false;
@@ -76,7 +76,7 @@ export class Frontend {
     viewgraph: ViewGraph;
 
     // the SVG to play with
-    outer: any;
+    outer: d3.Selection<any>;
 
     // the visuals group
     vis: any;
@@ -94,10 +94,7 @@ export class Frontend {
         this.modelgraph = modelgraph; // new Graph(getParameterByName('JLPT'));
         this.cookies = cookies;
 
-        // take into account th eheight of the toolbar
-        this.height = $(window).height() - 37;
-        // somehow we can't avoid a margin, so make it symmetric at least
-        this.width = $(window).width() - 7;
+        this.calcMySize();
 
         this.red = "rgb(125, 0, 0)";
 
@@ -647,6 +644,19 @@ export class Frontend {
         this.main(word);
     }
 
+    calcMySize() {
+        // take into account the height of the toolbar
+        this.height = $(window).height() - 37;
+        // somehow we can't avoid a margin, so make it symmetric at least
+        this.width = $(window).width() - 7;
+    }
+
+    onWindowResized() {
+        this.calcMySize();
+        
+        this.outer.attr("width", this.width).attr("height", this.height);
+    }
+
     fullScreenCancel() {
         this.outer.attr("width", this.width).attr("height", this.height);
         this.zoomToFit();
@@ -656,8 +666,8 @@ export class Frontend {
         var b = this.graphBounds();
         var w = b.X - b.x,
             h = b.Y - b.y;
-        var cw = this.outer.attr("width"),
-            ch = this.outer.attr("height");
+        var cw = parseInt(this.outer.attr("width")),
+            ch = parseInt(this.outer.attr("height"));
         var s = Math.min(cw / w, ch / h);
         var tx = (-b.x * s + (cw / s - w) * s / 2),
             ty = (-b.y * s + (ch / s - h) * s / 2);

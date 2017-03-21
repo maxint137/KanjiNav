@@ -173,6 +173,11 @@ require(['jquery', 'jquery-ui'], function($) {
             }
         });
 
+
+        $(window).resize(function() {
+            fe.onWindowResized();
+        });
+
         $("#wordHistoryCombo").combobox();
         $("#toggle").on("click", function() {
             $("#combobox").toggle();

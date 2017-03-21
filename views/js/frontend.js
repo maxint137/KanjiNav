@@ -39,10 +39,7 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
         function Frontend(modelgraph, d3StyleLayoutAdaptor, cookies) {
             this.modelgraph = modelgraph; // new Graph(getParameterByName('JLPT'));
             this.cookies = cookies;
-            // take into account th eheight of the toolbar
-            this.height = $(window).height() - 37;
-            // somehow we can't avoid a margin, so make it symmetric at least
-            this.width = $(window).width() - 7;
+            this.calcMySize();
             this.red = "rgb(125, 0, 0)";
             this.viewgraph = {
                 nodes: [],
@@ -472,6 +469,16 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
             this.updateWordInHistory(word);
             this.main(word);
         };
+        Frontend.prototype.calcMySize = function () {
+            // take into account the height of the toolbar
+            this.height = $(window).height() - 37;
+            // somehow we can't avoid a margin, so make it symmetric at least
+            this.width = $(window).width() - 7;
+        };
+        Frontend.prototype.onWindowResized = function () {
+            this.calcMySize();
+            this.outer.attr("width", this.width).attr("height", this.height);
+        };
         Frontend.prototype.fullScreenCancel = function () {
             this.outer.attr("width", this.width).attr("height", this.height);
             this.zoomToFit();
@@ -479,7 +486,7 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
         Frontend.prototype.zoomToFit = function () {
             var b = this.graphBounds();
             var w = b.X - b.x, h = b.Y - b.y;
-            var cw = this.outer.attr("width"), ch = this.outer.attr("height");
+            var cw = parseInt(this.outer.attr("width")), ch = parseInt(this.outer.attr("height"));
             var s = Math.min(cw / w, ch / h);
             var tx = (-b.x * s + (cw / s - w) * s / 2), ty = (-b.y * s + (ch / s - h) * s / 2);
             this.zoom.translate([tx, ty]).scale(s);
