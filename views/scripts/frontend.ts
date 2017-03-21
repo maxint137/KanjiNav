@@ -1,9 +1,14 @@
 /// <reference path="../node_modules/@types/webcola/index.d.ts" />.
 /// <reference path="../node_modules/@types/js-cookie/index.d.ts" />.
-import * as $ from 'jquery'
+/// <reference path="../node_modules/@types/jquery/index.d.ts" />.
+
+
+
+// UF: can't use the reference: 'd3' refers to a UMD global, but the current file is a module. Consider adding an import instead.
+// see http://garrettn.github.io/blog/2014/02/19/write-modular-javascript-that-works-anywhere-with-umd/
+/// <reference path="../node_modules/@types/d3/index.d.ts" />.
 import * as d3 from 'd3'
 
-//import kanjiNav = require("./kanjiNav");
 import { JLPTDictionary, NodeType, ApiNode } from 'kanjiNavBase'
 import { Graph, Node } from 'kanjiNav'
 
@@ -11,6 +16,8 @@ class ViewNode extends Node implements cola.Node {
     constructor(kn: Node) {
         super(kn.type, kn.id);
         this.copyData(kn);
+        
+        this.cast = kn.cast;
 
         this.hidden = false;
     }
@@ -23,7 +30,7 @@ class ViewNode extends Node implements cola.Node {
     number: any;
 
     // app specific:
-    colour: string;
+    color: string;
     viewgraphid: number;
     hidden: boolean;
 }
@@ -37,10 +44,6 @@ class ViewGraph {
 
     nodes: Array<ViewNode>;
     links: Array<ViewLink>;
-}
-
-interface ColaMachine {
-    d3adaptor(d3: any): cola.D3StyleLayoutAdaptor;
 }
 
 export class Frontend {
@@ -62,7 +65,6 @@ export class Frontend {
     cookies: Cookies.CookiesStatic;
 
     // the engine
-    cola: ColaMachine;
     d3cola: cola.D3StyleLayoutAdaptor;
     // zooming behaviour
     zoom: any;
@@ -87,7 +89,7 @@ export class Frontend {
     // ??
     nodeMouseDown: boolean;
 
-    constructor(modelgraph: Graph, coke: ColaMachine, cookies: Cookies.CookiesStatic) {
+    constructor(modelgraph: Graph, d3StyleLayoutAdaptor: cola.D3StyleLayoutAdaptor, cookies: Cookies.CookiesStatic) {
 
         this.modelgraph = modelgraph; // new Graph(getParameterByName('JLPT'));
         this.cookies = cookies;
@@ -104,8 +106,7 @@ export class Frontend {
             links: []
         };
 
-        this.cola = coke;
-        this.d3cola = <cola.D3StyleLayoutAdaptor>this.cola.d3adaptor(d3)
+        (this.d3cola = d3StyleLayoutAdaptor)
             .linkDistance(80)
             .avoidOverlaps(true)
             //  computes ideal lengths on each link to make extra space around high-degree nodes, using 5 as the basic length.
@@ -158,7 +159,7 @@ export class Frontend {
     defineGradients() {
         let defs = this.outer.append("svg:defs");
 
-        function addGradient(id, colour1, opacity1, colour2, opacity2) {
+        function addGradient(id, color1, opacity1, color2, opacity2) {
             var gradient = defs.append("svg:linearGradient")
                 .attr("id", id)
                 .attr("x1", "0%")
@@ -169,12 +170,12 @@ export class Frontend {
 
             gradient.append("svg:stop")
                 .attr("offset", "0%")
-                .attr("stop-color", colour1)
+                .attr("stop-color", color1)
                 .attr("stop-opacity", opacity1);
 
             gradient.append("svg:stop")
                 .attr("offset", "100%")
-                .attr("stop-color", colour2)
+                .attr("stop-color", color2)
                 .attr("stop-opacity", opacity2);
         }
 
@@ -243,7 +244,7 @@ export class Frontend {
         this.filteredNodes()
             .forEach(v => {
                 var fullyExpanded = this.modelgraph.fullyExpanded(v);
-                v.colour = fullyExpanded ? "black" : this.red;
+                v.color = fullyExpanded ? "black" : this.red;
             });
 
         // create a link in the view for each edge in the model
@@ -264,12 +265,12 @@ export class Frontend {
             // UF: not sure about these:
             if (this.inView(u) && !this.inView(v)) {
                 console.log("inView(u) && !inView(v)");
-                u.colour = this.red;
+                u.color = this.red;
             }
 
             if (!this.inView(u) && this.inView(v)) {
                 console.log("!inView(u) && inView(v)");
-                v.colour = this.red;
+                v.color = this.red;
             }
         });
 
@@ -355,17 +356,17 @@ export class Frontend {
         // update the fill of each of the elements, based on their state
         link
             .attr("fill", d => {
-                if (d.source.colour === this.red && d.target.colour === this.red) {
+                if (d.source.color === this.red && d.target.color === this.red) {
                     // UF never happens?
                     return this.red;
                 }
 
-                if (d.source.colour !== this.red && d.target.colour !== this.red) {
+                if (d.source.color !== this.red && d.target.color !== this.red) {
                     // the link between "resolved" nodes
                     return "darkgray";
                 }
 
-                return d.source.colour === this.red ? "url(#ReverseEdgeGradient)" : "url(#EdgeGradient)";
+                return d.source.color === this.red ? "url(#ReverseEdgeGradient)" : "url(#EdgeGradient)";
             });
 
         return link;
@@ -465,7 +466,7 @@ export class Frontend {
             }
         })
 
-        // the rubi
+        // the ruby
         nodeEnter.append("text")
             .attr("dy", "-1px")
             .text((n: ViewNode) => n.hiragana ? n.hiragana : '');
@@ -481,7 +482,7 @@ export class Frontend {
             .text(d => d.english && 0 in d.english ? d.english[0] : '?')
             ;
 
-        node.style("fill", (n: ViewNode) => n.colour);
+        node.style("fill", (n: ViewNode) => n.color);
 
         return node;
     }
@@ -587,12 +588,12 @@ export class Frontend {
 
     // handle the mouse-dblclick, tap
     dblclick(node: ViewNode) {
-        if (node.colour !== this.red) {
+        if (node.color !== this.red) {
             // collapse the node
             this.collapseNode(node);
 
             // paint it red
-            node.colour = this.red;
+            node.color = this.red;
 
             return;
         }

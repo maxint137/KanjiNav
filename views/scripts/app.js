@@ -1,10 +1,4 @@
-// File: /js/app.js
-
 // 'jquery' returns the jQuery object into '$'
-//
-// 'bootstrap' does not return an object. Must appear at the end
-
-
 require(['jquery', 'jquery-ui'], function($) {
 
     if (location.protocol !== "chrome-extension:") {
@@ -224,12 +218,13 @@ function zoomToFit() {
 }
 
 
-function fly(asExtension, word) {
+function fly(word, asExtension, useLocalDictionary = true) {
 
-    var dictionary = asExtension ? 'localDictionary' : 'serverDictionary';
+    var dictionary = useLocalDictionary ? 'localDictionary' : 'serverDictionary';
 
-    require(['jquery', dictionary, 'kanjiNav', 'frontend', 'cola', 'js-cookie', 'bootstrap'],
-        function($, lookupEngine, kanjiNav, frontend, cola, js_cookie) {
+    // 'bootstrap' does not return an object. Must appear at the end
+    require(['jquery', dictionary, 'kanjiNav', 'frontend', 'cola', 'd3', 'js-cookie', 'bootstrap'],
+        function($, lookupEngine, kanjiNav, frontend, webColaLibraray, d3, js_cookie) {
 
             if (asExtension) {
                 if (!word || "" == word) {
@@ -247,7 +242,10 @@ function fly(asExtension, word) {
                 }
             }
 
-            fe = new frontend.Frontend(new kanjiNav.Graph(lookupEngine.Dictionary), cola, js_cookie);
+            fe = new frontend.Frontend(
+                new kanjiNav.Graph(lookupEngine.Dictionary),
+                webColaLibraray.d3adaptor(d3),
+                js_cookie);
 
             fe.loadWordHistory('#wordHistoryCombo');
 
@@ -271,7 +269,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!chrome.tabs) {
 
-        fly(false);
+        // fly "locally" if loaded as a file://..
+        fly("", false, location.protocol == "file:");
 
     } else {
         chrome.tabs.executeScript({
@@ -280,100 +279,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             var word = !selection || "" === selection[0] ? "" : selection[0].trim();
 
-            fly(true, word);
+            fly(word, true);
         });
     }
-
-    return;
-
-    chrome.tabs.executeScript({
-        code: "window.getSelection().toString();"
-    }, function(selection) {
-
-        var word = !selection || "" === selection[0] ? "" : selection[0].trim();
-
-        fly(word, true);
-
-        return;
-
-        // the variables that manage everything, basically
-        require(['jquery', 'localDictionary', 'kanjiNav', 'frontend', 'cola', 'js-cookie', 'bootstrap'],
-            function($, lookupEngine, kanjiNav, frontend, cola, js_cookie) {
-
-                if (!selection || "" === selection[0]) {
-                    $("#mainDiv").hide();
-                    $("#helpDiv").show();
-                    $("html").css("min-width", "230px");
-                    $("body").css("height", "30px");
-
-                    return;
-                } else {
-                    $("#helpDiv").hide();
-                    $("#mainDiv").show();
-                    $("html").css("min-width", "800px");
-                    $("body").css("height", "350px");
-                }
-
-                fe = new frontend.Frontend(new kanjiNav.Graph(lookupEngine.Dictionary), cola, js_cookie);
-
-                fe.loadWordHistory('#wordHistoryCombo');
-
-                $("#hiddenWordsCombo").change(() => {
-
-                    var wordSelected = $("#hiddenWordsCombo").val();
-                    if (wordSelected) {
-
-                        fe.unhideWord(wordSelected);
-                    }
-                });
-
-                // get first node
-                fe.main(selection[0].trim());
-            });
-
-    });
 });
-
-
-
-// document.addEventListener('DOMContentLoaded', function() {
-
-//     //var asdf = chrome.tabs.executeScript;
-
-//     debugger;
-
-//     // the variables that manage everything, basically
-//     require(['jquery',
-//             'localDictionary',
-//             //'serverDictionary',,l
-//             'kanjiNav', 'frontend',
-//             'cola', 'js-cookie', 'bootstrap'
-//         ],
-//         function($, lookupEngine, kanjiNav, frontend, cola, js_cookie) {
-
-
-//             // chrome.tabs.executeScript({
-//             //     code: "window.getSelection().toString();"
-//             // }, function(selection) {
-//             //     alert("sel=" + selection);
-//             // });
-
-
-//             fe = new frontend.Frontend(new kanjiNav.Graph(lookupEngine.Dictionary), cola, js_cookie);
-
-//             fe.loadWordHistory('#wordHistoryCombo');
-
-//             $("#hiddenWordsCombo").change(() => {
-
-//                 var wordSelected = $("#hiddenWordsCombo").val();
-//                 if (wordSelected) {
-
-//                     fe.unhideWord(wordSelected);
-//                 }
-//             });
-
-//             // get first node
-//             fe.main(fe.getParameterByName('start') || '楽しい');
-//         });
-
-// });

@@ -1,3 +1,6 @@
+/// <reference path="../node_modules/@types/webcola/index.d.ts" />.
+/// <reference path="../node_modules/@types/js-cookie/index.d.ts" />.
+/// <reference path="../node_modules/@types/jquery/index.d.ts" />.
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -8,7 +11,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-define(["require", "exports", "jquery", "d3", "kanjiNavBase", "kanjiNav"], function (require, exports, $, d3, kanjiNavBase_1, kanjiNav_1) {
+define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (require, exports, d3, kanjiNavBase_1, kanjiNav_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var ViewNode = (function (_super) {
@@ -16,6 +19,7 @@ define(["require", "exports", "jquery", "d3", "kanjiNavBase", "kanjiNav"], funct
         function ViewNode(kn) {
             var _this = _super.call(this, kn.type, kn.id) || this;
             _this.copyData(kn);
+            _this.cast = kn.cast;
             _this.hidden = false;
             return _this;
         }
@@ -32,7 +36,7 @@ define(["require", "exports", "jquery", "d3", "kanjiNavBase", "kanjiNav"], funct
         return ViewGraph;
     }());
     var Frontend = (function () {
-        function Frontend(modelgraph, coke, cookies) {
+        function Frontend(modelgraph, d3StyleLayoutAdaptor, cookies) {
             this.modelgraph = modelgraph; // new Graph(getParameterByName('JLPT'));
             this.cookies = cookies;
             // take into account th eheight of the toolbar
@@ -44,8 +48,7 @@ define(["require", "exports", "jquery", "d3", "kanjiNavBase", "kanjiNav"], funct
                 nodes: [],
                 links: []
             };
-            this.cola = coke;
-            this.d3cola = this.cola.d3adaptor(d3)
+            (this.d3cola = d3StyleLayoutAdaptor)
                 .linkDistance(80)
                 .avoidOverlaps(true)
                 .size([this.width, this.height]);
@@ -83,7 +86,7 @@ define(["require", "exports", "jquery", "d3", "kanjiNavBase", "kanjiNav"], funct
         // define the gradients used down the road: SpikeGradient & (Reverse)EdgeGradient
         Frontend.prototype.defineGradients = function () {
             var defs = this.outer.append("svg:defs");
-            function addGradient(id, colour1, opacity1, colour2, opacity2) {
+            function addGradient(id, color1, opacity1, color2, opacity2) {
                 var gradient = defs.append("svg:linearGradient")
                     .attr("id", id)
                     .attr("x1", "0%")
@@ -93,11 +96,11 @@ define(["require", "exports", "jquery", "d3", "kanjiNavBase", "kanjiNav"], funct
                     .attr("spreadMethod", "pad");
                 gradient.append("svg:stop")
                     .attr("offset", "0%")
-                    .attr("stop-color", colour1)
+                    .attr("stop-color", color1)
                     .attr("stop-opacity", opacity1);
                 gradient.append("svg:stop")
                     .attr("offset", "100%")
-                    .attr("stop-color", colour2)
+                    .attr("stop-color", color2)
                     .attr("stop-opacity", opacity2);
             }
             addGradient("SpikeGradient", "red", 1, "red", 0);
@@ -154,7 +157,7 @@ define(["require", "exports", "jquery", "d3", "kanjiNavBase", "kanjiNav"], funct
             this.filteredNodes()
                 .forEach(function (v) {
                 var fullyExpanded = _this.modelgraph.fullyExpanded(v);
-                v.colour = fullyExpanded ? "black" : _this.red;
+                v.color = fullyExpanded ? "black" : _this.red;
             });
             // create a link in the view for each edge in the model
             Object.keys(this.modelgraph.edges).forEach(function (e) {
@@ -170,11 +173,11 @@ define(["require", "exports", "jquery", "d3", "kanjiNavBase", "kanjiNav"], funct
                 // UF: not sure about these:
                 if (_this.inView(u) && !_this.inView(v)) {
                     console.log("inView(u) && !inView(v)");
-                    u.colour = _this.red;
+                    u.color = _this.red;
                 }
                 if (!_this.inView(u) && _this.inView(v)) {
                     console.log("!inView(u) && inView(v)");
-                    v.colour = _this.red;
+                    v.color = _this.red;
                 }
             });
             this.update();
@@ -242,15 +245,15 @@ define(["require", "exports", "jquery", "d3", "kanjiNavBase", "kanjiNav"], funct
             // update the fill of each of the elements, based on their state
             link
                 .attr("fill", function (d) {
-                if (d.source.colour === _this.red && d.target.colour === _this.red) {
+                if (d.source.color === _this.red && d.target.color === _this.red) {
                     // UF never happens?
                     return _this.red;
                 }
-                if (d.source.colour !== _this.red && d.target.colour !== _this.red) {
+                if (d.source.color !== _this.red && d.target.color !== _this.red) {
                     // the link between "resolved" nodes
                     return "darkgray";
                 }
-                return d.source.colour === _this.red ? "url(#ReverseEdgeGradient)" : "url(#EdgeGradient)";
+                return d.source.color === _this.red ? "url(#ReverseEdgeGradient)" : "url(#EdgeGradient)";
             });
             return link;
         };
@@ -333,7 +336,7 @@ define(["require", "exports", "jquery", "d3", "kanjiNavBase", "kanjiNav"], funct
                     _this.dblclick(d);
                 }
             });
-            // the rubi
+            // the ruby
             nodeEnter.append("text")
                 .attr("dy", "-1px")
                 .text(function (n) { return n.hiragana ? n.hiragana : ''; });
@@ -344,7 +347,7 @@ define(["require", "exports", "jquery", "d3", "kanjiNavBase", "kanjiNav"], funct
             // the tooltip
             nodeEnter.append("title")
                 .text(function (d) { return d.english && 0 in d.english ? d.english[0] : '?'; });
-            node.style("fill", function (n) { return n.colour; });
+            node.style("fill", function (n) { return n.color; });
             return node;
         };
         // animates the mouse-over hint
@@ -428,11 +431,11 @@ define(["require", "exports", "jquery", "d3", "kanjiNavBase", "kanjiNav"], funct
         // handle the mouse-dblclick, tap
         Frontend.prototype.dblclick = function (node) {
             var _this = this;
-            if (node.colour !== this.red) {
+            if (node.color !== this.red) {
                 // collapse the node
                 this.collapseNode(node);
                 // paint it red
-                node.colour = this.red;
+                node.color = this.red;
                 return;
             }
             else {
