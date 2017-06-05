@@ -1,16 +1,17 @@
-import * as $ from 'jquery'
+/// <reference path="../node_modules/@types/jquery/index.d.ts" />
+/// <reference path="knApi.ts" />
 
-import { ApiNode, JLPTDictionary, NodeType } from './kanjiNavBase'
-
-class ServerDictionary implements JLPTDictionary
+class ServerDictionary implements KNApi.JapaneseDictionary
 {
-    lookup(type: NodeType, id: string, jlptFilter: string): JQueryPromise<any> {
-
+    lookupWord(id: string): JQueryPromise<KNApi.DbWord> {
         // http://localhost:3000/api/v1/word/食品
+        return $.get("/api/v1/word/" + id);
+    }
+    
+    lookupKanji(id: string): JQueryPromise<KNApi.DbKanji> {
         // http://localhost:3000/api/v1/kanji/品
-        var query = "/api/v1/" + type.type + "/" + id + (jlptFilter ? '?JLPT=' + jlptFilter : '');
-        return $.get(query);
+        return $.get("/api/v1/kanji/" + id);
     }
 }
 
-export let Dictionary: JLPTDictionary = new ServerDictionary();
+export let Dictionary: KNApi.JapaneseDictionary = new ServerDictionary();

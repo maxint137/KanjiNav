@@ -1,6 +1,7 @@
-/// <reference path="../node_modules/@types/webcola/index.d.ts" />.
-/// <reference path="../node_modules/@types/js-cookie/index.d.ts" />.
-/// <reference path="../node_modules/@types/jquery/index.d.ts" />.
+/// <reference path="../node_modules/@types/webcola/index.d.ts" />
+/// <reference path="../node_modules/@types/js-cookie/index.d.ts" />
+/// <reference path="../node_modules/@types/jquery/index.d.ts" />
+/// <reference path="knApi.ts" />
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -11,20 +12,79 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (require, exports, d3, kanjiNavBase_1, kanjiNav_1) {
+define(["require", "exports", "d3"], function (require, exports, d3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    var ViewNodeBase = (function () {
+        function ViewNodeBase(mn) {
+            this.mn = mn;
+        }
+        Object.defineProperty(ViewNodeBase.prototype, "text", {
+            get: function () { return this.mn.text; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewNodeBase.prototype, "type", {
+            get: function () { return this.mn.type; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewNodeBase.prototype, "id", {
+            get: function () { return this.mn.id; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewNodeBase.prototype, "title", {
+            get: function () { return this.mn.title; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewNodeBase.prototype, "subscript", {
+            get: function () { return this.mn.subscript; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewNodeBase.prototype, "superscript", {
+            get: function () { return this.mn.superscript; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewNodeBase.prototype, "hint", {
+            get: function () { return this.mn.hint; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewNodeBase.prototype, "JLPT", {
+            get: function () { return this.mn.JLPT; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewNodeBase.prototype, "isKanji", {
+            get: function () { return this.mn.isKanji; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewNodeBase.prototype, "hood", {
+            get: function () { return this.mn.hood; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ViewNodeBase.prototype, "degree", {
+            get: function () { return this.mn.degree; },
+            enumerable: true,
+            configurable: true
+        });
+        return ViewNodeBase;
+    }());
     var ViewNode = (function (_super) {
         __extends(ViewNode, _super);
-        function ViewNode(kn) {
-            var _this = _super.call(this, kn.type, kn.id) || this;
-            _this.copyData(kn);
-            _this.cast = kn.cast;
+        function ViewNode(mn) {
+            var _this = _super.call(this, mn) || this;
             _this.hidden = false;
             return _this;
         }
         return ViewNode;
-    }(kanjiNav_1.Node));
+    }(ViewNodeBase));
     var ViewLink = (function () {
         function ViewLink() {
         }
@@ -36,21 +96,26 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
         return ViewGraph;
     }());
     var Frontend = (function () {
-        function Frontend(modelgraph, d3StyleLayoutAdaptor, cookies) {
-            this.modelgraph = modelgraph; // new Graph(getParameterByName('JLPT'));
+        function Frontend(modelGraph, webColaLibrary, cookies) {
+            this.modelGraph = modelGraph;
+            this.webColaLibrary = webColaLibrary;
             this.cookies = cookies;
             this.calcMySize();
             this.red = "rgb(125, 0, 0)";
-            this.viewgraph = {
+            this.viewGraph = {
                 nodes: [],
                 links: []
             };
-            (this.d3cola = d3StyleLayoutAdaptor)
+            this.viewGraphSaved = {
+                nodes: [],
+                links: []
+            };
+            (this.layout = webColaLibrary.d3adaptor(d3))
                 .linkDistance(80)
                 .avoidOverlaps(true)
                 .size([this.width, this.height]);
             // alternatively just use the D3 built-in force layout
-            // var d3cola = d3.layout.force()
+            // var layout = d3.layout.force()
             //     .charge(-520)
             //     .linkDistance(80)
             //     .size([width, height]);
@@ -101,8 +166,16 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
                     .attr("stop-opacity", opacity2);
             }
             addGradient("SpikeGradient", "red", 1, "red", 0);
-            addGradient("EdgeGradient", this.red, 1, "darkgray", 1);
-            addGradient("ReverseEdgeGradient", "darkgray", 1, this.red, 1);
+            addGradient("EdgeGradient", this.red, 1, "darkGray", 1);
+            addGradient("ReverseEdgeGradient", "darkGray", 1, this.red, 1);
+        };
+        Frontend.prototype.saveGraph = function () {
+            this.viewGraphSaved.nodes = this.viewGraph.nodes;
+            this.refreshViewGraph();
+        };
+        Frontend.prototype.loadGraph = function () {
+            this.viewGraph.nodes = this.viewGraphSaved.nodes;
+            this.refreshViewGraph();
         };
         // adds a word to graph
         Frontend.prototype.main = function (word) {
@@ -110,59 +183,71 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
             // Note: http://piotrwalat.net/arrow-function-expressions-in-typescript/
             // Standard functions will dynamically bind this depending on execution context (just like in JavaScript)
             // Arrow functions on the other hand will preserve this of enclosing context. 
-            var d = this.modelgraph.getNode(word.length == 1 ? kanjiNavBase_1.NodeType.Char : kanjiNavBase_1.NodeType.Word, word, function (v) { return _this.addViewNode(new ViewNode(v)); });
-            $.when(d).then(function (startNode) { _this.refocus(startNode); });
+            //var d = this.modelGraph.loadNode(word.length == 1 ? KNModel_NodeType.Char : KNModel_NodeType.Word, word, v => this.addViewNode(v));
+            var d = this.modelGraph.loadNode(word.length == 1 ? "Kanji" : "Word", word, function (v) { return _this.addViewNode(v); });
+            $.when(d).then(function (loadedNode) { _this.refocus(loadedNode); });
         };
-        // adds the node to the viewgraph, picks the initial position based on the startpos and assignes viewgraphid
+        // adds the node to the viewGraph, picks the initial position based on the startPos and assigns viewGraphId
         // used to schedule the images rendering
-        Frontend.prototype.addViewNode = function (v, startpos) {
-            v.viewgraphid = this.viewgraph.nodes.length;
-            if (typeof startpos !== 'undefined') {
-                v.x = startpos.x;
-                v.y = startpos.y;
+        Frontend.prototype.addViewNode = function (mn, startPos) {
+            var vn = new ViewNode(mn);
+            vn.viewGraphId = this.viewGraph.nodes.length;
+            if (typeof startPos !== 'undefined') {
+                vn.x = startPos.x;
+                vn.y = startPos.y;
             }
-            this.viewgraph.nodes.push(v);
-        };
-        // setup the transiation based on the move/zoom, as it comes from 
-        Frontend.prototype.redraw = function (transition) {
-            // if mouse down then we are dragging not panning
-            if (this.nodeMouseDown) {
-                //debugger;
-                return;
-            }
-            // read the current zoom translation vector and the current zoom scale
-            (transition ? this.vis.transition() : this.vis)
-                .attr("transform", "translate(" + this.zoom.translate() + ") scale(" + this.zoom.scale() + ")");
+            this.viewGraph.nodes.push(vn);
         };
         // expands the selected node, renders the updated graph
-        Frontend.prototype.refocus = function (focus) {
+        Frontend.prototype.refocus = function (node) {
             var _this = this;
-            var neighboursExpanded = this.modelgraph.expandNeighbours(focus, function (v) {
-                if (!_this.inView(_this.findNode(v)))
-                    _this.addViewNode(new ViewNode(v), focus);
+            // find the corresponding view-node:
+            //let focus: ViewNode = this.viewGraph.nodes.filter((vn: ViewNode) => vn.id == node.id)[0];
+            var focus = this.viewGraph.nodes.filter(function (vn) { return vn.mn.id == node.id; })[0];
+            var neighborsExpanded = this.modelGraph.expandNeighbors(focus.mn, function (mn) {
+                if (!_this.inView(_this.findNode(mn))) {
+                    //this.addViewNode(new ViewNode(mn), focus);
+                    _this.addViewNode(mn, focus);
+                }
             });
-            // not sure why do we want to have it here in addition to the lines just below...
+            // not sure why do we want to have it here in addition to the line just below...
             this.refreshViewGraph();
-            $.when(neighboursExpanded).then(function () { return _this.refreshViewGraph(); });
+            $.when(neighborsExpanded).then(function (hood) { return _this.addViewLinks(node, hood); });
+            //$.when(neighborsExpanded).then((hood) => this.refreshViewGraph(node, hood));
         };
-        // sync the viewgraph with the modelgraph
+        Frontend.prototype.addViewLinks = function (node, hood) {
+            var _this = this;
+            var u = this.findNode(node);
+            hood.forEach(function (h) {
+                var newLink = { source: u, target: _this.findNode(h) };
+                // make sure it is a new one
+                var oldLinks1 = _this.viewGraph.links.filter(function (l) { return l.source.id == newLink.source.id && l.target.id == newLink.target.id; });
+                var oldLinks2 = _this.viewGraph.links.filter(function (l) { return l.target.id == newLink.source.id && l.source.id == newLink.target.id; });
+                if (0 === oldLinks1.length && 0 === oldLinks2.length) {
+                    _this.viewGraph.links.push(newLink);
+                }
+            });
+            this.refreshViewGraph();
+        };
+        // sync the viewGraph with the modelGraph
         Frontend.prototype.refreshViewGraph = function () {
             var _this = this;
-            // drop the links from the viewgraph first
-            this.viewgraph.links = [];
-            // set the color of each node in the viewgraph, based on the fully-expanded status
+            // set the color of each node in the viewGraph, based on the fully-expanded status
             this.filteredNodes()
                 .forEach(function (v) {
-                var fullyExpanded = _this.modelgraph.fullyExpanded(v);
-                v.color = fullyExpanded ? "black" : _this.red;
+                v.color = _this.modelGraph.isFullyExpanded(v.mn) ? "black" : _this.red;
             });
+            // this.update();
+            // return;
+            // drop the links from the viewGraph first
+            this.viewGraph.links = [];
             // create a link in the view for each edge in the model
-            Object.keys(this.modelgraph.edges).forEach(function (e) {
-                var l = _this.modelgraph.edges[e];
-                var u = _this.findNode(_this.modelgraph.nodes[l.source]);
-                var v = _this.findNode(_this.modelgraph.nodes[l.target]);
+            Object.keys(this.modelGraph.edges).forEach(function (e) {
+                var l = _this.modelGraph.edges[e];
+                var u = _this.findNode(_this.modelGraph.nodes[l.source]);
+                var v = _this.findNode(_this.modelGraph.nodes[l.target]);
                 if (_this.inView(u) && _this.inView(v)) {
-                    _this.viewgraph.links.push({
+                    _this.viewGraph.links.push({
                         source: u,
                         target: v
                     });
@@ -180,12 +265,12 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
             this.update();
         };
         Frontend.prototype.nodeIsNotFilteredOut = function (n) {
-            return n.isKanji()
-                || (this.isSelectedJlpt(n.JLPT) && false == n.hidden);
+            return n.mn.isKanji
+                || (false == n.hidden && this.isSelectedJlpt(n.mn.JLPT));
         };
         Frontend.prototype.filteredNodes = function () {
             var _this = this;
-            return this.viewgraph.nodes.filter(function (n) { return _this.nodeIsNotFilteredOut(n); });
+            return this.viewGraph.nodes.filter(function (n) { return _this.nodeIsNotFilteredOut(n); });
         };
         Frontend.prototype.isSelectedJlpt = function (level) {
             return '' == this.jlpts || 0 <= this.jlpts.indexOf(level.toString());
@@ -193,27 +278,27 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
         Frontend.prototype.filteredLinks = function () {
             var _this = this;
             // only the links which connect to visible nodes
-            return this.viewgraph.links.filter(function (l) {
+            return this.viewGraph.links.filter(function (l) {
                 return _this.nodeIsNotFilteredOut(l.source)
                     && _this.nodeIsNotFilteredOut(l.target);
             });
         };
-        // pushes the viewgraph data into the adapter and starts rendering process
+        // pushes the viewGraph data into the adapter and starts rendering process
         Frontend.prototype.update = function () {
-            this.d3cola
+            this.layout
                 .nodes(this.filteredNodes())
                 .links(this.filteredLinks())
                 .start();
             var node = this.updateNodes();
             var link = this.updateLinks();
-            this.d3cola.on("tick", function () {
-                // setting the transform attribute to the array will result in syncronous calls to the callback provided for each node/link
+            this.layout.on("tick", function () {
+                // setting the transform attribute to the array will result in synchronous calls to the callback provided for each node/link
                 // so that these will move to the designated positions
                 node.attr("transform", function (d) {
-                    if (!d.id || '' == d.id)
+                    if (!d.mn.text || '' == d.mn.text)
                         return "translate(" + (d.x - Frontend.nodeWidth / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
                     else
-                        return "translate(" + (d.x - 1.5 * d.id.length * Frontend.fontSize / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
+                        return "translate(" + (d.x - 1.5 * d.mn.text.length * Frontend.fontSize / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
                 });
                 link.attr("transform", function (d) {
                     var dx = d.source.x - d.target.x, dy = d.source.y - d.target.y;
@@ -229,7 +314,7 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
         // re-populates edgesLayer with links
         Frontend.prototype.updateLinks = function () {
             var _this = this;
-            // use the viewgrap's links to populate the edges-layer with objects based on the data:
+            // use the viewGraph's links to populate the edges-layer with objects based on the data:
             var link = this.edgesLayer.selectAll(".link")
                 .data(this.filteredLinks());
             // for every new entry insert a rect of class .link and initial height and position
@@ -248,7 +333,7 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
                 }
                 if (d.source.color !== _this.red && d.target.color !== _this.red) {
                     // the link between "resolved" nodes
-                    return "darkgray";
+                    return "darkGray";
                 }
                 return d.source.color === _this.red ? "url(#ReverseEdgeGradient)" : "url(#EdgeGradient)";
             });
@@ -259,11 +344,11 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
             var _this = this;
             var node = this.nodesLayer.selectAll(".node")
                 .data(this.filteredNodes(), function (d) {
-                return d.viewgraphid;
+                return d.viewGraphId;
             });
             // erase the nodes which aren't here anymore
             node.exit().remove();
-            // remember the last place/time the mouse/touch event has occured, so we can distinguish between a move and a click/tap
+            // remember the last place/time the mouse/touch event has occurred, so we can distinguish between a move and a click/tap
             var mouseDownEvent;
             var mouseUpEvent;
             var touchstartEvent;
@@ -271,7 +356,7 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
             // insert the parent group - it  tracks the user interaction
             var nodeEnter = node.enter().append("g")
                 .attr("id", function (d) {
-                return d.name();
+                return d.mn.id;
             })
                 .attr("class", "node")
                 .on("mousedown", function () {
@@ -290,14 +375,13 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
                 event.preventDefault();
             })
                 .on("mouseenter", function (d) {
-                _this.hintNeighbours(d);
-            }) // on mouse over nodes we show "spikes" indicating there are hidden neighbours
+                _this.hintNeighbors(d);
+            }) // on mouse over nodes we show "spikes" indicating there are hidden neighbors
                 .on("mouseleave", function (d) {
-                _this.unhintNeighbours(d);
+                _this.unHintNeighbors(d);
             })
                 .on("wheel", function (d) {
                 // UF: need to send that event to the canvas, but how?!
-                //debugger;
             })
                 .on("touchend", function (d) {
                 if (doubleTap) {
@@ -305,28 +389,26 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
                     _this.dblclick(d);
                 }
             })
-                .call(this.d3cola.drag);
-            // the background for the word/kangi
+                .call(this.layout.drag);
+            // the background for the word/kanji
             var wordCard = nodeEnter
                 .append("g")
-                .attr('style', function (n) { return "fill: " + _this.jlpt2color(n.JLPT); })
-                .attr('transform', function (n) { return n.isKanji() ? 'translate(-5, -20)' : 'translate(-10, -20)'; })
+                .attr('style', function (n) { return "fill: " + _this.jlpt2color(n.mn.JLPT); })
+                .attr('transform', function (n) { return n.mn.isKanji ? 'translate(-5, -20)' : 'translate(-10, -20)'; })
                 .append("use")
-                .attr("xlink:href", function (n) { return n.isKanji() ? '#kanjiBG' : '#g12' + n.id.length; });
+                .attr("xlink:href", function (n) { return n.mn.isKanji ? '#kanjiBG' : '#g12' + n.mn.text.length; });
             wordCard
                 .on("click", function (n) { _this.hideNode(n); });
             // the spikes
             nodeEnter.append("g")
-                .attr("id", function (n) {
-                return n.name() + "_spikes";
-            })
+                .attr("id", function (n) { return n.mn.id + "_spikes"; })
                 .attr("transform", "translate(0,3)");
             // the word itself
             var text = nodeEnter.append("text")
                 .attr('class', 'text')
-                .attr('dx', function (n) { return n.isKanji() ? '0.2em' : '0.0em'; })
-                .attr('dy', function (n) { return n.isKanji() ? '-0.0em' : '0.0em'; })
-                .text(function (d) { return d.id; });
+                .attr('dx', function (n) { return n.mn.isKanji ? '0.2em' : '0.0em'; })
+                .attr('dy', function (n) { return n.mn.isKanji ? '-0.0em' : '0.0em'; })
+                .text(function (n) { return n.mn.text; });
             text.on("dblclick", function (d) {
                 if (Math.abs(mouseDownEvent.screenX - mouseUpEvent.screenX) +
                     Math.abs(mouseDownEvent.screenY - mouseUpEvent.screenY) < 2) {
@@ -336,30 +418,30 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
             // the ruby
             nodeEnter.append("text")
                 .attr("dy", "-1px")
-                .text(function (n) { return n.hiragana ? n.hiragana : ''; });
+                .text(function (n) { return n.mn.superscript; });
             // the english translation
             nodeEnter.append("text")
                 .attr("dy", "3.0em")
-                .text(function (n) { return n.isKanji() ? '' : (n.english && 0 in n.english ? n.english[0] : '?'); });
+                .text(function (n) { return n.mn.subscript; });
             // the tooltip
             nodeEnter.append("title")
-                .text(function (d) { return d.english && 0 in d.english ? d.english[0] : '?'; });
+                .text(function (n) { return n.mn.hint; });
             node.style("fill", function (n) { return n.color; });
             return node;
         };
         // animates the mouse-over hint
-        Frontend.prototype.hintNeighbours = function (v) {
+        Frontend.prototype.hintNeighbors = function (v) {
             var _this = this;
-            if (!v.cast)
+            if (!v.mn.hood)
                 return;
-            var hiddenEdges = v.cast.length + 1 - v.degree;
+            var hiddenEdges = v.mn.hood.length + 1 - v.mn.degree;
             var r = 2 * Math.PI / hiddenEdges;
             for (var i = 0; i < hiddenEdges; ++i) {
                 var w = Frontend.nodeWidth - 6, h = Frontend.nodeHeight - 6, x = w / 2 + 25 * Math.cos(r * i), y = h / 2 + 30 * Math.sin(r * i);
-                var rect = new cola.vpsc.Rectangle(0, w, 0, h);
+                var rect = new this.webColaLibrary.Rectangle(0, w, 0, h);
                 var vi = rect.rayIntersection(x, y);
-                var dview = d3.select("#" + v.name() + "_spikes");
-                dview.append("rect")
+                var dataView = d3.select("#" + v.mn.id + "_spikes");
+                dataView.append("rect")
                     .attr("class", "spike")
                     .attr("rx", 1).attr("ry", 1)
                     .attr("x", 0).attr("y", 0)
@@ -369,13 +451,13 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
             }
         };
         // stopping the hint
-        Frontend.prototype.unhintNeighbours = function (v) {
-            var dview = d3.select("#" + v.name() + "_spikes");
-            dview.selectAll(".spike").remove();
+        Frontend.prototype.unHintNeighbors = function (v) {
+            var dataView = d3.select("#" + v.mn.id + "_spikes");
+            dataView.selectAll(".spike").remove();
         };
         Frontend.prototype.hideNode = function (n) {
             // don't hide kanji
-            if (n.isKanji()) {
+            if (n.mn.isKanji) {
                 return;
             }
             n.hidden = true;
@@ -385,45 +467,45 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
             if (0 == hiddenWordsCombo.find('option[value="' + n.id + '"]').length) {
                 hiddenWordsCombo.append($('<option>', {
                     value: n.id,
-                    text: n.id
+                    text: n.mn.text
                 }));
             }
         };
         Frontend.prototype.findNode = function (n) {
-            var fen = this.viewgraph.nodes.filter(function (fen) { return fen.id === n.id; });
+            var fen = this.viewGraph.nodes.filter(function (fen) { return fen.id === n.id; });
             return fen[0];
         };
-        // was the viewnode already added?
+        // was the viewNode already added?
         Frontend.prototype.inView = function (v) {
             return typeof v !== 'undefined'
-                && typeof v.viewgraphid !== 'undefined';
+                && typeof v.viewGraphId !== 'undefined';
         };
         Frontend.prototype.collapseNode = function (node) {
             var _this = this;
             // for each linked node
-            node.cast.forEach(function (c) {
+            node.mn.hood.forEach(function (c) {
                 // see how many links it has at the moment:
-                var neighbour = _this.filteredNodes().filter(function (nn) { return nn.id == c.word; })[0];
-                if (neighbour) {
-                    var links = _this.viewgraph.links.filter(function (l) { return l.source == neighbour || l.target == neighbour; });
+                var neighbor = _this.filteredNodes().filter(function (nn) { return nn.id == c.id; })[0];
+                if (neighbor) {
+                    var links = _this.viewGraph.links.filter(function (l) { return l.source == neighbor || l.target == neighbor; });
                     if (links.length == 1) {
                         // this node is only connected with one link - hide it
-                        _this.hideNode(neighbour);
+                        _this.hideNode(neighbor);
                     }
                 }
             });
             this.update();
         };
-        Frontend.prototype.uncollapseNode = function (node) {
+        Frontend.prototype.unCollapseNode = function (node) {
             var _this = this;
-            this.viewgraph.links
-                .filter(function (l) { return l.target == node; })
+            this.viewGraph.links
+                .filter(function (l) { return l.target.mn == node; })
                 .map(function (l) { return l.source; })
-                .forEach(function (n) { return _this.unhideWord(n.id); });
-            this.viewgraph.links
-                .filter(function (l) { return l.source == node; })
+                .forEach(function (n) { return _this.unHideWord(n.id); });
+            this.viewGraph.links
+                .filter(function (l) { return l.source.mn == node; })
                 .map(function (l) { return l.target; })
-                .forEach(function (n) { return _this.unhideWord(n.id); });
+                .forEach(function (n) { return _this.unHideWord(n.id); });
         };
         // handle the mouse-dblclick, tap
         Frontend.prototype.dblclick = function (node) {
@@ -436,9 +518,9 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
                 return;
             }
             else {
-                // uncollapse the node
-                this.uncollapseNode(node);
-                var d = this.modelgraph.getNode(node.type, node.id);
+                // un-collapse the node
+                this.unCollapseNode(node.mn);
+                var d = this.modelGraph.loadNode(node.mn.type, node.mn.text);
                 $.when(d).then(function (focus) { _this.refocus(focus); });
             }
         };
@@ -458,12 +540,12 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
             };
         };
         Frontend.prototype.clearAll = function () {
-            this.viewgraph = {
+            this.viewGraph = {
                 nodes: [],
                 links: []
             };
             this.update();
-            this.modelgraph.reset();
+            this.modelGraph.reset();
         };
         Frontend.prototype.navigateToWord = function (word) {
             this.updateWordInHistory(word);
@@ -482,6 +564,17 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
         Frontend.prototype.fullScreenCancel = function () {
             this.outer.attr("width", this.width).attr("height", this.height);
             this.zoomToFit();
+        };
+        // setup the translation based on the move/zoom, as it comes from 
+        Frontend.prototype.redraw = function (transition) {
+            // if mouse down then we are dragging not panning
+            if (this.nodeMouseDown) {
+                //debugger;
+                return;
+            }
+            // read the current zoom translation vector and the current zoom scale
+            (transition ? this.vis.transition() : this.vis)
+                .attr("transform", "translate(" + this.zoom.translate() + ") scale(" + this.zoom.scale() + ")");
         };
         Frontend.prototype.zoomToFit = function () {
             var b = this.graphBounds();
@@ -532,7 +625,7 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
             });
         };
         Frontend.prototype.removeWordFromHistory = function (selectBoxId, word) {
-            // delete it from the dropdown
+            // delete it from the drop-down
             $('#' + selectBoxId + " option[value='" + word + "']").remove();
             // and the history
             this.updateWordInHistory(word, false);
@@ -590,9 +683,9 @@ define(["require", "exports", "d3", "kanjiNavBase", "kanjiNav"], function (requi
                     return "#cccccc";
             }
         };
-        Frontend.prototype.unhideWord = function (word) {
+        Frontend.prototype.unHideWord = function (word) {
             $("#hiddenWordsCombo option[value='" + word + "']").remove();
-            this.viewgraph.nodes.filter(function (n) { return n.id == word; })[0].hidden = false;
+            this.viewGraph.nodes.filter(function (n) { return n.id == word; })[0].hidden = false;
             this.update();
         };
         return Frontend;

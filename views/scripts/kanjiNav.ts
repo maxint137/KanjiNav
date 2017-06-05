@@ -1,6 +1,6 @@
 import * as $ from 'jquery'
 
-import {JLPTDictionary, NodeType, ApiNode} from 'kanjiNavBase'
+import {JLPTDictionary, NodeType, ApiNode} from './kanjiNavBase'
 
 module kanjiNav {
     interface Map<T> {
@@ -82,8 +82,8 @@ module kanjiNav {
             }
 
             let node: Node = this.addNode(type, id);
-            if (parent && 0 != parent.cast.filter(c => c[type.id] == id).length) {
-                node.copyData(parent.cast.filter(c => c[type.id] == id)[0]);
+            if (parent && 0 != parent.cast.filter((c: any) => c[type.id] == id).length) {
+                node.copyData(parent.cast.filter((c: any) => c[type.id] == id)[0]);
             }
 
             var cast = this.db.lookup(type, id, this.jlptFilter);
@@ -92,7 +92,7 @@ module kanjiNav {
 
                 f === undefined || f(node);
 
-                (node.cast = c[type.castSel]).forEach(v => {
+                (node.cast = c[type.castSel]).forEach((v: any) => {
 
                     // UF: the server will make sure not to return null for unregistered kanji
                     if (null == v) {
@@ -101,9 +101,9 @@ module kanjiNav {
 
                     try {
 
-                        var neighbourname: string = type.next() + v[type.next().id];
-                        if (neighbourname in this.nodes) {
-                            this.addEdge(node, this.nodes[neighbourname]);
+                        var neighborName: string = type.next() + v[type.next().id];
+                        if (neighborName in this.nodes) {
+                            this.addEdge(node, this.nodes[neighborName]);
                         }
                     } catch (error) {
                         debugger;
@@ -115,7 +115,7 @@ module kanjiNav {
             return d.promise();
         }
 
-        expandNeighbours(node: Node, f: (v: Node) => void): JQueryPromise<Node[]> {
+        expandNeighbors(node: Node, f: (v: Node) => void): JQueryPromise<Node[]> {
 
             if (node.cast.filter(c => !c).length) {
                 debugger;
@@ -125,7 +125,7 @@ module kanjiNav {
             // fetch the nodes listed in the cast, bridge edges to these, and call back the client (so it can addViewNode)
             var dn = node.cast
                 //.filter(c => null != c)
-                .map(c => this.getNode(node.type.next(), c[node.type.next().id], v => {
+                .map((c: any) => this.getNode(node.type.next(), c[node.type.next().id], v => {
                     //v.label = c[v.type.label];
                     this.addEdge(node, v);
                     f(v);
@@ -134,8 +134,8 @@ module kanjiNav {
             var d = $.Deferred<Node[]>();
             $.when.apply($, dn)
                 .then(function () {
-                    var neighbours = Array.prototype.slice.call(arguments);
-                    d.resolve(neighbours);
+                    var neighbors = Array.prototype.slice.call(arguments);
+                    d.resolve(neighbors);
                 });
             return d.promise();
         }
@@ -148,7 +148,7 @@ module kanjiNav {
 
             return node.cast && node.cast
                 .filter(v => null != v)
-                .every(v => (node.type.next() + v[node.type.next().id]) in this.nodes);
+                .every((v: any) => (node.type.next() + v[node.type.next().id]) in this.nodes);
         }
 
         addNode(type: NodeType, id: string): Node {
@@ -158,15 +158,15 @@ module kanjiNav {
 
         addEdge(u: Node, v: Node) {
             var edge = Edge.makeEdge(u.type, u.name(), v.name());
-            var ename = edge.toString();
-            if (!(ename in this.edges)) {
-                this.edges[ename] = edge;
+            var edgeName = edge.toString();
+            if (!(edgeName in this.edges)) {
+                this.edges[edgeName] = edge;
             }
             ++u.degree, ++v.degree;
         }
     }
 }
 // https://www.typescriptlang.org/docs/handbook/modules.html
-// otherwise requre.js will not find it...
+// otherwise require.js will not find it...
 export = kanjiNav;
 

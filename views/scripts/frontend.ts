@@ -1,37 +1,53 @@
-/// <reference path="../node_modules/@types/webcola/index.d.ts" />.
-/// <reference path="../node_modules/@types/js-cookie/index.d.ts" />.
-/// <reference path="../node_modules/@types/jquery/index.d.ts" />.
-
-
+/// <reference path="../node_modules/@types/webcola/index.d.ts" />
+/// <reference path="../node_modules/@types/js-cookie/index.d.ts" />
+/// <reference path="../node_modules/@types/jquery/index.d.ts" />
+/// <reference path="knApi.ts" />
 
 // UF: can't use the reference: 'd3' refers to a UMD global, but the current file is a module. Consider adding an import instead.
 // see http://garrettn.github.io/blog/2014/02/19/write-modular-javascript-that-works-anywhere-with-umd/
 /// <reference path="../node_modules/@types/d3/index.d.ts" />.
 import * as d3 from 'd3'
 
-import { JLPTDictionary, NodeType, ApiNode } from 'kanjiNavBase'
-import { Graph, Node } from 'kanjiNav'
+//import { D3StyleLayoutAdaptor as ColaD3StyleLayoutAdaptor } from '../node_modules/webcola/WebCola/src/d3v3adaptor'
 
-class ViewNode extends Node implements cola.Node {
-    constructor(kn: Node) {
-        super(kn.type, kn.id);
-        this.copyData(kn);
+import { INode as KNModel_INode, Graph as KNModel_Graph, NodeTypes as KNModel_NodeTypes } from './knModel'
 
-        this.cast = kn.cast;
+class ViewNodeBase implements KNModel_INode{
 
-        this.hidden = false;
+    constructor(public mn: KNModel_INode) {
     }
 
+    get text(): string{ return this.mn.text;}
+    get type(): KNModel_NodeTypes{ return this.mn.type;}
+    get id(): string{ return this.mn.id;}
+    get title(): string[]{ return this.mn.title;}
+    get subscript(): string[]{ return this.mn.subscript;}
+    get superscript(): string[]{ return this.mn.superscript;}
+    get hint(): string[]{ return this.mn.hint;}
+    get JLPT(): KNApi.JlptLevel{ return this.mn.JLPT;}
+    get isKanji(): boolean{ return this.mn.isKanji;}
+    get hood(): KNModel_INode[]{ return this.mn.hood;}
+    get degree(): number { return this.mn.degree; }
+}
+
+class ViewNode extends ViewNodeBase implements  cola.Node {
+    
+    constructor(mn: KNModel_INode) {
+        super(mn);
+        this.hidden = false;
+    }
     // cola.Node's implementation
+    index?: number;
     x: number;
     y: number;
     width?: number;
-    height?: any;
-    number: any;
+    height?: number;
+    fixed: number;
+    number: number;
 
     // app specific:
     color: string;
-    viewgraphid: number;
+    viewGraphId: number;
     hidden: boolean;
 }
 
@@ -61,19 +77,14 @@ export class Frontend {
 
     red: string;
 
-    // cookie monster
-    cookies: Cookies.CookiesStatic;
-
     // the engine
-    d3cola: cola.D3StyleLayoutAdaptor;
-    // zooming behaviour
+    layout: any; //ColaD3StyleLayoutAdaptor;
+    // zooming behavior
     zoom: any;
 
-    // the object that communicates with the server to bring all the data
-    modelgraph: Graph;
-
-    // WebCola will render that graph, and we'll try to keep it updated with the modelgraph
-    viewgraph: ViewGraph;
+    // WebCola will render that graph, and we'll try to keep it updated with the modelGraph
+    viewGraph: ViewGraph;
+    viewGraphSaved: ViewGraph;
 
     // the SVG to play with
     outer: d3.Selection<any>;
@@ -89,21 +100,23 @@ export class Frontend {
     // ??
     nodeMouseDown: boolean;
 
-    constructor(modelgraph: Graph, d3StyleLayoutAdaptor: cola.D3StyleLayoutAdaptor, cookies: Cookies.CookiesStatic) {
-
-        this.modelgraph = modelgraph; // new Graph(getParameterByName('JLPT'));
-        this.cookies = cookies;
+    constructor(public modelGraph: KNModel_Graph, public webColaLibrary: any, public cookies: Cookies.CookiesStatic) {
 
         this.calcMySize();
 
         this.red = "rgb(125, 0, 0)";
 
-        this.viewgraph = {
+        this.viewGraph = {
             nodes: [],
             links: []
         };
 
-        (this.d3cola = d3StyleLayoutAdaptor)
+        this.viewGraphSaved = {
+            nodes: [],
+            links: []
+        };
+
+        (this.layout = webColaLibrary.d3adaptor(d3))
             .linkDistance(80)
             .avoidOverlaps(true)
             //  computes ideal lengths on each link to make extra space around high-degree nodes, using 5 as the basic length.
@@ -112,7 +125,7 @@ export class Frontend {
             .size([this.width, this.height]);
 
         // alternatively just use the D3 built-in force layout
-        // var d3cola = d3.layout.force()
+        // var layout = d3.layout.force()
         //     .charge(-520)
         //     .linkDistance(80)
         //     .size([width, height]);
@@ -149,14 +162,13 @@ export class Frontend {
         this.vis = this.outer.append('g');
         this.edgesLayer = this.vis.append("g");
         this.nodesLayer = this.vis.append("g");
-
     }
 
     // define the gradients used down the road: SpikeGradient & (Reverse)EdgeGradient
     defineGradients() {
         let defs = this.outer.append("svg:defs");
 
-        function addGradient(id, color1, opacity1, color2, opacity2) {
+        function addGradient(id: string, color1: string, opacity1: number, color2: string, opacity2: number) {
             var gradient = defs.append("svg:linearGradient")
                 .attr("id", id)
                 .attr("x1", "0%")
@@ -177,8 +189,19 @@ export class Frontend {
         }
 
         addGradient("SpikeGradient", "red", 1, "red", 0);
-        addGradient("EdgeGradient", this.red, 1, "darkgray", 1);
-        addGradient("ReverseEdgeGradient", "darkgray", 1, this.red, 1);
+        addGradient("EdgeGradient", this.red, 1, "darkGray", 1);
+        addGradient("ReverseEdgeGradient", "darkGray", 1, this.red, 1);
+    }
+
+
+    saveGraph() {
+        this.viewGraphSaved.nodes = this.viewGraph.nodes;
+        this.refreshViewGraph();
+    }
+
+    loadGraph() {
+        this.viewGraph.nodes = this.viewGraphSaved.nodes;
+        this.refreshViewGraph();
     }
 
     // adds a word to graph
@@ -187,73 +210,92 @@ export class Frontend {
         // Note: http://piotrwalat.net/arrow-function-expressions-in-typescript/
         // Standard functions will dynamically bind this depending on execution context (just like in JavaScript)
         // Arrow functions on the other hand will preserve this of enclosing context. 
-        var d = this.modelgraph.getNode(word.length == 1 ? NodeType.Char : NodeType.Word, word, v => this.addViewNode(new ViewNode(v)));
+        //var d = this.modelGraph.loadNode(word.length == 1 ? KNModel_NodeType.Char : KNModel_NodeType.Word, word, v => this.addViewNode(v));
+        var d = this.modelGraph.loadNode(word.length == 1 ? "Kanji" : "Word", word, v => this.addViewNode(v));
 
-        $.when(d).then(startNode => { this.refocus(startNode) });
+        $.when(d).then(loadedNode => { this.refocus(loadedNode) });
     }
 
-    // adds the node to the viewgraph, picks the initial position based on the startpos and assignes viewgraphid
+    // adds the node to the viewGraph, picks the initial position based on the startPos and assigns viewGraphId
     // used to schedule the images rendering
-    addViewNode(v: ViewNode, startpos?: any) {
+    addViewNode(mn: KNModel_INode, startPos?: cola.Node) {
 
-        v.viewgraphid = this.viewgraph.nodes.length;
+        let vn: ViewNode = new ViewNode(mn);
 
-        if (typeof startpos !== 'undefined') {
-            v.x = startpos.x;
-            v.y = startpos.y;
+        vn.viewGraphId = this.viewGraph.nodes.length;
+
+        if (typeof startPos !== 'undefined') {
+            vn.x = startPos.x;
+            vn.y = startPos.y;
         }
 
-        this.viewgraph.nodes.push(v);
-    }
-
-    // setup the transiation based on the move/zoom, as it comes from 
-    redraw(transition?: boolean) {
-        // if mouse down then we are dragging not panning
-        if (this.nodeMouseDown) {
-            //debugger;
-            return;
-        }
-
-        // read the current zoom translation vector and the current zoom scale
-        (transition ? this.vis.transition() : this.vis)
-            .attr("transform", "translate(" + this.zoom.translate() + ") scale(" + this.zoom.scale() + ")");
+        this.viewGraph.nodes.push(vn);
     }
 
     // expands the selected node, renders the updated graph
-    refocus(focus: any) {
-        var neighboursExpanded = this.modelgraph.expandNeighbours(focus, v => {
-            if (!this.inView(this.findNode(v)))
-                this.addViewNode(new ViewNode(v), focus);
+    refocus(node: KNModel_INode) {
+
+        // find the corresponding view-node:
+        //let focus: ViewNode = this.viewGraph.nodes.filter((vn: ViewNode) => vn.id == node.id)[0];
+        let focus: ViewNode = this.viewGraph.nodes.filter((vn: ViewNode) => vn.mn.id == node.id)[0];
+
+        let neighborsExpanded: JQueryPromise<KNModel_INode[]> = this.modelGraph.expandNeighbors(focus.mn, (mn: KNModel_INode) => {
+            if (!this.inView(this.findNode(mn))) {
+                //this.addViewNode(new ViewNode(mn), focus);
+                this.addViewNode(mn, focus);
+            }
         });
 
-        // not sure why do we want to have it here in addition to the lines just below...
+        // not sure why do we want to have it here in addition to the line just below...
         this.refreshViewGraph();
 
-        $.when(neighboursExpanded).then(() => this.refreshViewGraph());
+        $.when(neighborsExpanded).then((hood) => this.addViewLinks(node, hood));
+        //$.when(neighborsExpanded).then((hood) => this.refreshViewGraph(node, hood));
     }
 
-    // sync the viewgraph with the modelgraph
-    refreshViewGraph() {
-        // drop the links from the viewgraph first
-        this.viewgraph.links = [];
+    addViewLinks(node: KNModel_INode, hood: KNModel_INode[]) {
+        let u: ViewNode = this.findNode(node);
 
-        // set the color of each node in the viewgraph, based on the fully-expanded status
+        hood.forEach(h => {
+            let newLink: ViewLink = { source: u, target: this.findNode(h) };
+
+            // make sure it is a new one
+            let oldLinks1: ViewLink[] = this.viewGraph.links.filter((l) => l.source.id == newLink.source.id && l.target.id == newLink.target.id);
+            let oldLinks2: ViewLink[] = this.viewGraph.links.filter((l) => l.target.id == newLink.source.id && l.source.id == newLink.target.id);
+
+            if (0 === oldLinks1.length && 0 === oldLinks2.length) {
+                this.viewGraph.links.push(newLink);
+            }
+        });
+
+        this.refreshViewGraph();
+    }
+
+
+    // sync the viewGraph with the modelGraph
+    refreshViewGraph() {
+        // set the color of each node in the viewGraph, based on the fully-expanded status
         this.filteredNodes()
             .forEach(v => {
-                var fullyExpanded = this.modelgraph.fullyExpanded(v);
-                v.color = fullyExpanded ? "black" : this.red;
+                v.color = this.modelGraph.isFullyExpanded(v.mn) ? "black" : this.red;
             });
 
-        // create a link in the view for each edge in the model
-        Object.keys(this.modelgraph.edges).forEach(e => {
+        // this.update();
+        // return;
 
-            var l = this.modelgraph.edges[e];
-            let u: ViewNode = this.findNode(this.modelgraph.nodes[l.source]);
-            let v: ViewNode = this.findNode(this.modelgraph.nodes[l.target]);
+        // drop the links from the viewGraph first
+        this.viewGraph.links = [];
+
+        // create a link in the view for each edge in the model
+        Object.keys(this.modelGraph.edges).forEach(e => {
+
+            var l = this.modelGraph.edges[e];
+            let u: ViewNode = this.findNode(this.modelGraph.nodes[l.source]);
+            let v: ViewNode = this.findNode(this.modelGraph.nodes[l.target]);
 
             if (this.inView(u) && this.inView(v)) {
 
-                this.viewgraph.links.push({
+                this.viewGraph.links.push({
                     source: u,
                     target: v
                 });
@@ -276,29 +318,29 @@ export class Frontend {
 
     nodeIsNotFilteredOut(n: ViewNode) {
 
-        return n.isKanji()
-            || (this.isSelectedJlpt(n.JLPT) && false == n.hidden);
+        return n.mn.isKanji
+            || (false == n.hidden && this.isSelectedJlpt(n.mn.JLPT));
     }
 
     filteredNodes(): Array<ViewNode> {
-        return this.viewgraph.nodes.filter(n => { return this.nodeIsNotFilteredOut(n); });
+        return this.viewGraph.nodes.filter(n => { return this.nodeIsNotFilteredOut(n); });
     }
 
-    isSelectedJlpt(level: number) {
+    isSelectedJlpt(level: KNApi.JlptLevel) {
         return '' == this.jlpts || 0 <= this.jlpts.indexOf(level.toString());
     }
 
     filteredLinks() {
         // only the links which connect to visible nodes
-        return this.viewgraph.links.filter(l => {
+        return this.viewGraph.links.filter(l => {
             return this.nodeIsNotFilteredOut(l.source)
                 && this.nodeIsNotFilteredOut(l.target);
         });
     }
 
-    // pushes the viewgraph data into the adapter and starts rendering process
+    // pushes the viewGraph data into the adapter and starts rendering process
     update() {
-        this.d3cola
+        this.layout
             .nodes(this.filteredNodes())
             .links(this.filteredLinks())
             .start();
@@ -306,19 +348,19 @@ export class Frontend {
         var node = this.updateNodes();
         var link = this.updateLinks();
 
-        this.d3cola.on("tick", () => {
+        this.layout.on("tick", () => {
 
-            // setting the transform attribute to the array will result in syncronous calls to the callback provided for each node/link
+            // setting the transform attribute to the array will result in synchronous calls to the callback provided for each node/link
             // so that these will move to the designated positions
-            node.attr("transform", d => {
+            node.attr("transform", (d: ViewNode) => {
 
-                if (!d.id || '' == d.id)
+                if (!d.mn.text || '' == d.mn.text)
                     return "translate(" + (d.x - Frontend.nodeWidth / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
                 else
-                    return "translate(" + (d.x - 1.5 * d.id.length * Frontend.fontSize / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
+                    return "translate(" + (d.x - 1.5 * d.mn.text.length * Frontend.fontSize / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
             });
 
-            link.attr("transform", d => {
+            link.attr("transform", (d: ViewLink) => {
                 var dx = d.source.x - d.target.x,
                     dy = d.source.y - d.target.y;
 
@@ -326,7 +368,7 @@ export class Frontend {
 
                 return "translate(" + d.target.x + "," + d.target.y + ") rotate(" + r + ") ";
             })
-                .attr("width", d => {
+                .attr("width", (d: ViewLink) => {
                     var dx = d.source.x - d.target.x,
                         dy = d.source.y - d.target.y;
 
@@ -337,7 +379,7 @@ export class Frontend {
 
     // re-populates edgesLayer with links
     updateLinks() {
-        // use the viewgrap's links to populate the edges-layer with objects based on the data:
+        // use the viewGraph's links to populate the edges-layer with objects based on the data:
         var link = this.edgesLayer.selectAll(".link")
             .data(this.filteredLinks());
 
@@ -352,7 +394,7 @@ export class Frontend {
 
         // update the fill of each of the elements, based on their state
         link
-            .attr("fill", d => {
+            .attr("fill", (d: ViewLink) => {
                 if (d.source.color === this.red && d.target.color === this.red) {
                     // UF never happens?
                     return this.red;
@@ -360,7 +402,7 @@ export class Frontend {
 
                 if (d.source.color !== this.red && d.target.color !== this.red) {
                     // the link between "resolved" nodes
-                    return "darkgray";
+                    return "darkGray";
                 }
 
                 return d.source.color === this.red ? "url(#ReverseEdgeGradient)" : "url(#EdgeGradient)";
@@ -372,32 +414,32 @@ export class Frontend {
     // re-populate the nodesLayer with nodes
     updateNodes() {
         var node = this.nodesLayer.selectAll(".node")
-            .data(this.filteredNodes(), d => {
-                return d.viewgraphid;
+            .data(this.filteredNodes(), (d: ViewNode) => {
+                return d.viewGraphId;
             })
 
         // erase the nodes which aren't here anymore
         node.exit().remove();
 
-        // remember the last place/time the mouse/touch event has occured, so we can distinguish between a move and a click/tap
-        let mouseDownEvent: any;
-        let mouseUpEvent: any;
+        // remember the last place/time the mouse/touch event has occurred, so we can distinguish between a move and a click/tap
+        let mouseDownEvent: MouseEvent;
+        let mouseUpEvent: MouseEvent;
         let touchstartEvent: number;
         let doubleTap: boolean;
 
         // insert the parent group - it  tracks the user interaction
         var nodeEnter = node.enter().append("g")
 
-            .attr("id", d => {
-                return d.name()
+            .attr("id", (d: ViewNode) => {
+                return d.mn.id;
             })
             .attr("class", "node")
             .on("mousedown", () => {
-                mouseDownEvent = d3.event;
+                mouseDownEvent = d3.event as MouseEvent;
                 this.nodeMouseDown = true;
             }) // recording the mousedown state allows us to differentiate dragging from panning
             .on("mouseup", () => {
-                mouseUpEvent = d3.event;
+                mouseUpEvent = d3.event as MouseEvent;
                 this.nodeMouseDown = false;
             })
             .on("touchstart", () => {
@@ -407,76 +449,76 @@ export class Frontend {
             .on("touchmove", () => {
                 event.preventDefault();
             })
-            .on("mouseenter", d => {
-                this.hintNeighbours(d)
-            }) // on mouse over nodes we show "spikes" indicating there are hidden neighbours
-            .on("mouseleave", d => {
-                this.unhintNeighbours(d)
+            .on("mouseenter", (d: ViewNode) => {
+                this.hintNeighbors(d)
+            }) // on mouse over nodes we show "spikes" indicating there are hidden neighbors
+            .on("mouseleave", (d: ViewNode) => {
+                this.unHintNeighbors(d)
             })
-            .on("wheel", d => {
+            .on("wheel", (d: ViewNode) => {
                 // UF: need to send that event to the canvas, but how?!
-                //debugger;
             })
-            .on("touchend", d => {
+            .on("touchend", (d: ViewNode) => {
                 if (doubleTap) {
                     doubleTap = false;
                     this.dblclick(d);
                 }
             })
-            .call(this.d3cola.drag)
+            .call(this.layout.drag)
             ;
 
-        // the background for the word/kangi
+        // the background for the word/kanji
         let wordCard = nodeEnter
             .append("g")
-            .attr('style', n => "fill: " + this.jlpt2color(n.JLPT))
-            .attr('transform', n => n.isKanji() ? 'translate(-5, -20)' : 'translate(-10, -20)')
+            .attr('style', (n: ViewNode) => "fill: " + this.jlpt2color(n.mn.JLPT))
+            .attr('transform', (n: ViewNode) => n.mn.isKanji ? 'translate(-5, -20)' : 'translate(-10, -20)')
 
             // create a reference to the <g> id sections defined in the existing svg markup exported from Inkscape
             .append("use")
-            // g123 or kanjiBG
-            .attr("xlink:href", n => n.isKanji() ? '#kanjiBG' : '#g12' + n.id.length)
+            // kanjiBG or g12??
+            .attr("xlink:href", (n: ViewNode) => n.mn.isKanji ? '#kanjiBG' : '#g12' + n.mn.text.length)
             ;
 
         wordCard
-            .on("click", (n: ViewNode) => { this.hideNode(n); });
+            .on("click", (n: ViewNode) => { this.hideNode(n); })
+            ;
 
         // the spikes
         nodeEnter.append("g")
-            .attr("id", n => {
-                return n.name() + "_spikes"
-            })
-            .attr("transform", "translate(0,3)");
+            .attr("id", (n: ViewNode) => n.mn.id + "_spikes")
+            .attr("transform", "translate(0,3)")
+            ;
 
         // the word itself
         let text = nodeEnter.append("text")
             .attr('class', 'text')
-            .attr('dx', n => n.isKanji() ? '0.2em' : '0.0em')
-            .attr('dy', n => n.isKanji() ? '-0.0em' : '0.0em')
-            .text(d => d.id)
+            .attr('dx', (n: ViewNode) => n.mn.isKanji ? '0.2em' : '0.0em')
+            .attr('dy', (n: ViewNode) => n.mn.isKanji ? '-0.0em' : '0.0em')
+            .text((n: ViewNode) => n.mn.text)
             ;
 
-        text.on("dblclick", d => {
+        text.on("dblclick", (d: ViewNode) => {
             if (Math.abs(mouseDownEvent.screenX - mouseUpEvent.screenX) +
                 Math.abs(mouseDownEvent.screenY - mouseUpEvent.screenY) < 2) {
                 this.dblclick(d);
             }
-        })
+        });
 
         // the ruby
         nodeEnter.append("text")
             .attr("dy", "-1px")
-            .text((n: ViewNode) => n.hiragana ? n.hiragana : '');
+            .text((n: ViewNode) => n.mn.superscript)
+            ;
 
         // the english translation
         nodeEnter.append("text")
             .attr("dy", "3.0em")
-            .text((n: ViewNode) => n.isKanji() ? '' : (n.english && 0 in n.english ? n.english[0] : '?'))
+            .text((n: ViewNode) => n.mn.subscript)
             ;
 
         // the tooltip
         nodeEnter.append("title")
-            .text(d => d.english && 0 in d.english ? d.english[0] : '?')
+            .text((n: ViewNode) => n.mn.hint)
             ;
 
         node.style("fill", (n: ViewNode) => n.color);
@@ -485,9 +527,9 @@ export class Frontend {
     }
 
     // animates the mouse-over hint
-    hintNeighbours(v) {
-        if (!v.cast) return;
-        var hiddenEdges = v.cast.length + 1 - v.degree;
+    hintNeighbors(v: ViewNode) {
+        if (!v.mn.hood) return;
+        var hiddenEdges = v.mn.hood.length + 1 - v.mn.degree;
         var r = 2 * Math.PI / hiddenEdges;
         for (var i = 0; i < hiddenEdges; ++i) {
             var w = Frontend.nodeWidth - 6,
@@ -495,12 +537,13 @@ export class Frontend {
                 x = w / 2 + 25 * Math.cos(r * i),
                 y = h / 2 + 30 * Math.sin(r * i);
 
-            let rect = new cola.vpsc.Rectangle(0, w, 0, h);
+
+            let rect = new this.webColaLibrary.Rectangle(0, w, 0, h);
             let vi = rect.rayIntersection(x, y);
 
-            var dview = d3.select("#" + v.name() + "_spikes");
+            var dataView = d3.select("#" + v.mn.id + "_spikes");
 
-            dview.append("rect")
+            dataView.append("rect")
                 .attr("class", "spike")
                 .attr("rx", 1).attr("ry", 1)
                 .attr("x", 0).attr("y", 0)
@@ -511,14 +554,14 @@ export class Frontend {
     }
 
     // stopping the hint
-    unhintNeighbours(v) {
-        var dview = d3.select("#" + v.name() + "_spikes");
-        dview.selectAll(".spike").remove();
+    unHintNeighbors(v: ViewNode) {
+        var dataView = d3.select("#" + v.mn.id + "_spikes");
+        dataView.selectAll(".spike").remove();
     }
 
     hideNode(n: ViewNode) {
         // don't hide kanji
-        if (n.isKanji()) {
+        if (n.mn.isKanji) {
             return;
         }
 
@@ -531,36 +574,36 @@ export class Frontend {
         if (0 == hiddenWordsCombo.find('option[value="' + n.id + '"]').length) {
             hiddenWordsCombo.append($('<option>', {
                 value: n.id,
-                text: n.id
+                text: n.mn.text
             }));
         }
     }
 
-    findNode(n: Node): ViewNode {
-        let fen = this.viewgraph.nodes.filter((fen) => fen.id === n.id);
+    findNode(n: KNModel_INode): ViewNode {
+        let fen = this.viewGraph.nodes.filter(fen=> fen.id === n.id);
         return fen[0];
 
     }
 
-    // was the viewnode already added?
+    // was the viewNode already added?
     inView(v: ViewNode) {
 
         return typeof v !== 'undefined'
-            && typeof v.viewgraphid !== 'undefined';
+            && typeof v.viewGraphId !== 'undefined';
     }
 
     collapseNode(node: ViewNode) {
 
         // for each linked node
-        node.cast.forEach(c => {
+        node.mn.hood.forEach(c => {
             // see how many links it has at the moment:
-            let neighbour: ViewNode = this.filteredNodes().filter((nn) => nn.id == c.word)[0];
-            if (neighbour) {
-                let links = this.viewgraph.links.filter((l) => l.source == neighbour || l.target == neighbour);
+            let neighbor: ViewNode = this.filteredNodes().filter((nn) => nn.id == c.id)[0];
+            if (neighbor) {
+                let links = this.viewGraph.links.filter((l) => l.source == neighbor || l.target == neighbor);
 
                 if (links.length == 1) {
                     // this node is only connected with one link - hide it
-                    this.hideNode(neighbour);
+                    this.hideNode(neighbor);
                 }
             }
         });
@@ -568,18 +611,18 @@ export class Frontend {
         this.update();
     }
 
-    uncollapseNode(node: Node) {
+    unCollapseNode(node: KNModel_INode) {
 
-        this.viewgraph.links
-            .filter((l) => l.target == node)
+        this.viewGraph.links
+            .filter((l) => l.target.mn == node)
             .map((l) => l.source)
-            .forEach(n => this.unhideWord(n.id))
+            .forEach((n: ViewNode) => this.unHideWord(n.id))
             ;
 
-        this.viewgraph.links
-            .filter((l) => l.source == node)
+        this.viewGraph.links
+            .filter((l) => l.source.mn == node)
             .map((l) => l.target)
-            .forEach(n => this.unhideWord(n.id))
+            .forEach((n: ViewNode) => this.unHideWord(n.id))
             ;
     }
 
@@ -595,15 +638,13 @@ export class Frontend {
             return;
         }
         else {
-            // uncollapse the node
-            this.uncollapseNode(node);
+            // un-collapse the node
+            this.unCollapseNode(node.mn);
 
-            var d = this.modelgraph.getNode(node.type, node.id);
+            var d = this.modelGraph.loadNode(node.mn.type, node.mn.text);
 
             $.when(d).then((focus) => { this.refocus(focus) });
         }
-
-
     }
 
     graphBounds() {
@@ -611,7 +652,7 @@ export class Frontend {
             X = Number.NEGATIVE_INFINITY,
             y = Number.POSITIVE_INFINITY,
             Y = Number.NEGATIVE_INFINITY;
-        this.nodesLayer.selectAll(".node").each((v) => {
+        this.nodesLayer.selectAll(".node").each((v: ViewNode) => {
             x = Math.min(x, v.x - Frontend.nodeWidth / 2);
             X = Math.max(X, v.x + Frontend.nodeWidth / 2);
             y = Math.min(y, v.y - Frontend.nodeHeight / 2);
@@ -627,14 +668,14 @@ export class Frontend {
 
     clearAll() {
 
-        this.viewgraph = {
+        this.viewGraph = {
             nodes: [],
             links: []
         };
 
         this.update();
 
-        this.modelgraph.reset();
+        this.modelGraph.reset();
     }
 
     navigateToWord(word: string) {
@@ -653,13 +694,26 @@ export class Frontend {
 
     onWindowResized() {
         this.calcMySize();
-        
+
         this.outer.attr("width", this.width).attr("height", this.height);
     }
 
     fullScreenCancel() {
         this.outer.attr("width", this.width).attr("height", this.height);
         this.zoomToFit();
+    }
+
+    // setup the translation based on the move/zoom, as it comes from 
+    redraw(transition?: boolean) {
+        // if mouse down then we are dragging not panning
+        if (this.nodeMouseDown) {
+            //debugger;
+            return;
+        }
+
+        // read the current zoom translation vector and the current zoom scale
+        (transition ? this.vis.transition() : this.vis)
+            .attr("transform", "translate(" + this.zoom.translate() + ") scale(" + this.zoom.scale() + ")");
     }
 
     zoomToFit() {
@@ -675,7 +729,7 @@ export class Frontend {
         this.redraw(true);
     }
 
-    getParameterByName(name, url) {
+    getParameterByName(name: string, url: string) {
         if (!url) {
             url = window.location.href;
         }
@@ -708,7 +762,7 @@ export class Frontend {
     }
 
     setupJlptChecks() {
-
+        
         this.jlpts = this.storageGet(Frontend.jlptSelectedLevelsCookieName);
         if (!this.jlpts) {
             this.jlptSelect(5);
@@ -724,7 +778,7 @@ export class Frontend {
 
     removeWordFromHistory(selectBoxId: string, word: string) {
 
-        // delete it from the dropdown
+        // delete it from the drop-down
         $('#' + selectBoxId + " option[value='" + word + "']").remove();
 
         // and the history
@@ -801,11 +855,11 @@ export class Frontend {
         }
     }
 
-    unhideWord(word: string) {
+    unHideWord(word: string) {
 
         $("#hiddenWordsCombo option[value='" + word + "']").remove();
 
-        this.viewgraph.nodes.filter(n => n.id == word)[0].hidden = false;
+        this.viewGraph.nodes.filter(n => n.id == word)[0].hidden = false;
         this.update();
     }
 }

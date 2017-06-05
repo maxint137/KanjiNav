@@ -16,16 +16,7 @@
         // see https://www.typescriptlang.org/docs/handbook/modules.html
         "module": "amd",
 
-        "outDir": "./views/js",
-        //"outFile": "kanjiNav.js",
-
         "sourceMap": true
     },
-    "files": [
-        "./views/scripts/kanjiNavBase.ts",
-        "./views/scripts/localDictionary.ts",
-        "./views/scripts/serverDictionary.ts",
-        "./views/scripts/kanjiNav.ts",
-        "./views/scripts/frontend.ts"
-    ]
+    "files": ["01_SimpleJasmineTests.ts"]
 }

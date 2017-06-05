@@ -1,4 +1,4 @@
-var kanjis = [{
+var kanjisDB = [{
         "_id": {
             "$oid": "kc1803"
         },
@@ -65452,7 +65452,7 @@ var kanjis = [{
     },
 ];
 
-var words = [{
+var wordsDB = [{
         "_id": {
             "$oid": "w0e70a"
         },
@@ -137598,3 +137598,11 @@ var words = [{
         "JLPT": 1
     },
 ];
+
+export let  kanjis: any =  kanjisDB;
+export let  words: any = wordsDB;
+
+
+
+
+

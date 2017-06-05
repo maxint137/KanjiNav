@@ -1,4 +1,4 @@
-define(["require", "exports", "jquery", "kanjiNavBase"], function (require, exports, $, kanjiNavBase_1) {
+define(["require", "exports", "jquery", "./kanjiNavBase"], function (require, exports, $, kanjiNavBase_1) {
     "use strict";
     var kanjiNav;
     (function (kanjiNav) {
@@ -79,9 +79,9 @@ define(["require", "exports", "jquery", "kanjiNavBase"], function (require, expo
                             return;
                         }
                         try {
-                            var neighbourname = type.next() + v[type.next().id];
-                            if (neighbourname in _this.nodes) {
-                                _this.addEdge(node, _this.nodes[neighbourname]);
+                            var neighborName = type.next() + v[type.next().id];
+                            if (neighborName in _this.nodes) {
+                                _this.addEdge(node, _this.nodes[neighborName]);
                             }
                         }
                         catch (error) {
@@ -92,7 +92,7 @@ define(["require", "exports", "jquery", "kanjiNavBase"], function (require, expo
                 });
                 return d.promise();
             };
-            Graph.prototype.expandNeighbours = function (node, f) {
+            Graph.prototype.expandNeighbors = function (node, f) {
                 var _this = this;
                 if (node.cast.filter(function (c) { return !c; }).length) {
                     debugger;
@@ -108,8 +108,8 @@ define(["require", "exports", "jquery", "kanjiNavBase"], function (require, expo
                 var d = $.Deferred();
                 $.when.apply($, dn)
                     .then(function () {
-                    var neighbours = Array.prototype.slice.call(arguments);
-                    d.resolve(neighbours);
+                    var neighbors = Array.prototype.slice.call(arguments);
+                    d.resolve(neighbors);
                 });
                 return d.promise();
             };
@@ -128,9 +128,9 @@ define(["require", "exports", "jquery", "kanjiNavBase"], function (require, expo
             };
             Graph.prototype.addEdge = function (u, v) {
                 var edge = Edge.makeEdge(u.type, u.name(), v.name());
-                var ename = edge.toString();
-                if (!(ename in this.edges)) {
-                    this.edges[ename] = edge;
+                var edgeName = edge.toString();
+                if (!(edgeName in this.edges)) {
+                    this.edges[edgeName] = edge;
                 }
                 ++u.degree, ++v.degree;
             };

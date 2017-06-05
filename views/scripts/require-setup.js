@@ -15,10 +15,10 @@ var require = {
         "bootstrap": "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min",
         "js-cookie": "https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.3/js.cookie.min",
         "cola": "./node_modules/webcola/WebCola/cola.min",
-        "kanjiNavBase": "./js/kanjiNavBase",
-        "localDictionary": "./js/localDictionary",
-        "serverDictionary": "./js/serverDictionary",
-        "frontend": "./js/frontend",
-        "kanjiNav": "./js/kanjiNav"
+        "localDictionary": "./js/scripts/localDictionary",
+        "serverDictionary": "./js/scripts/serverDictionary",
+        "frontend": "./js/scripts/frontend",
+        "knModel": "./js/scripts/knModel",
+        "data": "./js/scripts/data"
     }
 };

@@ -210,6 +210,13 @@ require(['jquery', 'jquery-ui'], function($) {
             fe.clearAll();
         });
 
+        $("#saveButton").on("click", function() {
+            fe.saveGraph();
+        });
+
+        $("#loadButton").on("click", function() {
+            fe.loadGraph();
+        });
     });
 
 });
@@ -228,8 +235,8 @@ function fly(word, asExtension, useLocalDictionary = true) {
     var dictionary = useLocalDictionary ? 'localDictionary' : 'serverDictionary';
 
     // 'bootstrap' does not return an object. Must appear at the end
-    require(['jquery', dictionary, 'kanjiNav', 'frontend', 'cola', 'd3', 'js-cookie', 'bootstrap'],
-        function($, lookupEngine, kanjiNav, frontend, webColaLibraray, d3, js_cookie) {
+    require(['jquery', dictionary, 'knModel', 'frontend', 'cola', 'd3', 'js-cookie', 'data', 'bootstrap'],
+        function($, lookupEngine, knModel, frontend, webColaLibrary, d3, js_cookie, data) {
 
             if (asExtension) {
                 if (!word || "" == word) {
@@ -237,8 +244,6 @@ function fly(word, asExtension, useLocalDictionary = true) {
                     $("#helpDiv").show();
                     $("html").css("min-width", "230px");
                     $("body").css("height", "30px");
-
-                    return;
                 } else {
                     $("#helpDiv").hide();
                     $("#mainDiv").show();
@@ -248,8 +253,8 @@ function fly(word, asExtension, useLocalDictionary = true) {
             }
 
             fe = new frontend.Frontend(
-                new kanjiNav.Graph(lookupEngine.Dictionary),
-                webColaLibraray.d3adaptor(d3),
+                new knModel.Graph(lookupEngine.Dictionary),
+                webColaLibrary,
                 js_cookie);
 
             fe.loadWordHistory('#wordHistoryCombo');
@@ -259,7 +264,7 @@ function fly(word, asExtension, useLocalDictionary = true) {
                 var wordSelected = $("#hiddenWordsCombo").val();
                 if (wordSelected) {
 
-                    fe.unhideWord(wordSelected);
+                    fe.unHideWord(wordSelected);
                 }
             });
 

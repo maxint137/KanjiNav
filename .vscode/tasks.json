@@ -6,9 +6,10 @@
             "taskName": "build",
             "command": "tsc",
             "isShellCommand": true,
-            "args": ["-p", "."],
-            "showOutput": "silent",
-            "problemMatcher": "$tsc"
+            "args": ["-w", "-p", "./views"],
+            //"showOutput": "silent",
+            "isBackground": true,
+            "problemMatcher": "$tsc-watch"
         },
         {
             "taskName": "make chromex",
@@ -16,5 +17,5 @@
             //"args": ["build"],
             "isShellCommand": true
         }
-    ],
+    ]
 }
