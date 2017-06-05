@@ -122,7 +122,7 @@ define(["require", "exports"], function (require, exports) {
         });
         Object.defineProperty(WordNode.prototype, "subscript", {
             get: function () {
-                return this.dbWord.english;
+                return 1 < this.dbWord.english.length ? [this.dbWord.english[0], "..."] : [this.dbWord.english[0]];
             },
             enumerable: true,
             configurable: true
@@ -136,7 +136,7 @@ define(["require", "exports"], function (require, exports) {
         });
         Object.defineProperty(WordNode.prototype, "hint", {
             get: function () {
-                return this.subscript;
+                return this.dbWord.english;
             },
             enumerable: true,
             configurable: true
@@ -280,9 +280,9 @@ define(["require", "exports"], function (require, exports) {
                     catch (error) {
                         console.assert(false, error);
                     }
-                    // remember the user
-                    userCallback === undefined || userCallback(nNode);
                 });
+                // call back the user
+                userCallback === undefined || userCallback(nNode);
                 // finished
                 result.resolve(nNode);
             });

@@ -91,13 +91,13 @@ export class WordNode extends BaseNode implements INode {
         return [this.dbWord.word];
     }
     get subscript(): string[] {
-        return this.dbWord.english;
+        return 1 < this.dbWord.english.length ? [this.dbWord.english[0], "..."] : [this.dbWord.english[0]];
     }
     get superscript(): string[] {
         return [this.dbWord.hiragana];
     }
     get hint(): string[] {
-        return this.subscript;
+        return this.dbWord.english;
     }
     get hood(): Array<INode> {
         return this.dbWord.kanjis.map((data: KNApi.DbKanji & KNApi.DbWord) => nodeFactory("Kanji", data));
@@ -210,9 +210,10 @@ export class Graph {
                     console.assert(false, error);
                 }
 
-                // remember the user
-                userCallback === undefined || userCallback(nNode);
             });
+            
+            // call back the user
+            userCallback === undefined || userCallback(nNode);
 
             // finished
             result.resolve(nNode);
