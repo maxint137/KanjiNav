@@ -91,7 +91,7 @@ export class WordNode extends BaseNode implements INode {
         return [this.dbWord.word];
     }
     get subscript(): string[] {
-        return 1 < this.dbWord.english.length ? [this.dbWord.english[0], "..."] : [this.dbWord.english[0]];
+        return [this.dbWord.english[0] + (1 < this.dbWord.english.length ? "..." : "")];
     }
     get superscript(): string[] {
         return [this.dbWord.hiragana];

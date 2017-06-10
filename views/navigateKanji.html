@@ -81,117 +81,86 @@
             <button title="Zoom to fit" id="zoomToFitButton" type="button" class="btn btn-default btn-xs"><i class="fa fa-search-plus" aria-hidden="true"></i></button>
         </div>
 
-        <div id='kanjiMap'></div>
+        <div id='kanjiMap'>
+            <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0">
+                <defs>
+                    <filter id="wcShadow" color-interpolation-filters="sRGB">
+                        <feFlood flood-opacity=".5" flood-color="#000" result="flood" />
+                        <feComposite in="flood" in2="SourceGraphic" operator="in" result="composite1" />
+                        <feGaussianBlur in="composite1" stdDeviation="3" result="blur" />
+                        <!--<feOffset dx="1" dy="1" result="offset" />-->
+                        <feComposite in="SourceGraphic" in2="offset" result="composite2" />
+                    </filter>
+                    
+                    <g id='kanjiBG' transform="translate(0,10)">
+                        <circle cx="21" cy="21" r="21" stroke-width=".025"/>
+                    </g>
+                    
+                    <g class="wordCard" filter="url(#wcShadow)" id="g125" transform="translate(5,-2)">
+                        <g>
+                            <rect y="12" x="0" rx="5" ry="5" height="42" width="125"/>
+                            <circle cx="125" cy="12" r="8"/>
+                        </g>
+
+                        <g transform="rotate(45 125 12)">
+                            <path class="x-sign" d="M 120,12 130,12"/>
+                            <path class="x-sign" d="M 125,7 125,17"/>
+                        </g>                      
+                    </g>
+
+                    <g class="wordCard" filter="url(#wcShadow)" id="g124" transform="translate(5,-2)">
+                        <g>
+                            <rect y="12" x="0" rx="5" ry="5" height="42" width="100"/>
+                            <circle cx="100" cy="12" r="8"/>
+                        </g>
+
+                        <g transform="rotate(45 100 12)">
+                            <path class="x-sign" d="M 95,12 105,12"/>
+                            <path class="x-sign" d="M 100,7 100,17"/>
+                        </g>                      
+                    </g>
+
+                    <g class="wordCard" filter="url(#wcShadow)" id="g123" transform="translate(5,-2)">
+                        <g>
+                            <rect y="12" x="0" height="42" width="75" rx="5" ry="5"/>
+                            <circle cx="75" cy="12" r="8"/>
+                        </g>
+
+                        <g transform="rotate(45 75 12)">
+                            <path class="x-sign" d="M 70,12 80,12"/>
+                            <path class="x-sign" d="M 75,7 75,17"/>
+                        </g>                      
+                    </g>
+
+                    <g class="wordCard" filter="url(#wcShadow)" id="g122" transform="translate(5,-2)">
+                        <g>
+                            <rect y="12" x="0" rx="5" ry="5" height="42" width="50"/>
+                            <circle cx="50" cy="12" r="8"/>
+                        </g>
+                        <g transform="rotate(45 50 12)">
+                            <path class="x-sign" d="M 45,12 55,12"/>
+                            <path class="x-sign" d="M 50,7 50,17"/>
+                        </g>                
+                    </g>
+
+                    <g class="wordCard" filter="url(#wcShadow)" id="g121" transform="translate(5,-2)">
+                        <g>
+                            <rect y="12" x="0" height="42" width="35" rx="5" ry="5"/>
+                            <circle cx="35" cy="12" r="8"/>
+                        </g>
+
+                        <g transform="rotate(45 35 12)">
+                            <path class="x-sign" d="M 30,12 40,12"/>
+                            <path class="x-sign" d="M 35,7 35,17"/>
+                        </g>                      
+                    </g>
+
+                </defs>
+            </svg>
+        </div>
     </div>
-
-    <div style="position: absolute;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0">
-        <defs>
-            <filter id="wcShadow" color-interpolation-filters="sRGB">
-                <feFlood flood-opacity=".5" flood-color="#000" result="flood" />
-                <feComposite in="flood" in2="SourceGraphic" operator="in" result="composite1" />
-                <feGaussianBlur in="composite1" stdDeviation="3" result="blur" />
-                <!--<feOffset dx="1" dy="1" result="offset" />-->
-                <feComposite in="SourceGraphic" in2="offset" result="composite2" />
-            </filter>
-            
-            <g id='kanjiBG' transform="translate(0,10)">
-                <circle cx="21" cy="21" r="21" stroke-width=".025"/>
-            </g>
-            
-            <g class="wordCard" filter="url(#wcShadow)" id="g125" transform="translate(5,-2)">
-                <g>
-                    <rect y="12" x="0" rx="5" ry="5" height="42" width="125"/>
-                    <circle cx="125" cy="12" r="8"/>
-                </g>
-
-                <g transform="rotate(45 125 12)">
-                    <path class="x-sign" d="M 120,12 130,12"/>
-                    <path class="x-sign" d="M 125,7 125,17"/>
-                </g>                      
-            </g>
-
-            <g class="wordCard" filter="url(#wcShadow)" id="g124" transform="translate(5,-2)">
-                <g>
-                    <rect y="12" x="0" rx="5" ry="5" height="42" width="100"/>
-                    <circle cx="100" cy="12" r="8"/>
-                </g>
-
-                <g transform="rotate(45 100 12)">
-                    <path class="x-sign" d="M 95,12 105,12"/>
-                    <path class="x-sign" d="M 100,7 100,17"/>
-                </g>                      
-            </g>
-
-            <g class="wordCard" filter="url(#wcShadow)" id="g123" transform="translate(5,-2)">
-                <g>
-                    <rect y="12" x="0" height="42" width="75" rx="5" ry="5"/>
-                    <circle cx="75" cy="12" r="8"/>
-                </g>
-
-                <g transform="rotate(45 75 12)">
-                    <path class="x-sign" d="M 70,12 80,12"/>
-                    <path class="x-sign" d="M 75,7 75,17"/>
-                </g>                      
-            </g>
-
-            <g class="wordCard" filter="url(#wcShadow)" id="g122" transform="translate(5,-2)">
-                <g>
-                    <rect y="12" x="0" rx="5" ry="5" height="42" width="50"/>
-                    <circle cx="50" cy="12" r="8"/>
-                </g>
-                <g transform="rotate(45 50 12)">
-                    <path class="x-sign" d="M 45,12 55,12"/>
-                    <path class="x-sign" d="M 50,7 50,17"/>
-                </g>                
-            </g>
-
-            <g class="wordCard" filter="url(#wcShadow)" id="g121" transform="translate(5,-2)">
-                <g>
-                    <rect y="12" x="0" height="42" width="35" rx="5" ry="5"/>
-                    <circle cx="35" cy="12" r="8"/>
-                </g>
-
-                <g transform="rotate(45 35 12)">
-                    <path class="x-sign" d="M 30,12 40,12"/>
-                    <path class="x-sign" d="M 35,7 35,17"/>
-                </g>                      
-            </g>
-
-        </defs>
-    </svg>
-    </div>
-
-
 
     <script type="text/javascript" src="./js/google-analytics.js"></script>
-
-    <!-- the feedback stuff -->
-    <!--<script type="text/javascript">
-        reformal_wdg_domain = "kanjiNav";
-        reformal_wdg_mode = 0;
-        reformal_wdg_title = "Kanji Navigator";
-        reformal_wdg_ltitle = "Leave feedback";
-        reformal_wdg_lfont = "";
-        reformal_wdg_lsize = "";
-        reformal_wdg_color = "#FFA000";
-        reformal_wdg_bcolor = "#516683";
-        reformal_wdg_tcolor = "#FFFFFF";
-        reformal_wdg_align = "right";
-        reformal_wdg_waction = 0;
-        reformal_wdg_vcolor = "#9FCE54";
-        reformal_wdg_cmline = "#E0E0E0";
-        reformal_wdg_glcolor = "#105895";
-        reformal_wdg_tbcolor = "#FFFFFF";
-
-        reformal_wdg_bimage = "8489db229aa0a66ab6b80ebbe0bb26cd.png";
-    </script>
-
-    <script type="text/javascript" language="JavaScript" src="http://idea.informer.com/tab6.js?domain=kanjiNav"></script>
-    <noscript><a href="http://kanjiNav.idea.informer.com">Kanji Navigator feedback </a>
-        <a href="http://idea.informer.com"><img src="http://widget.idea.informer.com/tmpl/images/widget_logo.jpg" /></a>
-    </noscript>-->
-
 </body>
 
 </html>

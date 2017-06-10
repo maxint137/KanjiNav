@@ -122,7 +122,7 @@ define(["require", "exports"], function (require, exports) {
         });
         Object.defineProperty(WordNode.prototype, "subscript", {
             get: function () {
-                return 1 < this.dbWord.english.length ? [this.dbWord.english[0], "..."] : [this.dbWord.english[0]];
+                return [this.dbWord.english[0] + (1 < this.dbWord.english.length ? "..." : "")];
             },
             enumerable: true,
             configurable: true
