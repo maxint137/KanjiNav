@@ -357,7 +357,7 @@ export class Frontend {
                 if (!d.mn.text || '' == d.mn.text)
                     return "translate(" + (d.x - Frontend.nodeWidth / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
                 else
-                    return "translate(" + (d.x - 1.5 * d.mn.text.length * Frontend.fontSize / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
+                    return `translate(${d.x},${d.y})`;
             });
 
             link.attr("transform", (d: ViewLink) => {
@@ -366,7 +366,8 @@ export class Frontend {
 
                 var r = 180 * Math.atan2(dy, dx) / Math.PI;
 
-                return "translate(" + d.target.x + "," + d.target.y + ") rotate(" + r + ") ";
+                return `translate(${d.target.x},${d.target.y}) rotate(${r})`;
+                
             })
                 .attr("width", (d: ViewLink) => {
                     var dx = d.source.x - d.target.x,
@@ -467,16 +468,14 @@ export class Frontend {
             .call(this.layout.drag)
             ;
 
-        // the background for the word/kanji
+        // the bubble for the word/kanji
         let wordCard = nodeEnter
             .append("g")
             .attr('style', (n: ViewNode) => "fill: " + this.jlpt2color(n.mn.JLPT))
-            .attr('transform', (n: ViewNode) => n.mn.isKanji ? 'translate(-5, -20)' : 'translate(-10, -20)')
-
             // create a reference to the <g> id sections defined in the existing svg markup exported from Inkscape
             .append("use")
             // kanjiBG or g12??
-            .attr("xlink:href", (n: ViewNode) => n.mn.isKanji ? '#kanjiBG' : '#g12' + n.mn.text.length)
+            .attr("xlink:href", (n: ViewNode) => n.mn.isKanji ? '#kanjiBG' : '#wc_' + n.mn.text.length)
             ;
 
         wordCard
@@ -488,13 +487,27 @@ export class Frontend {
             .attr("id", (n: ViewNode) => n.mn.id + "_spikes")
             .attr("transform", "translate(0,3)")
             ;
-
-        // the word itself
+            
         let text = nodeEnter.append("text")
-            .attr('class', 'text')
-            .attr('dx', (n: ViewNode) => n.mn.isKanji ? '0.2em' : '0.0em')
-            .attr('dy', (n: ViewNode) => n.mn.isKanji ? '-0.0em' : '0.0em')
+            .attr('class', 'text word')
+            .attr('dy', '8px')
             .text((n: ViewNode) => n.mn.text)
+            ;
+            
+         // the superscript
+       text.append("tspan")
+            .attr('class', 'ruby')
+            .attr('x', '0')
+            .attr('y', '-11px')
+            .text((n: ViewNode) => n.mn.superscript)
+            ;
+
+        // the subscript
+       text.append("tspan")
+            .attr('class', 'translation')
+            .attr("x", "0")
+            .attr("dy", "30px")
+            .text((n: ViewNode) => n.mn.subscript)
             ;
 
         text.on("dblclick", (d: ViewNode) => {
@@ -504,17 +517,6 @@ export class Frontend {
             }
         });
 
-        // the ruby
-        nodeEnter.append("text")
-            .attr("dy", "-1px")
-            .text((n: ViewNode) => n.mn.superscript)
-            ;
-
-        // the english translation
-        nodeEnter.append("text")
-            .attr("dy", "3.0em")
-            .text((n: ViewNode) => n.mn.subscript)
-            ;
 
         // the tooltip
         nodeEnter.append("title")

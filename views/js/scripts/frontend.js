@@ -298,12 +298,12 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
                     if (!d.mn.text || '' == d.mn.text)
                         return "translate(" + (d.x - Frontend.nodeWidth / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
                     else
-                        return "translate(" + (d.x - 1.5 * d.mn.text.length * Frontend.fontSize / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
+                        return "translate(" + d.x + "," + d.y + ")";
                 });
                 link.attr("transform", function (d) {
                     var dx = d.source.x - d.target.x, dy = d.source.y - d.target.y;
                     var r = 180 * Math.atan2(dy, dx) / Math.PI;
-                    return "translate(" + d.target.x + "," + d.target.y + ") rotate(" + r + ") ";
+                    return "translate(" + d.target.x + "," + d.target.y + ") rotate(" + r + ")";
                 })
                     .attr("width", function (d) {
                     var dx = d.source.x - d.target.x, dy = d.source.y - d.target.y;
@@ -390,39 +390,40 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
                 }
             })
                 .call(this.layout.drag);
-            // the background for the word/kanji
+            // the bubble for the word/kanji
             var wordCard = nodeEnter
                 .append("g")
                 .attr('style', function (n) { return "fill: " + _this.jlpt2color(n.mn.JLPT); })
-                .attr('transform', function (n) { return n.mn.isKanji ? 'translate(-5, -20)' : 'translate(-10, -20)'; })
                 .append("use")
-                .attr("xlink:href", function (n) { return n.mn.isKanji ? '#kanjiBG' : '#g12' + n.mn.text.length; });
+                .attr("xlink:href", function (n) { return n.mn.isKanji ? '#kanjiBG' : '#wc_' + n.mn.text.length; });
             wordCard
                 .on("click", function (n) { _this.hideNode(n); });
             // the spikes
             nodeEnter.append("g")
                 .attr("id", function (n) { return n.mn.id + "_spikes"; })
                 .attr("transform", "translate(0,3)");
-            // the word itself
             var text = nodeEnter.append("text")
-                .attr('class', 'text')
-                .attr('dx', function (n) { return n.mn.isKanji ? '0.2em' : '0.0em'; })
-                .attr('dy', function (n) { return n.mn.isKanji ? '-0.0em' : '0.0em'; })
+                .attr('class', 'text word')
+                .attr('dy', '8px')
                 .text(function (n) { return n.mn.text; });
+            // the superscript
+            text.append("tspan")
+                .attr('class', 'ruby')
+                .attr('x', '0')
+                .attr('y', '-11px')
+                .text(function (n) { return n.mn.superscript; });
+            // the subscript
+            text.append("tspan")
+                .attr('class', 'translation')
+                .attr("x", "0")
+                .attr("dy", "30px")
+                .text(function (n) { return n.mn.subscript; });
             text.on("dblclick", function (d) {
                 if (Math.abs(mouseDownEvent.screenX - mouseUpEvent.screenX) +
                     Math.abs(mouseDownEvent.screenY - mouseUpEvent.screenY) < 2) {
                     _this.dblclick(d);
                 }
             });
-            // the ruby
-            nodeEnter.append("text")
-                .attr("dy", "-1px")
-                .text(function (n) { return n.mn.superscript; });
-            // the english translation
-            nodeEnter.append("text")
-                .attr("dy", "3.0em")
-                .text(function (n) { return n.mn.subscript; });
             // the tooltip
             nodeEnter.append("title")
                 .text(function (n) { return n.mn.hint; });

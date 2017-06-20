@@ -181,14 +181,14 @@ define(["require", "exports"], function (require, exports) {
         });
         Object.defineProperty(KanjiNode.prototype, "subscript", {
             get: function () {
-                return [];
+                return [this.dbKanji.onyomi[0]];
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(KanjiNode.prototype, "superscript", {
             get: function () {
-                return [];
+                return [this.dbKanji.kunyomi[0]];
             },
             enumerable: true,
             configurable: true

@@ -6,11 +6,7 @@ body {
     /*http://jisho.org/search/%E5%8B%95%20%23kanji*/
     font-family: "HiraKakuPro-W3", "Hiragino Kaku Gothic Pro W3", "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", "メイリオ", Meiryo, "游ゴシック", YuGothic, "ＭＳ Ｐゴシック", "MS PGothic", "ＭＳ ゴシック", "MS Gothic", sans-serif;
     font-size: 22px;
-    text-align: left;
-    text-decoration: none;
-    font-weight: normal;
-    line-height: 1;
-    dominant-baseline: hanging;
+    text-anchor: middle;
 }
 
 .background {
@@ -100,4 +96,18 @@ circle {
 #kanjiMap {
     margin-left: 3px;
     margin-right: 3px;
+}
+
+.word {
+    font-weight: bold;
+}
+
+.ruby {
+    font-size: 10px;
+    font-weight: normal;
+}
+
+.translation {
+    font-size: 13px;
+    font-weight: normal;
 }

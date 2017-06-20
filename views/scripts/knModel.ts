@@ -121,10 +121,10 @@ export class KanjiNode extends BaseNode implements INode {
         return [this.dbKanji.character];
     }
     get subscript(): string[] {
-        return [];
+        return  [this.dbKanji.onyomi[0]];
     }
     get superscript(): string[] {
-        return [];
+        return [this.dbKanji.kunyomi[0]];
     }
     get hint(): string[] {
         return this.dbKanji.english;
