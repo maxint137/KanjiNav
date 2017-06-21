@@ -144,13 +144,13 @@ export function nodeFactory(type: NodeTypes, dbData: KNApi.DbWord & KNApi.DbKanj
         return new KanjiNode(dbData);
     }
 
-    throw new Error("Unexpected node type: " + type);
+    throw new Error(`Unexpected node type: ${type}`);
 }
 
 export class Edge {
     constructor(public source: string, public target: string) { }
     toString(): string {
-        return this.source + '-' + this.target;
+        return `${this.source}-${this.target}`;
     }
 
     // edge is always towards the actor/char
@@ -262,7 +262,7 @@ export class Graph {
     isFullyExpanded(node: INode): boolean {
 
         if (node.hood && 0 < node.hood.filter(v => !v).length) {
-            console.log("Nulls for " + node.id);
+            console.log(`Nulls for ${node.id}`);
         }
 
         return node.hood && node.hood

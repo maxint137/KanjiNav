@@ -227,7 +227,7 @@ define(["require", "exports"], function (require, exports) {
             this.target = target;
         }
         Edge.prototype.toString = function () {
-            return this.source + '-' + this.target;
+            return this.source + "-" + this.target;
         };
         // edge is always towards the actor/char
         Edge.makeEdge = function (type, thisName, otherName) {
