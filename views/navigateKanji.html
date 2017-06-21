@@ -96,18 +96,59 @@
                         <circle cx="0" cy="0" r="21" stroke-width=".025" />
                     </g>
 
-                    <g class='wordCard' filter='url(#wcShadow)' id='wc_1' transform='translate(-13.2, -22)'>
+            <!--
+            void Main()
+            {
+                var fontSize = 22;
+                var wordLength = 3;
+
+                wordCard(fontSize, 1).Dump();
+                wordCard(fontSize, 2).Dump();
+                wordCard(fontSize, 3).Dump();
+                wordCard(fontSize, 4).Dump();
+                wordCard(fontSize, 5).Dump();
+
+            }
+
+            string wordCard(int fontSize, int wordLength)
+            {
+                var boxCornerR = 8;
+                var buttonSize = 8;
+
+                var boxHeight = fontSize * 2;
+                var boxLength = Math.Max(boxHeight, fontSize * wordLength * 1.2);
+
+                var xSize = buttonSize * 0.5;
+
+                return $@"
+            <g class='wordCard' filter='url(#wcShadow)' id='wc_{wordLength}'
+                transform='translate({-boxLength / 2}, {-boxHeight / 2})'>
+                <g>
+                    <rect y='0' x='0' height='{boxHeight}' width='{boxLength}' 
+                    rx='{boxCornerR}' ry='{boxCornerR}'/>
+                    <circle cx='{boxLength}' cy='0' r='{buttonSize}'/>
+                </g>
+                
+                <g transform='rotate(45 {boxLength} 0)'>
+                    <path class='x-sign' d='M {boxLength - xSize},0 {boxLength + xSize},0'/>
+                    <path class='x-sign' d='M {boxLength},{-xSize} {boxLength},{xSize}'/>
+                </g>                      
+            </g>
+            ";
+            }
+            -->
+
+                    <g class='wordCard' filter='url(#wcShadow)' id='wc_1' transform='translate(-22, -22)'>
                         <g>
-                            <rect y='0' x='0' height='44' width='26.4' rx='8' ry='8' />
-                            <circle cx='26.4' cy='0' r='8' />
+                            <rect y='0' x='0' height='44' width='44' rx='8' ry='8' />
+                            <circle cx='44' cy='0' r='8' />
                         </g>
 
-                        <g transform='rotate(45 26.4 0)'>
-                            <path class='x-sign' d='M 22.4,0 30.4,0' />
-                            <path class='x-sign' d='M 26.4,-4 26.4,4' />
+                        <g transform='rotate(45 44 0)'>
+                            <path class='x-sign' d='M 40,0 48,0' />
+                            <path class='x-sign' d='M 44,-4 44,4' />
                         </g>
                     </g>
-
 
                     <g class='wordCard' filter='url(#wcShadow)' id='wc_2' transform='translate(-26.4, -22)'>
                         <g>
