@@ -1,6 +1,6 @@
 import * as KNApi from "knApi";
 
-import { kanjis, words } from "./data"
+import { kanjis, words } from "./data";
 
 class LocalDictionary implements KNApi.IJapaneseDictionary {
 

@@ -683,10 +683,10 @@ export class Frontend {
             Y = Math.max(Y, v.y + Frontend.nodeHeight / 2);
         });
         return {
-            x,
             X,
-            y,
             Y,
+            x,
+            y,
         };
     }
 

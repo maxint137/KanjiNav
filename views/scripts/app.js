@@ -1,6 +1,5 @@
 var fe = {};
 
-
 function setupPageControllers() {
     // 'jquery' returns the jQuery object into '$'
     require(['jquery', 'jquery-ui'], function($) {

@@ -7,7 +7,10 @@ var watch = require('gulp-watch');
 
 var setupRoot = "c:/temp/kanjiNavSetup";
 
-gulp.task('default', ['copy_manifest', 'copy_views', 'compress1', 'compress2', 'copy_extern', 'copy_extern_images', 'copy_fonts', 'cdn2local']);
+gulp.task('default', function() {
+    console.log('Hello Gulp!');
+});
+gulp.task('things_for_chrome', ['copy_manifest', 'copy_views', 'compress1', 'compress2', 'copy_extern', 'copy_extern_images', 'copy_fonts', 'cdn2local']);
 
 gulp.task('cdn2local', function() {
     return watch([
@@ -104,3 +107,16 @@ gulp.task('copy_fonts', function() {
         ])
         .pipe(gulp.dest(setupRoot + '/chromexDebug/fonts'))
 });
+
+
+var tslint = require("gulp-tslint");
+gulp.task("tslint", () =>
+    gulp.src([
+        './views/scripts/**.ts',
+        './tests/**/**.ts',
+    ])
+    .pipe(tslint({
+        formatter: "verbose"
+    }))
+    .pipe(tslint.report())
+);
