@@ -12,26 +12,26 @@ import * as d3 from 'd3'
 
 import { INode as KNModel_INode, Graph as KNModel_Graph, NodeTypes as KNModel_NodeTypes } from './knModel'
 
-class ViewNodeBase implements KNModel_INode{
+class ViewNodeBase implements KNModel_INode {
 
     constructor(public mn: KNModel_INode) {
     }
 
-    get text(): string{ return this.mn.text;}
-    get type(): KNModel_NodeTypes{ return this.mn.type;}
-    get id(): string{ return this.mn.id;}
-    get title(): string[]{ return this.mn.title;}
-    get subscript(): string[]{ return this.mn.subscript;}
-    get superscript(): string[]{ return this.mn.superscript;}
-    get hint(): string[]{ return this.mn.hint;}
-    get JLPT(): KNApi.JlptLevel{ return this.mn.JLPT;}
-    get isKanji(): boolean{ return this.mn.isKanji;}
-    get hood(): KNModel_INode[]{ return this.mn.hood;}
+    get text(): string { return this.mn.text; }
+    get type(): KNModel_NodeTypes { return this.mn.type; }
+    get id(): string { return this.mn.id; }
+    get title(): string[] { return this.mn.title; }
+    get subscript(): string[] { return this.mn.subscript; }
+    get superscript(): string[] { return this.mn.superscript; }
+    get hint(): string[] { return this.mn.hint; }
+    get JLPT(): KNApi.JlptLevel { return this.mn.JLPT; }
+    get isKanji(): boolean { return this.mn.isKanji; }
+    get hood(): KNModel_INode[] { return this.mn.hood; }
     get degree(): number { return this.mn.degree; }
 }
 
-class ViewNode extends ViewNodeBase implements  cola.Node {
-    
+class ViewNode extends ViewNodeBase implements cola.Node {
+
     constructor(mn: KNModel_INode) {
         super(mn);
         this.hidden = false;
@@ -193,7 +193,7 @@ export class Frontend {
         addGradient("ReverseEdgeGradient", "darkGray", 1, this.red, 1);
     }
 
-
+    // UF: these are not sufficient anymore, we must (de)serialize the model data as well
     saveGraph() {
         this.viewGraphSaved.nodes = this.viewGraph.nodes;
         this.refreshViewGraph();
@@ -241,7 +241,6 @@ export class Frontend {
 
         let neighborsExpanded: JQueryPromise<KNModel_INode[]> = this.modelGraph.expandNeighbors(focus.mn, (mn: KNModel_INode) => {
             if (!this.inView(this.findNode(mn))) {
-                //this.addViewNode(new ViewNode(mn), focus);
                 this.addViewNode(mn, focus);
             }
         });
@@ -250,23 +249,23 @@ export class Frontend {
         this.refreshViewGraph();
 
         $.when(neighborsExpanded).then((hood) => this.addViewLinks(node, hood));
-        //$.when(neighborsExpanded).then((hood) => this.refreshViewGraph(node, hood));
     }
 
     addViewLinks(node: KNModel_INode, hood: KNModel_INode[]) {
         let u: ViewNode = this.findNode(node);
 
-        hood.forEach(h => {
-            let newLink: ViewLink = { source: u, target: this.findNode(h) };
+        typeof hood === 'undefined' ||
+            hood.forEach(h => {
+                let newLink: ViewLink = { source: u, target: this.findNode(h) };
 
-            // make sure it is a new one
-            let oldLinks1: ViewLink[] = this.viewGraph.links.filter((l) => l.source.id == newLink.source.id && l.target.id == newLink.target.id);
-            let oldLinks2: ViewLink[] = this.viewGraph.links.filter((l) => l.target.id == newLink.source.id && l.source.id == newLink.target.id);
+                // make sure it is a new one
+                let oldLinks1: ViewLink[] = this.viewGraph.links.filter((l) => l.source.id == newLink.source.id && l.target.id == newLink.target.id);
+                let oldLinks2: ViewLink[] = this.viewGraph.links.filter((l) => l.target.id == newLink.source.id && l.source.id == newLink.target.id);
 
-            if (0 === oldLinks1.length && 0 === oldLinks2.length) {
-                this.viewGraph.links.push(newLink);
-            }
-        });
+                if (0 === oldLinks1.length && 0 === oldLinks2.length) {
+                    this.viewGraph.links.push(newLink);
+                }
+            });
 
         this.refreshViewGraph();
     }
@@ -355,7 +354,7 @@ export class Frontend {
             node.attr("transform", (d: ViewNode) => {
 
                 if (!d.mn.text || '' == d.mn.text)
-                    return "translate(" + (d.x - Frontend.nodeWidth / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
+                    return `translate(${d.x - Frontend.nodeWidth / 2}, ${d.y - Frontend.nodeHeight / 2})`;
                 else
                     return `translate(${d.x},${d.y})`;
             });
@@ -367,7 +366,7 @@ export class Frontend {
                 var r = 180 * Math.atan2(dy, dx) / Math.PI;
 
                 return `translate(${d.target.x},${d.target.y}) rotate(${r})`;
-                
+
             })
                 .attr("width", (d: ViewLink) => {
                     var dx = d.source.x - d.target.x,
@@ -471,11 +470,11 @@ export class Frontend {
         // the bubble for the word/kanji
         let wordCard = nodeEnter
             .append("g")
-            .attr('style', (n: ViewNode) => "fill: " + this.jlpt2color(n.mn.JLPT))
+            .attr('style', (n: ViewNode) => `fill: ${this.jlpt2color(n.mn.JLPT)}`)
             // create a reference to the <g> id sections defined in the existing svg markup exported from Inkscape
             .append("use")
             // kanjiBG or g12??
-            .attr("xlink:href", (n: ViewNode) => n.mn.isKanji ? '#kanjiBG' : '#wc_' + n.mn.text.length)
+            .attr("xlink:href", (n: ViewNode) => n.mn.isKanji ? '#kanjiBG' : `#wc_${n.mn.text.length}`)
             ;
 
         wordCard
@@ -484,26 +483,26 @@ export class Frontend {
 
         // the spikes
         nodeEnter.append("g")
-            .attr("id", (n: ViewNode) => n.mn.id + "_spikes")
+            .attr("id", (n: ViewNode) => `${n.mn.id}_spikes`)
             .attr("transform", "translate(0,3)")
             ;
-            
+
         let text = nodeEnter.append("text")
             .attr('class', 'text word')
             .attr('dy', '8px')
             .text((n: ViewNode) => n.mn.text)
             ;
-            
-         // the superscript
-       text.append("tspan")
+
+        // the superscript
+        text.append("tspan")
             .attr('class', 'ruby')
             .attr('x', '0')
             .attr('y', '-11px')
-            .text((n: ViewNode) => n.mn.superscript)
+            .text((n: ViewNode) => n.superscript[0] == "" ? " " : n.mn.superscript)
             ;
 
         // the subscript
-       text.append("tspan")
+        text.append("tspan")
             .attr('class', 'translation')
             .attr("x", "0")
             .attr("dy", "30px")
@@ -543,21 +542,21 @@ export class Frontend {
             let rect = new this.webColaLibrary.Rectangle(0, w, 0, h);
             let vi = rect.rayIntersection(x, y);
 
-            var dataView = d3.select("#" + v.mn.id + "_spikes");
+            var dataView = d3.select(`#${v.mn.id}_spikes`);
 
             dataView.append("rect")
                 .attr("class", "spike")
                 .attr("rx", 1).attr("ry", 1)
                 .attr("x", 0).attr("y", 0)
                 .attr("width", 10).attr("height", 2)
-                .attr("transform", "translate(" + vi.x + "," + vi.y + ") rotate(" + (360 * i / hiddenEdges) + ")")
+                .attr("transform", `translate(${vi.x},${vi.y}) rotate(${360 * i / hiddenEdges})`)
                 .on("dblclick", () => this.dblclick(v));
         }
     }
 
     // stopping the hint
     unHintNeighbors(v: ViewNode) {
-        var dataView = d3.select("#" + v.mn.id + "_spikes");
+        var dataView = d3.select('#${v.mn.id}_spikes');
         dataView.selectAll(".spike").remove();
     }
 
@@ -573,7 +572,7 @@ export class Frontend {
 
         // add the word to the combo, if it's not there yet
         let hiddenWordsCombo: JQuery = $('#hiddenWordsCombo');
-        if (0 == hiddenWordsCombo.find('option[value="' + n.id + '"]').length) {
+        if (0 == hiddenWordsCombo.find(`option[value="${n.id}"]`).length) {
             hiddenWordsCombo.append($('<option>', {
                 value: n.id,
                 text: n.mn.text
@@ -582,7 +581,7 @@ export class Frontend {
     }
 
     findNode(n: KNModel_INode): ViewNode {
-        let fen = this.viewGraph.nodes.filter(fen=> fen.id === n.id);
+        let fen = this.viewGraph.nodes.filter(fen => fen.id === n.id);
         return fen[0];
 
     }
@@ -715,7 +714,7 @@ export class Frontend {
 
         // read the current zoom translation vector and the current zoom scale
         (transition ? this.vis.transition() : this.vis)
-            .attr("transform", "translate(" + this.zoom.translate() + ") scale(" + this.zoom.scale() + ")");
+            .attr("transform", `translate(${this.zoom.translate()}) scale(${this.zoom.scale()})`);
     }
 
     zoomToFit() {
@@ -736,7 +735,7 @@ export class Frontend {
             url = window.location.href;
         }
         name = name.replace(/[\[\]]/g, "\\$&");
-        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        var regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`),
             results = regex.exec(url);
         if (!results) return null;
         if (!results[2]) return '';
@@ -764,7 +763,7 @@ export class Frontend {
     }
 
     setupJlptChecks() {
-        
+
         this.jlpts = this.storageGet(Frontend.jlptSelectedLevelsCookieName);
         if (!this.jlpts) {
             this.jlptSelect(5);
@@ -773,15 +772,15 @@ export class Frontend {
 
         this.jlpts.split('').forEach(n => {
 
-            $('#JLPT' + n).prop('checked', true);
-            $('#JLPT' + n).parents('label').addClass('active');
+            $(`#JLPT${n}`).prop('checked', true);
+            $(`#JLPT${n}`).parents('label').addClass('active');
         });
     }
 
     removeWordFromHistory(selectBoxId: string, word: string) {
 
         // delete it from the drop-down
-        $('#' + selectBoxId + " option[value='" + word + "']").remove();
+        $(`#${selectBoxId} option[value='${word}']`).remove();
 
         // and the history
         this.updateWordInHistory(word, false);
@@ -837,7 +836,7 @@ export class Frontend {
         curSel = curSel ? curSel : '';
 
         // we land here before the control has reflected the new status
-        let willBecomeChecked: boolean = !$('#JLPT' + n).is(':checked');
+        let willBecomeChecked: boolean = !$(`#JLPT${n}`).is(':checked');
         this.jlpts = curSel.replace(new RegExp(n.toString(), 'g'), '') + (willBecomeChecked ? n.toString() : '');
 
         this.storageSet(Frontend.jlptSelectedLevelsCookieName, this.jlpts);
@@ -859,7 +858,7 @@ export class Frontend {
 
     unHideWord(word: string) {
 
-        $("#hiddenWordsCombo option[value='" + word + "']").remove();
+        $(`#hiddenWordsCombo option[value='${word}']`).remove();
 
         this.viewGraph.nodes.filter(n => n.id == word)[0].hidden = false;
         this.update();

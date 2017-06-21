@@ -6,7 +6,7 @@ interface Map<T> {
 }
 
 export type NodeTypes = 'Word' | 'Kanji';
-function opposite(tp: NodeTypes): NodeTypes{
+function opposite(tp: NodeTypes): NodeTypes {
     return tp == 'Word' ? 'Kanji' : 'Word';
 }
 
@@ -27,7 +27,7 @@ export interface INode {
     JLPT: KNApi.JlptLevel;
 
     isKanji: boolean;
-    
+
     hood: Array<INode>;
     degree: number;
 }
@@ -40,11 +40,11 @@ class BaseNode implements INode {
     get JLPT(): KNApi.JlptLevel {
         return this.dictEntry.JLPT;
     }
-    
+
     get isKanji(): boolean {
         return this.type == "Kanji";
     }
-    
+
     get id(): string {
         return `${this.type}_${this.text}`;
     }
@@ -121,7 +121,7 @@ export class KanjiNode extends BaseNode implements INode {
         return [this.dbKanji.character];
     }
     get subscript(): string[] {
-        return  [this.dbKanji.onyomi[0]];
+        return [this.dbKanji.onyomi[0]];
     }
     get superscript(): string[] {
         return [this.dbKanji.kunyomi[0]];
@@ -144,13 +144,13 @@ export function nodeFactory(type: NodeTypes, dbData: KNApi.DbWord & KNApi.DbKanj
         return new KanjiNode(dbData);
     }
 
-    throw new Error("Unexpected node type: " + type);
+    throw new Error(`Unexpected node type: ${type}`);
 }
 
 export class Edge {
     constructor(public source: string, public target: string) { }
     toString(): string {
-        return this.source + '-' + this.target;
+        return `${this.source}-${this.target}`;
     }
 
     // edge is always towards the actor/char
@@ -211,7 +211,7 @@ export class Graph {
                 }
 
             });
-            
+
             // call back the user
             userCallback === undefined || userCallback(nNode);
 
@@ -227,6 +227,12 @@ export class Graph {
     expandNeighbors(parentNode: INode, f: (v: INode) => void): JQueryPromise<INode[]> {
 
         console.assert(0 === parentNode.hood.filter(h => !h).length, `Nulls in the hood for '${parentNode.id}'`);
+
+        if (0 === parentNode.hood.length) {
+            let d: JQueryDeferred<INode[]> = $.Deferred<INode[]>();
+            d.resolveWith([]);
+            return d.promise();
+        }
 
         // fetch the nodes listed in the hood, bridge edges to these, and call back the client (so it can addViewNode)
         let hoodLoaded: JQueryPromise<INode>[] = parentNode.hood
@@ -245,7 +251,7 @@ export class Graph {
         let d: JQueryDeferred<INode[]> = $.Deferred<INode[]>();
 
         $.when.apply($, hoodLoaded)
-            .then(function() {
+            .then(function () {
                 let neighbors: INode[] = Array.prototype.slice.call(arguments);
                 d.resolve(neighbors);
             });
@@ -256,7 +262,7 @@ export class Graph {
     isFullyExpanded(node: INode): boolean {
 
         if (node.hood && 0 < node.hood.filter(v => !v).length) {
-            console.log("Nulls for " + node.id);
+            console.log(`Nulls for ${node.id}`);
         }
 
         return node.hood && node.hood

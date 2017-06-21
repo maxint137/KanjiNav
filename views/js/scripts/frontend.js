@@ -169,6 +169,7 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             addGradient("EdgeGradient", this.red, 1, "darkGray", 1);
             addGradient("ReverseEdgeGradient", "darkGray", 1, this.red, 1);
         };
+        // UF: these are not sufficient anymore, we must (de)serialize the model data as well
         Frontend.prototype.saveGraph = function () {
             this.viewGraphSaved.nodes = this.viewGraph.nodes;
             this.refreshViewGraph();
@@ -206,27 +207,26 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             var focus = this.viewGraph.nodes.filter(function (vn) { return vn.mn.id == node.id; })[0];
             var neighborsExpanded = this.modelGraph.expandNeighbors(focus.mn, function (mn) {
                 if (!_this.inView(_this.findNode(mn))) {
-                    //this.addViewNode(new ViewNode(mn), focus);
                     _this.addViewNode(mn, focus);
                 }
             });
             // not sure why do we want to have it here in addition to the line just below...
             this.refreshViewGraph();
             $.when(neighborsExpanded).then(function (hood) { return _this.addViewLinks(node, hood); });
-            //$.when(neighborsExpanded).then((hood) => this.refreshViewGraph(node, hood));
         };
         Frontend.prototype.addViewLinks = function (node, hood) {
             var _this = this;
             var u = this.findNode(node);
-            hood.forEach(function (h) {
-                var newLink = { source: u, target: _this.findNode(h) };
-                // make sure it is a new one
-                var oldLinks1 = _this.viewGraph.links.filter(function (l) { return l.source.id == newLink.source.id && l.target.id == newLink.target.id; });
-                var oldLinks2 = _this.viewGraph.links.filter(function (l) { return l.target.id == newLink.source.id && l.source.id == newLink.target.id; });
-                if (0 === oldLinks1.length && 0 === oldLinks2.length) {
-                    _this.viewGraph.links.push(newLink);
-                }
-            });
+            typeof hood === 'undefined' ||
+                hood.forEach(function (h) {
+                    var newLink = { source: u, target: _this.findNode(h) };
+                    // make sure it is a new one
+                    var oldLinks1 = _this.viewGraph.links.filter(function (l) { return l.source.id == newLink.source.id && l.target.id == newLink.target.id; });
+                    var oldLinks2 = _this.viewGraph.links.filter(function (l) { return l.target.id == newLink.source.id && l.source.id == newLink.target.id; });
+                    if (0 === oldLinks1.length && 0 === oldLinks2.length) {
+                        _this.viewGraph.links.push(newLink);
+                    }
+                });
             this.refreshViewGraph();
         };
         // sync the viewGraph with the modelGraph
@@ -296,7 +296,7 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
                 // so that these will move to the designated positions
                 node.attr("transform", function (d) {
                     if (!d.mn.text || '' == d.mn.text)
-                        return "translate(" + (d.x - Frontend.nodeWidth / 2) + "," + (d.y - Frontend.nodeHeight / 2) + ")";
+                        return "translate(" + (d.x - Frontend.nodeWidth / 2) + ", " + (d.y - Frontend.nodeHeight / 2) + ")";
                     else
                         return "translate(" + d.x + "," + d.y + ")";
                 });
@@ -395,7 +395,7 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
                 .append("g")
                 .attr('style', function (n) { return "fill: " + _this.jlpt2color(n.mn.JLPT); })
                 .append("use")
-                .attr("xlink:href", function (n) { return n.mn.isKanji ? '#kanjiBG' : '#wc_' + n.mn.text.length; });
+                .attr("xlink:href", function (n) { return n.mn.isKanji ? '#kanjiBG' : "#wc_" + n.mn.text.length; });
             wordCard
                 .on("click", function (n) { _this.hideNode(n); });
             // the spikes
@@ -411,7 +411,7 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
                 .attr('class', 'ruby')
                 .attr('x', '0')
                 .attr('y', '-11px')
-                .text(function (n) { return n.mn.superscript; });
+                .text(function (n) { return n.superscript[0] == "" ? " " : n.mn.superscript; });
             // the subscript
             text.append("tspan")
                 .attr('class', 'translation')
@@ -447,13 +447,13 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
                     .attr("rx", 1).attr("ry", 1)
                     .attr("x", 0).attr("y", 0)
                     .attr("width", 10).attr("height", 2)
-                    .attr("transform", "translate(" + vi.x + "," + vi.y + ") rotate(" + (360 * i / hiddenEdges) + ")")
+                    .attr("transform", "translate(" + vi.x + "," + vi.y + ") rotate(" + 360 * i / hiddenEdges + ")")
                     .on("dblclick", function () { return _this.dblclick(v); });
             }
         };
         // stopping the hint
         Frontend.prototype.unHintNeighbors = function (v) {
-            var dataView = d3.select("#" + v.mn.id + "_spikes");
+            var dataView = d3.select('#${v.mn.id}_spikes');
             dataView.selectAll(".spike").remove();
         };
         Frontend.prototype.hideNode = function (n) {
@@ -465,7 +465,7 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             this.update();
             // add the word to the combo, if it's not there yet
             var hiddenWordsCombo = $('#hiddenWordsCombo');
-            if (0 == hiddenWordsCombo.find('option[value="' + n.id + '"]').length) {
+            if (0 == hiddenWordsCombo.find("option[value=\"" + n.id + "\"]").length) {
                 hiddenWordsCombo.append($('<option>', {
                     value: n.id,
                     text: n.mn.text
@@ -621,13 +621,13 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
                 this.jlptSelect(4);
             }
             this.jlpts.split('').forEach(function (n) {
-                $('#JLPT' + n).prop('checked', true);
-                $('#JLPT' + n).parents('label').addClass('active');
+                $("#JLPT" + n).prop('checked', true);
+                $("#JLPT" + n).parents('label').addClass('active');
             });
         };
         Frontend.prototype.removeWordFromHistory = function (selectBoxId, word) {
             // delete it from the drop-down
-            $('#' + selectBoxId + " option[value='" + word + "']").remove();
+            $("#" + selectBoxId + " option[value='" + word + "']").remove();
             // and the history
             this.updateWordInHistory(word, false);
         };
@@ -668,7 +668,7 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             var curSel = this.storageGet(Frontend.jlptSelectedLevelsCookieName);
             curSel = curSel ? curSel : '';
             // we land here before the control has reflected the new status
-            var willBecomeChecked = !$('#JLPT' + n).is(':checked');
+            var willBecomeChecked = !$("#JLPT" + n).is(':checked');
             this.jlpts = curSel.replace(new RegExp(n.toString(), 'g'), '') + (willBecomeChecked ? n.toString() : '');
             this.storageSet(Frontend.jlptSelectedLevelsCookieName, this.jlpts);
             this.refreshViewGraph();
