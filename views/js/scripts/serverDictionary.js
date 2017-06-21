@@ -1,6 +1,4 @@
-/// <reference path="../node_modules/@types/jquery/index.d.ts" />
-/// <reference path="knApi.ts" />
-define(["require", "exports"], function (require, exports) {
+define(["require", "exports", "../views/node_modules/@types/jquery/index.d.ts"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var ServerDictionary = (function () {

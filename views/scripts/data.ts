@@ -1,4 +1,6 @@
-var kanjisDB = [{
+/* cSpell:disable */
+/* tslint:disable */
+const kanjisDB = [{
         "_id": {
             "$oid": "kc1803"
         },
@@ -65452,7 +65454,7 @@ var kanjisDB = [{
     },
 ];
 
-var wordsDB = [{
+const wordsDB = [{
         "_id": {
             "$oid": "w0e70a"
         },
@@ -137601,8 +137603,3 @@ var wordsDB = [{
 
 export let  kanjis: any =  kanjisDB;
 export let  words: any = wordsDB;
-
-
-
-
-

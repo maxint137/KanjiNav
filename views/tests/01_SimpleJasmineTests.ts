@@ -1,7 +1,7 @@
-/// <reference path="../node_modules/@types/jasmine/index.d.ts" />
+import "../node_modules/@types/jasmine/index.d.ts";
 
-import { JLPTDictionary, NodeType, ApiNode } from '../scripts/kanjiNavBase'
-import { Dictionary } from '../scripts/localDictionary'
+import * as KNApi from "../scripts/knApi";
+import { Dictionary } from "../scripts/localDictionary";
 
 describe("tests/localDictionary.ts ", () => {
 
@@ -10,21 +10,19 @@ describe("tests/localDictionary.ts ", () => {
     beforeEach((done) => {
         returnedValue = "no_return_value";
 
-        let dict: KNApi.JapaneseDictionary = Dictionary;
-        
-        let hood: JQueryPromise<KNApi.DbKanji> = dict.lookupKanji("山");
+        const dict: KNApi.IJapaneseDictionary = Dictionary;
 
-        $.when(hood).then(c => {
-            returnedValue = c._dbId;
+        const hood: JQueryPromise<KNApi.DbKanji> = dict.lookupKanji("山");
+
+        $.when(hood).then((c) => {
+            returnedValue = c.dbId;
             done();
         });
     });
-
-
     it("should return success after 1 second", (done) => {
         expect(returnedValue).toEqual("山");
 
         done();
     });
-}
+},
 );

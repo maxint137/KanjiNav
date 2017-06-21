@@ -1,7 +1,3 @@
-/// <reference path="../node_modules/@types/webcola/index.d.ts" />
-/// <reference path="../node_modules/@types/js-cookie/index.d.ts" />
-/// <reference path="../node_modules/@types/jquery/index.d.ts" />
-/// <reference path="knApi.ts" />
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -103,12 +99,12 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             this.calcMySize();
             this.red = "rgb(125, 0, 0)";
             this.viewGraph = {
+                links: [],
                 nodes: [],
-                links: []
             };
             this.viewGraphSaved = {
+                links: [],
                 nodes: [],
-                links: []
             };
             (this.layout = webColaLibrary.d3adaptor(d3))
                 .linkDistance(80)
@@ -128,20 +124,44 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             this.defineGradients();
             this.setupJlptChecks();
         }
+        // adds a word to graph
+        Frontend.prototype.main = function (word) {
+            var _this = this;
+            // Note: http://piotrwalat.net/arrow-function-expressions-in-typescript/
+            // Standard functions will dynamically bind this depending on execution context (just like in JavaScript)
+            // Arrow functions on the other hand will preserve this of enclosing context.
+            // var d = this.modelGraph.loadNode(word.length == 1
+            //  ? KNModel_NodeType.Char
+            //  : KNModel_NodeType.Word, word, v => this.addViewNode(v));
+            var d = this.modelGraph.loadNode(word.length === 1 ? "Kanji" : "Word", word, function (v) { return _this.addViewNode(v); });
+            $.when(d).then(function (loadedNode) { _this.refocus(loadedNode); });
+        };
+        Frontend.prototype.clearAll = function () {
+            this.viewGraph = {
+                links: [],
+                nodes: [],
+            };
+            this.update();
+            this.modelGraph.reset();
+        };
+        Frontend.prototype.fullScreenCancel = function () {
+            this.outer.attr("width", this.width).attr("height", this.height);
+            this.zoomToFit();
+        };
         // add layers and zooming to the outer SVG
         Frontend.prototype.setupZooming = function () {
             var _this = this;
             // https://github.com/d3/d3-3.x-api-reference/blob/master/Zoom-Behavior.md
             // Construct a new zoom behavior:
             this.zoom = d3.behavior.zoom();
-            this.outer.append('rect')
-                .attr('class', 'background')
-                .attr('width', "100%")
-                .attr('height', "100%")
+            this.outer.append("rect")
+                .attr("class", "background")
+                .attr("width", "100%")
+                .attr("height", "100%")
                 .call(this.zoom.on("zoom", function () { return _this.redraw(); }))
                 .on("dblclick.zoom", function () { return _this.zoomToFit(); });
             // the layers in play
-            this.vis = this.outer.append('g');
+            this.vis = this.outer.append("g");
             this.edgesLayer = this.vis.append("g");
             this.nodesLayer = this.vis.append("g");
         };
@@ -178,22 +198,12 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             this.viewGraph.nodes = this.viewGraphSaved.nodes;
             this.refreshViewGraph();
         };
-        // adds a word to graph
-        Frontend.prototype.main = function (word) {
-            var _this = this;
-            // Note: http://piotrwalat.net/arrow-function-expressions-in-typescript/
-            // Standard functions will dynamically bind this depending on execution context (just like in JavaScript)
-            // Arrow functions on the other hand will preserve this of enclosing context. 
-            //var d = this.modelGraph.loadNode(word.length == 1 ? KNModel_NodeType.Char : KNModel_NodeType.Word, word, v => this.addViewNode(v));
-            var d = this.modelGraph.loadNode(word.length == 1 ? "Kanji" : "Word", word, function (v) { return _this.addViewNode(v); });
-            $.when(d).then(function (loadedNode) { _this.refocus(loadedNode); });
-        };
         // adds the node to the viewGraph, picks the initial position based on the startPos and assigns viewGraphId
         // used to schedule the images rendering
         Frontend.prototype.addViewNode = function (mn, startPos) {
             var vn = new ViewNode(mn);
             vn.viewGraphId = this.viewGraph.nodes.length;
-            if (typeof startPos !== 'undefined') {
+            if (typeof startPos !== "undefined") {
                 vn.x = startPos.x;
                 vn.y = startPos.y;
             }
@@ -203,8 +213,8 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
         Frontend.prototype.refocus = function (node) {
             var _this = this;
             // find the corresponding view-node:
-            //let focus: ViewNode = this.viewGraph.nodes.filter((vn: ViewNode) => vn.id == node.id)[0];
-            var focus = this.viewGraph.nodes.filter(function (vn) { return vn.mn.id == node.id; })[0];
+            // let focus: ViewNode = this.viewGraph.nodes.filter((vn: ViewNode) => vn.id == node.id)[0];
+            var focus = this.viewGraph.nodes.filter(function (vn) { return vn.mn.id === node.id; })[0];
             var neighborsExpanded = this.modelGraph.expandNeighbors(focus.mn, function (mn) {
                 if (!_this.inView(_this.findNode(mn))) {
                     _this.addViewNode(mn, focus);
@@ -217,16 +227,21 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
         Frontend.prototype.addViewLinks = function (node, hood) {
             var _this = this;
             var u = this.findNode(node);
-            typeof hood === 'undefined' ||
+            if (typeof hood !== "undefined") {
                 hood.forEach(function (h) {
                     var newLink = { source: u, target: _this.findNode(h) };
                     // make sure it is a new one
-                    var oldLinks1 = _this.viewGraph.links.filter(function (l) { return l.source.id == newLink.source.id && l.target.id == newLink.target.id; });
-                    var oldLinks2 = _this.viewGraph.links.filter(function (l) { return l.target.id == newLink.source.id && l.source.id == newLink.target.id; });
+                    var oldLinks1 = _this.viewGraph.links.filter(function (l) {
+                        return l.source.id === newLink.source.id && l.target.id === newLink.target.id;
+                    });
+                    var oldLinks2 = _this.viewGraph.links.filter(function (l) {
+                        return l.target.id === newLink.source.id && l.source.id === newLink.target.id;
+                    });
                     if (0 === oldLinks1.length && 0 === oldLinks2.length) {
                         _this.viewGraph.links.push(newLink);
                     }
                 });
+            }
             this.refreshViewGraph();
         };
         // sync the viewGraph with the modelGraph
@@ -249,7 +264,7 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
                 if (_this.inView(u) && _this.inView(v)) {
                     _this.viewGraph.links.push({
                         source: u,
-                        target: v
+                        target: v,
                     });
                 }
                 // UF: not sure about these:
@@ -266,14 +281,14 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
         };
         Frontend.prototype.nodeIsNotFilteredOut = function (n) {
             return n.mn.isKanji
-                || (false == n.hidden && this.isSelectedJlpt(n.mn.JLPT));
+                || (false === n.hidden && this.isSelectedJlpt(n.mn.JLPT));
         };
         Frontend.prototype.filteredNodes = function () {
             var _this = this;
             return this.viewGraph.nodes.filter(function (n) { return _this.nodeIsNotFilteredOut(n); });
         };
         Frontend.prototype.isSelectedJlpt = function (level) {
-            return '' == this.jlpts || 0 <= this.jlpts.indexOf(level.toString());
+            return "" === this.jlpts || 0 <= this.jlpts.indexOf(level.toString());
         };
         Frontend.prototype.filteredLinks = function () {
             var _this = this;
@@ -292,21 +307,26 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             var node = this.updateNodes();
             var link = this.updateLinks();
             this.layout.on("tick", function () {
-                // setting the transform attribute to the array will result in synchronous calls to the callback provided for each node/link
+                // setting the transform attribute to the array will result in
+                // synchronous calls to the callback provided for each node/link
                 // so that these will move to the designated positions
                 node.attr("transform", function (d) {
-                    if (!d.mn.text || '' == d.mn.text)
+                    if (!d.mn.text || "" === d.mn.text) {
                         return "translate(" + (d.x - Frontend.nodeWidth / 2) + ", " + (d.y - Frontend.nodeHeight / 2) + ")";
-                    else
+                    }
+                    else {
                         return "translate(" + d.x + "," + d.y + ")";
+                    }
                 });
                 link.attr("transform", function (d) {
-                    var dx = d.source.x - d.target.x, dy = d.source.y - d.target.y;
+                    var dx = d.source.x - d.target.x;
+                    var dy = d.source.y - d.target.y;
                     var r = 180 * Math.atan2(dy, dx) / Math.PI;
                     return "translate(" + d.target.x + "," + d.target.y + ") rotate(" + r + ")";
                 })
                     .attr("width", function (d) {
-                    var dx = d.source.x - d.target.x, dy = d.source.y - d.target.y;
+                    var dx = d.source.x - d.target.x;
+                    var dy = d.source.y - d.target.y;
                     return Math.sqrt(dx * dx + dy * dy);
                 });
             });
@@ -314,7 +334,7 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
         // re-populates edgesLayer with links
         Frontend.prototype.updateLinks = function () {
             var _this = this;
-            // use the viewGraph's links to populate the edges-layer with objects based on the data:
+            // use the viewGraph"s links to populate the edges-layer with objects based on the data:
             var link = this.edgesLayer.selectAll(".link")
                 .data(this.filteredLinks());
             // for every new entry insert a rect of class .link and initial height and position
@@ -348,7 +368,8 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             });
             // erase the nodes which aren't here anymore
             node.exit().remove();
-            // remember the last place/time the mouse/touch event has occurred, so we can distinguish between a move and a click/tap
+            // remember the last place/time the mouse/touch event has occurred,
+            // so we can distinguish between a move and a click/tap
             var mouseDownEvent;
             var mouseUpEvent;
             var touchstartEvent;
@@ -393,9 +414,9 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             // the bubble for the word/kanji
             var wordCard = nodeEnter
                 .append("g")
-                .attr('style', function (n) { return "fill: " + _this.jlpt2color(n.mn.JLPT); })
+                .attr("style", function (n) { return "fill: " + _this.jlpt2color(n.mn.JLPT); })
                 .append("use")
-                .attr("xlink:href", function (n) { return n.mn.isKanji ? '#kanjiBG' : "#wc_" + n.mn.text.length; });
+                .attr("xlink:href", function (n) { return n.mn.isKanji ? "#kanjiBG" : "#wc_" + n.mn.text.length; });
             wordCard
                 .on("click", function (n) { _this.hideNode(n); });
             // the spikes
@@ -403,18 +424,18 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
                 .attr("id", function (n) { return n.mn.id + "_spikes"; })
                 .attr("transform", "translate(0,3)");
             var text = nodeEnter.append("text")
-                .attr('class', 'text word')
-                .attr('dy', '8px')
+                .attr("class", "text word")
+                .attr("dy", "8px")
                 .text(function (n) { return n.mn.text; });
             // the superscript
             text.append("tspan")
-                .attr('class', 'ruby')
-                .attr('x', '0')
-                .attr('y', '-11px')
-                .text(function (n) { return n.superscript[0] == "" ? " " : n.mn.superscript; });
+                .attr("class", "ruby")
+                .attr("x", "0")
+                .attr("y", "-11px")
+                .text(function (n) { return n.superscript[0] === "" ? " " : n.mn.superscript; });
             // the subscript
             text.append("tspan")
-                .attr('class', 'translation')
+                .attr("class", "translation")
                 .attr("x", "0")
                 .attr("dy", "30px")
                 .text(function (n) { return n.mn.subscript; });
@@ -433,12 +454,16 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
         // animates the mouse-over hint
         Frontend.prototype.hintNeighbors = function (v) {
             var _this = this;
-            if (!v.mn.hood)
+            if (!v.mn.hood) {
                 return;
+            }
             var hiddenEdges = v.mn.hood.length + 1 - v.mn.degree;
             var r = 2 * Math.PI / hiddenEdges;
             for (var i = 0; i < hiddenEdges; ++i) {
-                var w = Frontend.nodeWidth - 6, h = Frontend.nodeHeight - 6, x = w / 2 + 25 * Math.cos(r * i), y = h / 2 + 30 * Math.sin(r * i);
+                var w = Frontend.nodeWidth - 6;
+                var h = Frontend.nodeHeight - 6;
+                var x = w / 2 + 25 * Math.cos(r * i);
+                var y = h / 2 + 30 * Math.sin(r * i);
                 var rect = new this.webColaLibrary.Rectangle(0, w, 0, h);
                 var vi = rect.rayIntersection(x, y);
                 var dataView = d3.select("#" + v.mn.id + "_spikes");
@@ -453,43 +478,42 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
         };
         // stopping the hint
         Frontend.prototype.unHintNeighbors = function (v) {
-            var dataView = d3.select('#${v.mn.id}_spikes');
+            var dataView = d3.select("#" + v.mn.id + "_spikes");
             dataView.selectAll(".spike").remove();
         };
         Frontend.prototype.hideNode = function (n) {
-            // don't hide kanji
+            // don"t hide kanji
             if (n.mn.isKanji) {
                 return;
             }
             n.hidden = true;
             this.update();
-            // add the word to the combo, if it's not there yet
-            var hiddenWordsCombo = $('#hiddenWordsCombo');
-            if (0 == hiddenWordsCombo.find("option[value=\"" + n.id + "\"]").length) {
-                hiddenWordsCombo.append($('<option>', {
+            // add the word to the combo, if it"s not there yet
+            var hiddenWordsCombo = $("#hiddenWordsCombo");
+            if (0 === hiddenWordsCombo.find("option[value=\"" + n.id + "\"]").length) {
+                hiddenWordsCombo.append($("<option>", {
+                    text: n.mn.text,
                     value: n.id,
-                    text: n.mn.text
                 }));
             }
         };
         Frontend.prototype.findNode = function (n) {
-            var fen = this.viewGraph.nodes.filter(function (fen) { return fen.id === n.id; });
-            return fen[0];
+            return this.viewGraph.nodes.filter(function (fen) { return fen.id === n.id; })[0];
         };
         // was the viewNode already added?
         Frontend.prototype.inView = function (v) {
-            return typeof v !== 'undefined'
-                && typeof v.viewGraphId !== 'undefined';
+            return typeof v !== "undefined"
+                && typeof v.viewGraphId !== "undefined";
         };
         Frontend.prototype.collapseNode = function (node) {
             var _this = this;
             // for each linked node
             node.mn.hood.forEach(function (c) {
                 // see how many links it has at the moment:
-                var neighbor = _this.filteredNodes().filter(function (nn) { return nn.id == c.id; })[0];
+                var neighbor = _this.filteredNodes().filter(function (nn) { return nn.id === c.id; })[0];
                 if (neighbor) {
-                    var links = _this.viewGraph.links.filter(function (l) { return l.source == neighbor || l.target == neighbor; });
-                    if (links.length == 1) {
+                    var links = _this.viewGraph.links.filter(function (l) { return l.source === neighbor || l.target === neighbor; });
+                    if (links.length === 1) {
                         // this node is only connected with one link - hide it
                         _this.hideNode(neighbor);
                     }
@@ -500,11 +524,11 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
         Frontend.prototype.unCollapseNode = function (node) {
             var _this = this;
             this.viewGraph.links
-                .filter(function (l) { return l.target.mn == node; })
+                .filter(function (l) { return l.target.mn === node; })
                 .map(function (l) { return l.source; })
                 .forEach(function (n) { return _this.unHideWord(n.id); });
             this.viewGraph.links
-                .filter(function (l) { return l.source.mn == node; })
+                .filter(function (l) { return l.source.mn === node; })
                 .map(function (l) { return l.target; })
                 .forEach(function (n) { return _this.unHideWord(n.id); });
         };
@@ -526,7 +550,10 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             }
         };
         Frontend.prototype.graphBounds = function () {
-            var x = Number.POSITIVE_INFINITY, X = Number.NEGATIVE_INFINITY, y = Number.POSITIVE_INFINITY, Y = Number.NEGATIVE_INFINITY;
+            var x = Number.POSITIVE_INFINITY;
+            var X = Number.NEGATIVE_INFINITY;
+            var y = Number.POSITIVE_INFINITY;
+            var Y = Number.NEGATIVE_INFINITY;
             this.nodesLayer.selectAll(".node").each(function (v) {
                 x = Math.min(x, v.x - Frontend.nodeWidth / 2);
                 X = Math.max(X, v.x + Frontend.nodeWidth / 2);
@@ -537,16 +564,8 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
                 x: x,
                 X: X,
                 y: y,
-                Y: Y
+                Y: Y,
             };
-        };
-        Frontend.prototype.clearAll = function () {
-            this.viewGraph = {
-                nodes: [],
-                links: []
-            };
-            this.update();
-            this.modelGraph.reset();
         };
         Frontend.prototype.navigateToWord = function (word) {
             this.updateWordInHistory(word);
@@ -555,22 +574,18 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
         Frontend.prototype.calcMySize = function () {
             // take into account the height of the toolbar
             this.height = $(window).height() - 37;
-            // somehow we can't avoid a margin, so make it symmetric at least
+            // somehow we can"t avoid a margin, so make it symmetric at least
             this.width = $(window).width() - 7;
         };
         Frontend.prototype.onWindowResized = function () {
             this.calcMySize();
             this.outer.attr("width", this.width).attr("height", this.height);
         };
-        Frontend.prototype.fullScreenCancel = function () {
-            this.outer.attr("width", this.width).attr("height", this.height);
-            this.zoomToFit();
-        };
-        // setup the translation based on the move/zoom, as it comes from 
+        // setup the translation based on the move/zoom, as it comes from
         Frontend.prototype.redraw = function (transition) {
             // if mouse down then we are dragging not panning
             if (this.nodeMouseDown) {
-                //debugger;
+                // debugger;
                 return;
             }
             // read the current zoom translation vector and the current zoom scale
@@ -579,10 +594,13 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
         };
         Frontend.prototype.zoomToFit = function () {
             var b = this.graphBounds();
-            var w = b.X - b.x, h = b.Y - b.y;
-            var cw = parseInt(this.outer.attr("width")), ch = parseInt(this.outer.attr("height"));
+            var w = b.X - b.x;
+            var h = b.Y - b.y;
+            var cw = parseInt(this.outer.attr("width"), 10);
+            var ch = parseInt(this.outer.attr("height"), 10);
             var s = Math.min(cw / w, ch / h);
-            var tx = (-b.x * s + (cw / s - w) * s / 2), ty = (-b.y * s + (ch / s - h) * s / 2);
+            var tx = (-b.x * s + (cw / s - w) * s / 2);
+            var ty = (-b.y * s + (ch / s - h) * s / 2);
             this.zoom.translate([tx, ty]).scale(s);
             this.redraw(true);
         };
@@ -591,11 +609,14 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
                 url = window.location.href;
             }
             name = name.replace(/[\[\]]/g, "\\$&");
-            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"), results = regex.exec(url);
-            if (!results)
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)");
+            var results = regex.exec(url);
+            if (!results) {
                 return null;
-            if (!results[2])
-                return '';
+            }
+            if (!results[2]) {
+                return "";
+            }
             return decodeURIComponent(results[2].replace(/\+/g, " "));
         };
         Frontend.prototype.storageGet = function (paramName) {
@@ -620,39 +641,39 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
                 this.jlptSelect(5);
                 this.jlptSelect(4);
             }
-            this.jlpts.split('').forEach(function (n) {
-                $("#JLPT" + n).prop('checked', true);
-                $("#JLPT" + n).parents('label').addClass('active');
+            this.jlpts.split("").forEach(function (n) {
+                $("#JLPT" + n).prop("checked", true);
+                $("#JLPT" + n).parents("label").addClass("active");
             });
         };
         Frontend.prototype.removeWordFromHistory = function (selectBoxId, word) {
             // delete it from the drop-down
-            $("#" + selectBoxId + " option[value='" + word + "']").remove();
+            $("#" + selectBoxId + " option[value=\"" + word + "\"]").remove();
             // and the history
             this.updateWordInHistory(word, false);
         };
         Frontend.prototype.loadWordHistory = function (selectBoxId) {
             var selectBox = $(selectBoxId);
             selectBox
-                .find('option')
+                .find("option")
                 .remove()
                 .end();
             var oldHistory = this.storageGet(Frontend.wordsHistoryCookieName);
-            if (!oldHistory || '' === oldHistory) {
-                oldHistory = '楽しい 普通 産業';
+            if (!oldHistory || "" === oldHistory) {
+                oldHistory = "楽しい 普通 産業";
             }
-            var oldHistoryArray = oldHistory.split(' ');
+            var oldHistoryArray = oldHistory.split(" ");
             oldHistoryArray.forEach(function (word) {
-                selectBox.append($('<option>', {
+                selectBox.append($("<option>", {
+                    text: word,
                     value: word,
-                    text: word
                 }));
             });
         };
         Frontend.prototype.updateWordInHistory = function (word, add) {
             if (add === void 0) { add = true; }
             var oldHistory = this.storageGet(Frontend.wordsHistoryCookieName);
-            var oldHistoryArray = oldHistory ? oldHistory.split(' ') : [];
+            var oldHistoryArray = oldHistory ? oldHistory.split(" ") : [];
             var foundIndex = oldHistoryArray.indexOf(word);
             // to add, and wasn't found?
             if (add && foundIndex < 0) {
@@ -662,14 +683,14 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             if (!add && 0 <= foundIndex) {
                 oldHistoryArray.splice(foundIndex, 1);
             }
-            this.storageSet(Frontend.wordsHistoryCookieName, oldHistoryArray.join(' '));
+            this.storageSet(Frontend.wordsHistoryCookieName, oldHistoryArray.join(" "));
         };
         Frontend.prototype.jlptSelect = function (n) {
             var curSel = this.storageGet(Frontend.jlptSelectedLevelsCookieName);
-            curSel = curSel ? curSel : '';
+            curSel = curSel ? curSel : "";
             // we land here before the control has reflected the new status
-            var willBecomeChecked = !$("#JLPT" + n).is(':checked');
-            this.jlpts = curSel.replace(new RegExp(n.toString(), 'g'), '') + (willBecomeChecked ? n.toString() : '');
+            var willBecomeChecked = !$("#JLPT" + n).is(":checked");
+            this.jlpts = curSel.replace(new RegExp(n.toString(), "g"), "") + (willBecomeChecked ? n.toString() : "");
             this.storageSet(Frontend.jlptSelectedLevelsCookieName, this.jlpts);
             this.refreshViewGraph();
         };
@@ -685,8 +706,8 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             }
         };
         Frontend.prototype.unHideWord = function (word) {
-            $("#hiddenWordsCombo option[value='" + word + "']").remove();
-            this.viewGraph.nodes.filter(function (n) { return n.id == word; })[0].hidden = false;
+            $("#hiddenWordsCombo option[value=\"" + word + "\"]").remove();
+            this.viewGraph.nodes.filter(function (n) { return n.id === word; })[0].hidden = false;
             this.update();
         };
         return Frontend;

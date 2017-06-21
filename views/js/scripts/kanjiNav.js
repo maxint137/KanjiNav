@@ -1,5 +1,7 @@
 define(["require", "exports", "jquery", "./kanjiNavBase"], function (require, exports, $, kanjiNavBase_1) {
     "use strict";
+    // modules vs namespaces
+    // https://stackoverflow.com/questions/30357634/how-do-i-use-namespaces-with-typescript-external-modules
     var kanjiNav;
     (function (kanjiNav) {
         var Node = (function () {

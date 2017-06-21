@@ -1,4 +1,4 @@
-/// <reference path="../node_modules/@types/jquery/index.d.ts" />
+/// import "/views/node_modules/@types/jquery/index.d.ts";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -9,14 +9,15 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var KNApi;
-(function (KNApi) {
+define(["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
     var DictEntry = (function () {
         function DictEntry() {
         }
         return DictEntry;
     }());
-    KNApi.DictEntry = DictEntry;
+    exports.DictEntry = DictEntry;
     var WordCore = (function (_super) {
         __extends(WordCore, _super);
         function WordCore() {
@@ -24,7 +25,7 @@ var KNApi;
         }
         return WordCore;
     }(DictEntry));
-    KNApi.WordCore = WordCore;
+    exports.WordCore = WordCore;
     var DbWord = (function (_super) {
         __extends(DbWord, _super);
         function DbWord() {
@@ -32,7 +33,7 @@ var KNApi;
         }
         return DbWord;
     }(WordCore));
-    KNApi.DbWord = DbWord;
+    exports.DbWord = DbWord;
     var DbKanji = (function (_super) {
         __extends(DbKanji, _super);
         function DbKanji() {
@@ -40,6 +41,6 @@ var KNApi;
         }
         return DbKanji;
     }(DictEntry));
-    KNApi.DbKanji = DbKanji;
-})(KNApi || (KNApi = {}));
+    exports.DbKanji = DbKanji;
+});
 //# sourceMappingURL=knApi.js.map

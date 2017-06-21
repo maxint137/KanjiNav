@@ -1,5 +1,4 @@
-/// <reference path="../node_modules/@types/jquery/index.d.ts" />
-/// <reference path="knApi.ts" />
+/// import "/views/node_modules/@types/jquery/index.d.ts";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -14,7 +13,7 @@ define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function opposite(tp) {
-        return tp == 'Word' ? 'Kanji' : 'Word';
+        return tp === "Word" ? "Kanji" : "Word";
     }
     var BaseNode = (function () {
         function BaseNode(dictEntry) {
@@ -29,7 +28,7 @@ define(["require", "exports"], function (require, exports) {
         });
         Object.defineProperty(BaseNode.prototype, "isKanji", {
             get: function () {
-                return this.type == "Kanji";
+                return this.type === "Kanji";
             },
             enumerable: true,
             configurable: true
@@ -210,12 +209,13 @@ define(["require", "exports"], function (require, exports) {
         return KanjiNode;
     }(BaseNode));
     exports.KanjiNode = KanjiNode;
-    // just the opposite of what they recommend in https://stackoverflow.com/questions/42634116/factory-returning-classes-in-typescript
+    // just the opposite of what they recommend in
+    // https://stackoverflow.com/questions/42634116/factory-returning-classes-in-typescript
     function nodeFactory(type, dbData) {
-        if (type == "Word") {
+        if (type === "Word") {
             return new WordNode(dbData);
         }
-        if (type == "Kanji") {
+        if (type === "Kanji") {
             return new KanjiNode(dbData);
         }
         throw new Error("Unexpected node type: " + type);
@@ -226,13 +226,13 @@ define(["require", "exports"], function (require, exports) {
             this.source = source;
             this.target = target;
         }
-        Edge.prototype.toString = function () {
-            return this.source + "-" + this.target;
-        };
         // edge is always towards the actor/char
         Edge.makeEdge = function (type, thisName, otherName) {
-            //return type == NodeType.Word ? new Edge(thisName, otherName) : new Edge(otherName, thisName);
-            return type == "Word" ? new Edge(thisName, otherName) : new Edge(otherName, thisName);
+            // return type == NodeType.Word ? new Edge(thisName, otherName) : new Edge(otherName, thisName);
+            return type === "Word" ? new Edge(thisName, otherName) : new Edge(otherName, thisName);
+        };
+        Edge.prototype.toString = function () {
+            return this.source + "-" + this.target;
         };
         return Edge;
     }());
@@ -262,7 +262,9 @@ define(["require", "exports"], function (require, exports) {
                 return result.promise();
             }
             // query the database
-            var hood = type == "Kanji" ? this.db.lookupKanji(text) : this.db.lookupWord(text);
+            var hood = type === "Kanji"
+                ? this.db.lookupKanji(text)
+                : this.db.lookupWord(text);
             $.when(hood).then(function (c) {
                 var nNode = nodeFactory(type, c);
                 _this.nodes[nNode.id] = nNode;
@@ -272,7 +274,7 @@ define(["require", "exports"], function (require, exports) {
                         console.assert(false, "Server bad response: null in the hood");
                     }
                     try {
-                        var neighborName = v.id; //opposite(type) + v[type.next().id];
+                        var neighborName = v.id; // opposite(type) + v[type.next().id];
                         if (neighborName in _this.nodes) {
                             _this.addEdge(nNode, _this.nodes[neighborName]);
                         }
@@ -282,7 +284,9 @@ define(["require", "exports"], function (require, exports) {
                     }
                 });
                 // call back the user
-                userCallback === undefined || userCallback(nNode);
+                if (userCallback !== undefined) {
+                    userCallback(nNode);
+                }
                 // finished
                 result.resolve(nNode);
             });
@@ -292,7 +296,7 @@ define(["require", "exports"], function (require, exports) {
         // For each loaded node adds an edge connecting it to the parent node.
         Graph.prototype.expandNeighbors = function (parentNode, f) {
             var _this = this;
-            console.assert(0 === parentNode.hood.filter(function (h) { return !h; }).length, "Nulls in the hood for '" + parentNode.id + "'");
+            console.assert(0 === parentNode.hood.filter(function (h) { return !h; }).length, "Nulls in the hood for \"" + parentNode.id + "\"");
             if (0 === parentNode.hood.length) {
                 var d_1 = $.Deferred();
                 d_1.resolveWith([]);
@@ -308,8 +312,8 @@ define(["require", "exports"], function (require, exports) {
             });
             var d = $.Deferred();
             $.when.apply($, hoodLoaded)
-                .then(function () {
-                var neighbors = Array.prototype.slice.call(arguments);
+                .then(function (args) {
+                var neighbors = Array.prototype.slice.call(args);
                 d.resolve(neighbors);
             });
             return d.promise();
@@ -329,7 +333,8 @@ define(["require", "exports"], function (require, exports) {
             if (!(eName in this.edges)) {
                 this.edges[eName] = edge;
             }
-            ++u.degree, ++v.degree;
+            ++u.degree;
+            ++v.degree;
         };
         return Graph;
     }());
