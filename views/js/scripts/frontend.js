@@ -169,6 +169,7 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             addGradient("EdgeGradient", this.red, 1, "darkGray", 1);
             addGradient("ReverseEdgeGradient", "darkGray", 1, this.red, 1);
         };
+        // UF: these are not sufficient anymore, we must (de)serialize the model data as well
         Frontend.prototype.saveGraph = function () {
             this.viewGraphSaved.nodes = this.viewGraph.nodes;
             this.refreshViewGraph();
@@ -206,27 +207,26 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             var focus = this.viewGraph.nodes.filter(function (vn) { return vn.mn.id == node.id; })[0];
             var neighborsExpanded = this.modelGraph.expandNeighbors(focus.mn, function (mn) {
                 if (!_this.inView(_this.findNode(mn))) {
-                    //this.addViewNode(new ViewNode(mn), focus);
                     _this.addViewNode(mn, focus);
                 }
             });
             // not sure why do we want to have it here in addition to the line just below...
             this.refreshViewGraph();
             $.when(neighborsExpanded).then(function (hood) { return _this.addViewLinks(node, hood); });
-            //$.when(neighborsExpanded).then((hood) => this.refreshViewGraph(node, hood));
         };
         Frontend.prototype.addViewLinks = function (node, hood) {
             var _this = this;
             var u = this.findNode(node);
-            hood.forEach(function (h) {
-                var newLink = { source: u, target: _this.findNode(h) };
-                // make sure it is a new one
-                var oldLinks1 = _this.viewGraph.links.filter(function (l) { return l.source.id == newLink.source.id && l.target.id == newLink.target.id; });
-                var oldLinks2 = _this.viewGraph.links.filter(function (l) { return l.target.id == newLink.source.id && l.source.id == newLink.target.id; });
-                if (0 === oldLinks1.length && 0 === oldLinks2.length) {
-                    _this.viewGraph.links.push(newLink);
-                }
-            });
+            typeof hood === 'undefined' ||
+                hood.forEach(function (h) {
+                    var newLink = { source: u, target: _this.findNode(h) };
+                    // make sure it is a new one
+                    var oldLinks1 = _this.viewGraph.links.filter(function (l) { return l.source.id == newLink.source.id && l.target.id == newLink.target.id; });
+                    var oldLinks2 = _this.viewGraph.links.filter(function (l) { return l.target.id == newLink.source.id && l.source.id == newLink.target.id; });
+                    if (0 === oldLinks1.length && 0 === oldLinks2.length) {
+                        _this.viewGraph.links.push(newLink);
+                    }
+                });
             this.refreshViewGraph();
         };
         // sync the viewGraph with the modelGraph
@@ -411,7 +411,7 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
                 .attr('class', 'ruby')
                 .attr('x', '0')
                 .attr('y', '-11px')
-                .text(function (n) { return n.mn.superscript; });
+                .text(function (n) { return n.superscript[0] == "" ? " " : n.mn.superscript; });
             // the subscript
             text.append("tspan")
                 .attr('class', 'translation')

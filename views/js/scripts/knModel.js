@@ -293,6 +293,11 @@ define(["require", "exports"], function (require, exports) {
         Graph.prototype.expandNeighbors = function (parentNode, f) {
             var _this = this;
             console.assert(0 === parentNode.hood.filter(function (h) { return !h; }).length, "Nulls in the hood for '" + parentNode.id + "'");
+            if (0 === parentNode.hood.length) {
+                var d_1 = $.Deferred();
+                d_1.resolveWith([]);
+                return d_1.promise();
+            }
             // fetch the nodes listed in the hood, bridge edges to these, and call back the client (so it can addViewNode)
             var hoodLoaded = parentNode.hood
                 .map(function (h) {
