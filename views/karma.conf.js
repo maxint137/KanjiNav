@@ -1,12 +1,16 @@
 module.exports = function(config) {
     config.set({
-        frameworks: ["jasmine", "karma-typescript"],
+        // basePath: "./tests",
         files: [
-            { pattern: "src/**/*.ts" }, // *.tsx for React Jsx 
+            "https://code.jquery.com/jquery-1.11.2.min.js",
+            { pattern: "scripts/**/*.ts" },
+            { pattern: "tests/**/*.ts" },
         ],
         preprocessors: {
-            "**/*.ts": ["karma-typescript"], // *.tsx for React Jsx 
+            //"scripts/**/*.ts": ["karma-typescript", "coverage"],
+            "**/*.ts": ["karma-typescript"],
         },
+        frameworks: ["jasmine", "karma-typescript"],
         reporters: ["progress", "karma-typescript"],
         browsers: ["Chrome"]
     });

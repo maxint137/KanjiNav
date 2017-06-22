@@ -1,11 +1,9 @@
-import "../node_modules/@types/jasmine/index.d.ts";
-
 import * as KNApi from "../scripts/knApi";
 import { Dictionary } from "../scripts/localDictionary";
 
-describe("tests/localDictionary.ts ", () => {
+describe("tests/localDictionaryTest.ts ", () => {
 
-    let returnedValue: any;
+    let returnedValue: any = 7;
 
     beforeEach((done) => {
         returnedValue = "no_return_value";
@@ -14,15 +12,14 @@ describe("tests/localDictionary.ts ", () => {
 
         const hood: JQueryPromise<KNApi.DbKanji> = dict.lookupKanji("山");
 
-        $.when(hood).then((c) => {
-            returnedValue = c.dbId;
+        $.when(hood).then((k: KNApi.DbKanji) => {
+            returnedValue = k.character;
             done();
         });
     });
+
     it("should return success after 1 second", (done) => {
         expect(returnedValue).toEqual("山");
-
         done();
     });
-},
-);
+});
