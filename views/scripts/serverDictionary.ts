@@ -1,4 +1,4 @@
-import * as KNApi from "knApi";
+import * as KNApi from "./knApi";
 
 class ServerDictionary implements KNApi.IJapaneseDictionary {
     public lookupWord(id: string): JQueryPromise<KNApi.DbWord> {

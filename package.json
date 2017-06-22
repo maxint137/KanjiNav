@@ -1,0 +1,45 @@
+{
+    "name": "kanji-nav",
+    "version": "1.0.0",
+    "description": "see connection between different words Japanese words",
+    "main": "gulpfile.js",
+    "dependencies": {
+        "bootstrap": "^3.3.7",
+        "font-awesome": "^4.7.0",
+        "jquery": "^3.1.1",
+        "jqueryui": "^1.11.1",
+        "pump": "^1.0.2",
+        "requirejs": "^2.3.3"
+    },
+    "devDependencies": {
+        "browserify": "^14.4.0",
+        "gulp": "^3.9.1",
+        "gulp-rename": "^1.2.2",
+        "gulp-replace-path": "^0.4.0",
+        "gulp-sourcemaps": "^2.6.0",
+        "gulp-tslint": "^8.1.1",
+        "gulp-typescript": "^3.1.7",
+        "gulp-uglify": "^2.1.2",
+        "gulp-watch": "^4.3.11",
+        "tslint": "^5.4.3",
+        "typescript": "^2.3.4",
+        "vinyl-transform": "^1.0.0"
+    },
+    "scripts": {
+        "test": "testCmd"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/maxint137/KanjiNav.git"
+    },
+    "keywords": [
+        "japanese",
+        "jlpt"
+    ],
+    "author": "max levy",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/maxint137/KanjiNav/issues"
+    },
+    "homepage": "https://github.com/maxint137/KanjiNav#readme"
+}

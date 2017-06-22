@@ -33,12 +33,5 @@
         // Sometimes modules are not directly located under baseUrl. For instance, an import to a module "jquery" would be translated at runtime to "node_modules\jquery\dist\jquery.slim.min.js". Loaders use a mapping configuration to map module names to files at run-time, see RequireJs documentation and SystemJS documentation.
 
         // The TypeScript compiler supports the declaration of such mappings using "paths" property in tsconfig.json files. Here is an example for how to specify the "paths" property for jquery.
-    },
-    "files": [
-        "./scripts/kanjiNav.ts",
-        "./scripts/localDictionary.ts",
-        "./scripts/serverDictionary.ts",
-        "./scripts/frontend.ts",
-        "./tests/01_SimpleJasmineTests.ts"
-    ]
+    }
 }

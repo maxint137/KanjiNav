@@ -1,6 +1,8 @@
 define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    /* cSpell:disable */
+    /* tslint:disable */
     var kanjisDB = [{
             "_id": {
                 "$oid": "kc1803"

@@ -1,4 +1,4 @@
-/// import "/views/node_modules/@types/jquery/index.d.ts";
+// import "./node_modules/@types/jquery/index";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||

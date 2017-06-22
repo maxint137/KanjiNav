@@ -1,4 +1,4 @@
-import * as KNApi from "knApi";
+import * as KNApi from "./knApi";
 
 import { kanjis, words } from "./data";
 
@@ -8,8 +8,10 @@ class LocalDictionary implements KNApi.IJapaneseDictionary {
         return kanjis.filter((k: any) => 0 <= word.indexOf(k.character))
             .map((k: any) => {
 
-                // tslint:disable-next-line:no-string-literal
-                const kWords = k.words.map((kw: any) => words.filter((w: any) => w["_id"]["$oid"] === kw["$oid"])[0]);
+                const kWords = k.words.map((kw: any) =>
+                    words.filter((w: any) =>
+                        // tslint:disable-next-line:no-string-literal
+                        w["_id"]["$oid"] === kw["$oid"])[0]);
 
                 return {
                     JLPT: parseInt(k.JLPT, 10),

@@ -1,4 +1,4 @@
-define(["require", "exports", "../views/node_modules/@types/jquery/index.d.ts"], function (require, exports) {
+define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var ServerDictionary = (function () {

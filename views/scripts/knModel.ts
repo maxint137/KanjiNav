@@ -1,4 +1,6 @@
-import * as KNApi from "knApi";
+// import "./node_modules/@types/jquery/index";
+
+import * as KNApi from "./knApi";
 
 interface IMap<T> {
     [key: string]: T;
@@ -251,7 +253,7 @@ export class Graph {
                     },
                     parentNode,
                 ),
-            );
+        );
 
         const d: JQueryDeferred<INode[]> = $.Deferred<INode[]>();
 

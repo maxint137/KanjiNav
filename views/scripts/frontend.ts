@@ -3,11 +3,9 @@
 // see http://garrettn.github.io/blog/2014/02/19/write-modular-javascript-that-works-anywhere-with-umd/
 // import "/views/node_modules/@types/d3/index.d.ts";
 import * as d3 from "d3";
-
-import * as KNApi from "knApi";
-
 // import { D3StyleLayoutAdaptor as ColaD3StyleLayoutAdaptor } from "../node_modules/webcola/WebCola/src/d3v3adaptor"
 
+import * as KNApi from "./knApi";
 import { Graph as KNModel_Graph, INode as KNModel_INode, NodeTypes as KNModel_NodeTypes } from "./knModel";
 
 class ViewNodeBase implements KNModel_INode {
@@ -155,7 +153,7 @@ export class Frontend {
         //  : KNModel_NodeType.Word, word, v => this.addViewNode(v));
         const d = this.modelGraph.loadNode(word.length === 1 ? "Kanji" : "Word", word, (v) => this.addViewNode(v));
 
-        $.when(d).then((loadedNode) => { this.refocus(loadedNode); });
+        $.when(d).then((loadedNode: any) => { this.refocus(loadedNode); });
     }
 
     public clearAll() {
@@ -268,7 +266,7 @@ export class Frontend {
         // not sure why do we want to have it here in addition to the line just below...
         this.refreshViewGraph();
 
-        $.when(neighborsExpanded).then((hood) => this.addViewLinks(node, hood));
+        $.when(neighborsExpanded).then((hood: any) => this.addViewLinks(node, hood));
     }
 
     private addViewLinks(node: KNModel_INode, hood: KNModel_INode[]) {
@@ -666,7 +664,7 @@ export class Frontend {
 
             const d = this.modelGraph.loadNode(node.mn.type, node.mn.text);
 
-            $.when(d).then((focus) => { this.refocus(focus); });
+            $.when(d).then((focus: any) => { this.refocus(focus); });
         }
     }
 

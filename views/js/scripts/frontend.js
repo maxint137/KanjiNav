@@ -561,10 +561,10 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
                 Y = Math.max(Y, v.y + Frontend.nodeHeight / 2);
             });
             return {
-                x: x,
                 X: X,
-                y: y,
                 Y: Y,
+                x: x,
+                y: y,
             };
         };
         Frontend.prototype.navigateToWord = function (word) {

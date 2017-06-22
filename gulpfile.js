@@ -7,9 +7,8 @@ var watch = require('gulp-watch');
 
 var setupRoot = "c:/temp/kanjiNavSetup";
 
-gulp.task('default', function() {
-    console.log('Hello Gulp!');
-});
+gulp.task('default', ['tslint', 'tsc', 'tsc-tests']);
+
 gulp.task('things_for_chrome', ['copy_manifest', 'copy_views', 'compress1', 'compress2', 'copy_extern', 'copy_extern_images', 'copy_fonts', 'cdn2local']);
 
 gulp.task('cdn2local', function() {
@@ -109,6 +108,8 @@ gulp.task('copy_fonts', function() {
 });
 
 
+
+
 var tslint = require("gulp-tslint");
 gulp.task("tslint", () =>
     gulp.src([
@@ -120,3 +121,66 @@ gulp.task("tslint", () =>
     }))
     .pipe(tslint.report())
 );
+
+
+var ts = require('gulp-typescript');
+// var tsProject = ts.createProject({
+//     removeComments: true,
+//     noImplicitAny: true,
+//     target: 'ES5',
+//     module: 'commonjs',
+//     declarationFiles: false
+// });
+var viewsTsProject = ts.createProject("views/tsconfig.json");
+
+gulp.task('tsc', function() {
+
+    // UF: selecting the input seems to be redundant, after all that's what we have in tsconfig.json
+    // Yet for some reason I can't make it work using the following line:
+    // let src = tsProject.src();
+    let src = gulp.src([
+        "./views/scripts/**.ts",
+        "./views/node_modules/@types/**/**.ts",
+    ]);
+
+    return src
+        .pipe(viewsTsProject())
+        .js.pipe(gulp.dest('./temp/source/js'));
+});
+
+
+var tsTestProject = ts.createProject({
+    removeComments: true,
+    noImplicitAny: true,
+    target: 'ES5',
+    module: 'commonjs',
+    declarationFiles: false
+});
+
+gulp.task('tsc-tests', function() {
+    return gulp.src('./tests/**/**.test.ts')
+        .pipe(tsTestProject())
+        .js.pipe(gulp.dest('./temp/test/'));
+});
+
+
+var browserify = require('browserify'),
+    transform = require('vinyl-transform'),
+    uglify = require('gulp-uglify'),
+    sourcemaps = require('gulp-sourcemaps');
+
+var browserified = transform(function(filename) {
+    var b = browserify({ entries: filename, debug: true });
+    return b.bundle();
+});
+
+
+// https://github.com/substack/node-browserify/issues/1198
+gulp.task('bundle-js', function() {
+    return gulp.src('./temp/source/js/frontend.js')
+        .pipe(browserified)
+        .pipe(sourcemaps.init({ loadMaps: true }))
+        .pipe(uglify())
+        .pipe(sourcemaps.write('./'))
+        .pipe(gulp.dest('./dist/source/js/'));
+});

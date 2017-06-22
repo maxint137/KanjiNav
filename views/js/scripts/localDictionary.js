@@ -1,4 +1,3 @@
-/// import "/views/node_modules/@types/jquery/index.d";
 define(["require", "exports", "./data"], function (require, exports, data_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -55,8 +54,12 @@ define(["require", "exports", "./data"], function (require, exports, data_1) {
     LocalDictionary.loadKanji = function (word) {
         return data_1.kanjis.filter(function (k) { return 0 <= word.indexOf(k.character); })
             .map(function (k) {
-            // tslint:disable-next-line:no-string-literal
-            var kWords = k.words.map(function (kw) { return data_1.words.filter(function (w) { return w["_id"]["$oid"] === kw["$oid"]; })[0]; });
+            var kWords = k.words.map(function (kw) {
+                return data_1.words.filter(function (w) {
+                    // tslint:disable-next-line:no-string-literal
+                    return w["_id"]["$oid"] === kw["$oid"];
+                })[0];
+            });
             return {
                 JLPT: parseInt(k.JLPT, 10),
                 __v: 1,

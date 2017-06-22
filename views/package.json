@@ -1,23 +1,26 @@
 {
-    "name": "view modules",
-    "version": "0.1",
-    "dependencies": {
-        "@types/d3": "^3.5.17",
-        "@types/jasmine": "^2.5.47",
-        "@types/jquery": "latest",
-        "@types/js-cookie": "latest",
-        "@types/webcola": "latest",
-        "d3": "^3.5.17",
-        "jasmine": "^2.5.3",
-        "js-cookie": "^2.1.3",
-        "underscore": "latest",
-        "webcola": "3.3.3"
-    },
-    "devDependencies": {
-        "chai": "^3.5.0",
-        "karma": "^1.3.0",
-        "karma-typescript": "^2.1.7",
-        "qunitjs": "^2.2.1",
-        "requirejs": "^2.3.3"
-    }
+  "name": "view modules",
+  "version": "0.1",
+  "dependencies": {
+    "@types/d3": "^3.5.17",
+    "@types/jasmine": "^2.5.47",
+    "@types/jquery": "latest",
+    "@types/js-cookie": "latest",
+    "@types/requirejs": "^2.1.29",
+    "@types/webcola": "latest",
+    "d3": "^3.5.17",
+    "js-cookie": "^2.1.3",
+    "requirejs-plugins": "^1.0.2",
+    "text": "github:requirejs/text",
+    "underscore": "latest",
+    "webcola": "3.3.3"
+  },
+  "devDependencies": {
+    "jasmine": "^2.5.3",
+    "chai": "^3.5.0",
+    "karma": "^1.3.0",
+    "karma-typescript": "^2.1.7",
+    "qunitjs": "^2.2.1",
+    "requirejs": "^2.3.3"
+  }
 }
