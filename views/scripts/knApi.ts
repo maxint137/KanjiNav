@@ -1,8 +1,8 @@
 export type JlptLevel = 5 | 4 | 3 | 2 | 1 | 0;
 
 export interface IJapaneseDictionary {
-    lookupKanji(k: string): JQueryPromise<DbKanji>;
-    lookupWord(word: string): JQueryPromise<DbWord>;
+    lookupKanji(k: string): Promise<DbKanji>;
+    lookupWord(word: string): Promise<DbWord>;
 }
 
 export class DictEntry {

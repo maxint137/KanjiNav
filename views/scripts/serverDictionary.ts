@@ -1,15 +1,36 @@
-import * as KNApi from "./knApi";
+import * as request from "d3-request";
 
-class ServerDictionary implements KNApi.IJapaneseDictionary {
-    public lookupWord(id: string): JQueryPromise<KNApi.DbWord> {
-        // http://localhost:3000/api/v1/word/食品
-        return $.get("/api/v1/word/" + id);
+import { DbKanji, DbWord, DictEntry, IJapaneseDictionary } from "./knApi";
+
+class ServerDictionary implements IJapaneseDictionary {
+
+    public doLookup<WordOrKanji extends DictEntry>(id: string, entryType: string): Promise<WordOrKanji> {
+
+        return new Promise<WordOrKanji>((resolve: (data: WordOrKanji) => void, reject: (error: any) => void) => {
+
+            request.json<WordOrKanji>(
+                `/api/v1/${entryType}/${id}`,
+                (error: any, data: WordOrKanji) => {
+
+                    if (error) {
+                        return reject(error);
+                    }
+
+                    resolve(data);
+                },
+            );
+        });
     }
 
-    public lookupKanji(id: string): JQueryPromise<KNApi.DbKanji> {
-        // http://localhost:3000/api/v1/kanji/品
-        return $.get("/api/v1/kanji/" + id);
+    public lookupWord(id: string): Promise<DbWord> {
+
+        return this.doLookup<DbWord>(id, "word");
+    }
+
+    public lookupKanji(id: string): Promise<DbKanji> {
+
+        return this.doLookup<DbKanji>(id, "kanji");
     }
 }
 
-export let Dictionary: KNApi.IJapaneseDictionary = new ServerDictionary();
+export let Dictionary: IJapaneseDictionary = new ServerDictionary();

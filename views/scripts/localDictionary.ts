@@ -1,8 +1,8 @@
-import * as KNApi from "./knApi";
+import { DbKanji, DbWord, IJapaneseDictionary, JlptLevel } from "./knApi";
 
 import { kanjis, words } from "./data";
 
-class LocalDictionary implements KNApi.IJapaneseDictionary {
+export class LocalDictionary implements IJapaneseDictionary {
 
     private static loadKanji: (word: string) => any = (word: string) => {
         return kanjis.filter((k: any) => 0 <= word.indexOf(k.character))
@@ -24,7 +24,7 @@ class LocalDictionary implements KNApi.IJapaneseDictionary {
             });
     }
 
-    public parseJlpt(jlpt: string): KNApi.JlptLevel {
+    public parseJlpt(jlpt: string): JlptLevel {
 
         switch (parseInt(jlpt, 10)) {
             default:
@@ -37,37 +37,45 @@ class LocalDictionary implements KNApi.IJapaneseDictionary {
         }
     }
 
-    public lookupKanji(id: string): JQueryPromise<KNApi.DbKanji> {
+    public lookupKanji(id: string): Promise<DbKanji> {
 
-        const result: JQueryDeferred<KNApi.DbKanji> = $.Deferred<KNApi.DbKanji>();
+        const promise: Promise<DbKanji> = new Promise<DbKanji>((resolve, reject) => {
 
-        const kanji = kanjis.filter((k: any) => k.character === id)[0];
+            const kanji = kanjis.filter((k: any) => k.character === id)[0];
 
-        const kanjiApiRes: KNApi.DbKanji = {
-            JLPT: this.parseJlpt(kanji.JLPT),
-            // tslint:disable-next-line:no-string-literal
-            character: kanji.character,
-            // tslint:disable-next-line:no-string-literal
-            dbId: "58883418e46ff154dc7-" + kanji["_id"]["$oid"],
-            english: kanji.english,
-            kunyomi: kanji.kunyomi,
-            onyomi: kanji.onyomi,
-            words: LocalDictionary.loadKanji(id)[0].words,
-        };
+            if (!kanji) {
+                return reject(`Kanji not found for id=${id}`);
+            }
 
-        setTimeout(() => result.resolve(kanjiApiRes), 137);
+            const kanjiApiRes: DbKanji = {
+                JLPT: this.parseJlpt(kanji.JLPT),
+                // tslint:disable-next-line:no-string-literal
+                character: kanji.character,
+                // tslint:disable-next-line:no-string-literal
+                dbId: "58883418e46ff154dc7-" + kanji["_id"]["$oid"],
+                english: kanji.english,
+                kunyomi: kanji.kunyomi,
+                onyomi: kanji.onyomi,
+                words: LocalDictionary.loadKanji(id)[0].words,
+            };
 
-        return result;
+            setTimeout(() => resolve(kanjiApiRes), 137);
+        });
+
+        return promise;
     }
 
-    public lookupWord(id: string): JQueryPromise<KNApi.DbWord> {
+    public lookupWord(id: string): Promise<DbWord> {
 
-        const result: JQueryDeferred<KNApi.DbWord> = $.Deferred<KNApi.DbWord>();
+        const promise: Promise<DbWord> = new Promise((resolve, reject) => {
 
-        const word = words.filter((w: any) => w.word === id)[0];
+            const word = words.filter((w: any) => w.word === id)[0];
 
-        if (word) {
-            const wordApiRes: KNApi.DbWord = {
+            if (!word) {
+                return reject(`Word  not found for id=${id}`);
+            }
+
+            const wordApiRes: DbWord = {
 
                 JLPT: this.parseJlpt(word.JLPT),
                 // tslint:disable-next-line:no-string-literal
@@ -78,11 +86,11 @@ class LocalDictionary implements KNApi.IJapaneseDictionary {
                 word: word.word,
             };
 
-            setTimeout(() => result.resolve(wordApiRes), 137);
-        }
+            setTimeout(() => resolve(wordApiRes), 137);
+        });
 
-        return result;
+        return promise;
     }
 }
 
-export let Dictionary: KNApi.IJapaneseDictionary = new LocalDictionary();
+export let Dictionary: IJapaneseDictionary = new LocalDictionary();

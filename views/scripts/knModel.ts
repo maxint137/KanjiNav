@@ -190,11 +190,11 @@ export class Graph {
         }
 
         // query the database
-        const hood: JQueryPromise<KNApi.DictEntry> = type === "Kanji"
+        const hood: Promise<KNApi.DictEntry> = type === "Kanji"
             ? this.db.lookupKanji(text)
             : this.db.lookupWord(text);
 
-        $.when(hood).then((c: KNApi.DbWord & KNApi.DbKanji) => {
+        hood.then((c: KNApi.DbWord & KNApi.DbKanji) => {
 
             const nNode: INode = nodeFactory(type, c);
 
@@ -202,7 +202,7 @@ export class Graph {
 
             (nNode.hood).forEach((v: INode) => {
                 // UF: the server will make sure not to return null for unregistered kanji
-                if (null == v) {
+                if (null === v) {
                     console.assert(false, "Server bad response: null in the hood");
                 }
 
@@ -273,7 +273,7 @@ export class Graph {
         }
 
         return node.hood && node.hood
-            .filter((v: INode) => null != v)
+            .filter((v: INode) => null !== v)
             .every((v: INode) => v.id in this.nodes);
     }
 

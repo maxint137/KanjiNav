@@ -1,17 +1,23 @@
 module.exports = function(config) {
     config.set({
-        // basePath: "./tests",
+        basePath: '../..',
         files: [
-            "https://code.jquery.com/jquery-1.11.2.min.js",
-            { pattern: "scripts/**/*.ts" },
-            { pattern: "tests/**/*.ts" },
+            "./node_modules/jquery/dist/jquery.min.js",
+            { pattern: "./scripts/**/*.ts" },
+            { pattern: "./tests/**/*.ts" },
         ],
         preprocessors: {
             //"scripts/**/*.ts": ["karma-typescript", "coverage"],
             "**/*.ts": ["karma-typescript"],
         },
-        frameworks: ["jasmine", "karma-typescript"],
+        frameworks: ["mocha", "chai", "karma-typescript"],
         reporters: ["progress", "karma-typescript"],
-        browsers: ["Chrome"]
+        browsers: ["Chrome"],
+        plugins: [
+            "karma-mocha",
+            "karma-typescript",
+            'karma-chrome-launcher',
+            "chai"
+        ]
     });
 };

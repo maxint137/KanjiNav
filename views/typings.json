@@ -2,5 +2,6 @@
   "globalDependencies": {
     "webcola": "registry:dt/webcola#3.1.1+20160510192225"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {}
 }

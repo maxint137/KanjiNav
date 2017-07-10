@@ -14,6 +14,10 @@ var requireConfig = {
         "jquery": "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min",
         "jquery-ui": "https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min",
         "d3": "https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min",
+        "d3-request": "https://cdnjs.cloudflare.com/ajax/libs/d3-request/1.0.5/d3-request.min",
+        "d3-collection": "https://cdnjs.cloudflare.com/ajax/libs/d3-collection/1.0.4/d3-collection.min",
+        "d3-dispatch": "https://cdnjs.cloudflare.com/ajax/libs/d3-dispatch/1.0.3/d3-dispatch.min",
+        "d3-dsv": "https://cdnjs.cloudflare.com/ajax/libs/d3-dsv/1.0.5/d3-dsv.min",
         "bootstrap": "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min",
         "js-cookie": "https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.3/js.cookie.min",
         "cola": "./node_modules/webcola/WebCola/cola.min",
@@ -263,10 +267,12 @@ function fly(word, asExtension, useLocalDictionary) {
     var dictionary = useLocalDictionary ? 'localDictionary' : 'serverDictionary';
 
     // 'bootstrap' does not return an object. Must appear at the end
-    require(['jquery', dictionary, 'knModel', 'frontend', 'cola', 'd3', 'js-cookie', 'data',
+    require(['jquery', dictionary, 'knModel', 'frontend', 'cola', 'd3', "d3-request", "d3-collection", 'js-cookie', 'data',
             'bootstrap'
         ],
-        function($, lookupEngine, knModel, frontend, webColaLibrary, d3, js_cookie, data) {
+        function($, lookupEngine, knModel, frontend, webColaLibrary, d3, d3_request, js_cookie, data) {
+
+            debugger;
 
             if (asExtension) {
                 if (!word || "" == word) {

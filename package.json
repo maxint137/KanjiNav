@@ -21,12 +21,14 @@
         "gulp-typescript": "^3.1.7",
         "gulp-uglify": "^2.1.2",
         "gulp-watch": "^4.3.11",
+        "jquery-deferred": "^0.3.1",
         "tslint": "^5.4.3",
         "typescript": "^2.3.4",
         "vinyl-transform": "^1.0.0"
     },
     "scripts": {
-        "test": "testCmd"
+        "_comment": "mocha -w -r views/tests/tsconfig.js --watch-extensions ts --reporter dot views/tests/**/*.spec.ts",
+        "test": "mocha -r views/tests/tsconfig.js views/tests/**/*.spec.ts"
     },
     "repository": {
         "type": "git",

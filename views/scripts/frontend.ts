@@ -5,13 +5,14 @@
 import * as d3 from "d3";
 // import { D3StyleLayoutAdaptor as ColaD3StyleLayoutAdaptor } from "../node_modules/webcola/WebCola/src/d3v3adaptor"
 
+import * as cola from "../node_modules/webcola/WebCola/index";
+
 import * as KNApi from "./knApi";
 import { Graph as KNModel_Graph, INode as KNModel_INode, NodeTypes as KNModel_NodeTypes } from "./knModel";
 
 class ViewNodeBase implements KNModel_INode {
 
-    constructor(public mn: KNModel_INode) {
-    }
+    constructor(public mn: KNModel_INode) { }
 
     get text(): string { return this.mn.text; }
     get type(): KNModel_NodeTypes { return this.mn.type; }
@@ -28,7 +29,7 @@ class ViewNodeBase implements KNModel_INode {
 
 class ViewNode extends ViewNodeBase implements cola.Node {
 
-    // cola.Node"s implementation
+    // cola.Node's implementation
     public index?: number;
     public x: number;
     public y: number;
@@ -75,7 +76,7 @@ export class Frontend {
     private red: string;
 
     // the engine
-    private layout: any; // ColaD3StyleLayoutAdaptor;
+    private layout: any; // cola.ID3StyleLayoutAdaptor;
     // zooming behavior
     private zoom: any;
 
@@ -401,7 +402,7 @@ export class Frontend {
 
     // re-populates edgesLayer with links
     private updateLinks() {
-        // use the viewGraph"s links to populate the edges-layer with objects based on the data:
+        // use the viewGraph's links to populate the edges-layer with objects based on the data:
         const link = this.edgesLayer.selectAll(".link")
             .data(this.filteredLinks());
 
@@ -593,7 +594,7 @@ export class Frontend {
 
         this.update();
 
-        // add the word to the combo, if it"s not there yet
+        // add the word to the combo, if it's not there yet
         const hiddenWordsCombo: JQuery = $("#hiddenWordsCombo");
         if (0 === hiddenWordsCombo.find(`option[value="${n.id}"]`).length) {
             hiddenWordsCombo.append($("<option>", {
