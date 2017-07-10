@@ -4,15 +4,19 @@
   "description": "Parse JLPT words/kanji TSV files into JSON, put them inside a mongodb collection",
   "homepage": "https://nihongoichiban.com/2011/04/10/complete-list-of-kanji-for-jlpt-n5/",
   "keywords": [
-    "kanji", "japanese", "JLPT"
+    "kanji",
+    "japanese",
+    "JLPT"
   ],
   "author": "Max Levy",
   "dependencies": {
-    "d3": "latest",
-    "underscore": "latest",
+    "@types/d3": "^4.9.0",
+    "@types/underscore": "^1.8.1",
     "async": "latest",
+    "bluebird": "latest",
+    "d3": "latest",
     "mongodb": "latest",
     "mongoose": "latest",
-    "bluebird": "latest"
+    "underscore": "latest"
   }
 }
