@@ -7,7 +7,7 @@ import * as mongoose from "mongoose";
 import * as KanjiSchema from "./../model/kanji";
 import * as WordSchema from "./../model/word";
 
-const uri = "mongodb://localhost:27017/TestDB2";
+const uri = "mongodb://localhost:27017/TestDB";
 // There were some strange problems with capital letters in collection names...
 const kanjisCollectionName: string = "kanjis";
 const wordsCollectionName: string = "words";
@@ -201,7 +201,7 @@ function normalizeKanji() {
 }
 
 // step 1 + 2
-// injectRawData();
+injectRawData();
 
 // step 2
-normalizeKanji();
+//normalizeKanji();
