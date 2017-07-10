@@ -1,9 +1,5 @@
-var Promise = require("bluebird");
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
-
-mongoose.Promise = global.Promise;
-Promise.promisifyAll(require("mongoose"));
 
 var KanjiSchema = module.exports = new mongoose.Schema({
     character: {

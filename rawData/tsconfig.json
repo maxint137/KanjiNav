@@ -5,6 +5,8 @@
     "compilerOptions": {
         "target": "es6",
         "lib": ["dom", "es2015.promise", "es5", "es6"],
-        "module": "commonjs"
+        "module": "commonjs",
+        "allowJs": true,
+        "outDir": "./js"
     }
 }

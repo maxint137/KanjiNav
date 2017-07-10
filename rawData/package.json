@@ -12,12 +12,14 @@
   "dependencies": {
     "@types/d3": "^4.9.0",
     "@types/mongodb": "^2.2.7",
+    "@types/mongoose": "^4.7.18",
     "@types/underscore": "^1.8.1",
     "async": "latest",
     "bluebird": "latest",
     "d3": "latest",
     "mongodb": "latest",
-    "mongoose": "latest",
+    "mongoose": "^4.11.1",
+    "node": "0.0.0",
     "underscore": "latest"
   }
 }
