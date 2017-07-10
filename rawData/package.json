@@ -11,6 +11,7 @@
   "author": "Max Levy",
   "dependencies": {
     "@types/d3": "^4.9.0",
+    "@types/mongodb": "^2.2.7",
     "@types/underscore": "^1.8.1",
     "async": "latest",
     "bluebird": "latest",

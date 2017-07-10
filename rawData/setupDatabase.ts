@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import * as _ from "underscore";
+import * as mongodb from "mongodb";
 
-var mongodb = require('mongodb');
 var uri = 'mongodb://localhost:27017/TestDB2';
 
 var KanjiList = ["JLPT5/KanjiList.N5.tsv",
