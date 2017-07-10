@@ -18,7 +18,7 @@
         // see https://www.typescriptlang.org/docs/handbook/modules.html
         "module": "amd",
 
-        "outDir": "./../js/scripts",
+        "outDir": "./../js",
         //"outFile": "kanjiNav.js",
 
         //"noImplicitAny": true,

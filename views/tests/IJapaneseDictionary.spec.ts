@@ -1,3 +1,5 @@
+// tslint:disable:space-before-function-paren
+// tslint:disable:only-arrow-functions
 // mocha -w -r views/tests/tsconfig.js --watch-extensions ts --reporter dot views/tests/**/*.spec.ts
 
 // import * as request from "request";
@@ -18,10 +20,36 @@ import * as KNApi from "../scripts/knApi";
 import { Dictionary as DL, LocalDictionary as LocalDictionaryImp } from "../scripts/localDictionary";
 import { Dictionary as DS } from "../scripts/serverDictionary";
 
+describe("IJapaneseDictionary's implementations report errors properly", () => {
+
+    beforeEach(function () {
+        this.stub = sinon.stub(request, "json");
+    });
+
+    afterEach(function () {
+        this.stub.restore();
+    });
+
+    it.only("serverDictionary does", function (done) {
+        this.stub.callsArgWith(1, "testing an error scenario", null);
+
+        DS.lookupKanji("山")
+            .then((res) => {
+
+                chai.assert(false, "Should not complete properly");
+
+                done();
+            })
+            .catch((error: any): void => {
+                const test = error.should.not.be.null;
+                done();
+            });
+    });
+});
+
 describe("IJapaneseDictionary has two following implementations", () => {
     describe("localDictionary allows for", () => {
 
-        // tslint:disable-next-line:only-arrow-functions space-before-function-paren
         it("kanji lookup", function (done) {
 
             // chaiAsPromised doesn't look practical:
@@ -38,7 +66,6 @@ describe("IJapaneseDictionary has two following implementations", () => {
             });
         });
 
-        // tslint:disable-next-line:only-arrow-functions space-before-function-paren
         it("word lookup", function (done) {
 
             DL.lookupWord("明日").then((res) => {
@@ -67,17 +94,14 @@ describe("IJapaneseDictionary has two following implementations", () => {
 
     describe("serverDictionary allows two lookups", () => {
 
-        // tslint:disable-next-line:space-before-function-paren
         beforeEach(function () {
             this.stub = sinon.stub(request, "json");
         });
 
-        // tslint:disable-next-line:space-before-function-paren
         afterEach(function () {
             this.stub.restore();
         });
 
-        // tslint:disable-next-line:only-arrow-functions space-before-function-paren
         it("by word", function (done) {
 
             // tslint:disable-next-line:max-line-length
@@ -95,7 +119,6 @@ describe("IJapaneseDictionary has two following implementations", () => {
             });
         });
 
-        // tslint:disable-next-line:only-arrow-functions space-before-function-paren
         it("by kanji", function (done) {
 
             const kanjiResponse =
