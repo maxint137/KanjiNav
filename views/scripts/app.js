@@ -4,10 +4,10 @@ var requireConfig = {
     waitSeconds: 120,
     shim: {
         "jquery-ui": {
-            deps: ['jquery'],
-            exports: 'jQuery.ui'
+            deps: ["jquery"],
+            exports: "jQuery.ui"
         },
-        "bootstrap": { deps: ['jquery', 'jquery-ui'] },
+        "bootstrap": { deps: ["jquery", "jquery-ui"] },
         "js-cookie": {}
     },
     paths: {
@@ -32,8 +32,8 @@ var requireConfig = {
 require.config(requireConfig);
 
 function setupPageControllers() {
-    // 'jquery' returns the jQuery object into '$'
-    require(['jquery', 'jquery-ui'], function($) {
+    // "jquery" returns the jQuery object into "$"
+    require(["jquery", "jquery-ui"], function($) {
 
         if (location.protocol !== "chrome-extension:") {
             $("html").css("min-width", "0px");
@@ -176,7 +176,7 @@ function setupPageControllers() {
                         return;
                     }
 
-                    this.element.append($('<option>', {
+                    this.element.append($("<option>", {
                         value: this.input.val(),
                         text: this.input.val()
                     }));
@@ -192,7 +192,7 @@ function setupPageControllers() {
                     // Remove invalid value
                     this.input
                         .val("")
-                        .attr("title", value + " didn't match any item")
+                        .attr("title", value + " didn't match any item ")
                         .tooltip("open");
                     this.element.val("");
                     this._delay(function() {
@@ -232,12 +232,12 @@ function setupPageControllers() {
             });
 
             $("#delButton").on("click", function() {
-                fe.removeWord('wordHistoryCombo', $('#word').val());
-                $('#word').val('');
+                fe.removeWord("wordHistoryCombo", $("#word").val());
+                $("#word").val("");
             });
 
             $("#addButton").on("click", function() {
-                fe.navigateToWord($('#word').val());
+                fe.navigateToWord($("#word").val());
             });
 
             $("#clearButton").on("click", function() {
@@ -264,59 +264,65 @@ function zoomToFit() {
 
 function fly(word, asExtension, useLocalDictionary) {
 
-    var dictionary = useLocalDictionary ? 'localDictionary' : 'serverDictionary';
+    var dictionary = useLocalDictionary ? "localDictionary" : "serverDictionary";
 
-    // 'bootstrap' does not return an object. Must appear at the end
-    require(['jquery', dictionary, 'knModel', 'frontend', 'cola', 'd3', "d3-request", "d3-collection", 'js-cookie', 'data',
-            'bootstrap'
-        ],
-        function($, lookupEngine, knModel, frontend, webColaLibrary, d3, d3_request, js_cookie, data) {
+    // "bootstrap" does not return an object. Must appear at the end
+    var libs = ["jquery",
+        dictionary,
+        "knModel",
+        "frontend",
+        "cola",
+        "d3",
+        "d3-request",
+        "d3-collection",
+        "js-cookie",
+        "bootstrap"
+    ];
 
-            debugger;
+    require(libs, function($, lookupEngine, knModel, frontend, webColaLibrary, d3, d3_request, js_cookie) {
 
-            if (asExtension) {
-                if (!word || "" == word) {
-                    $("#mainDiv").hide();
-                    $("#helpDiv").show();
-                    $("html").css("min-width", "230px");
-                    $("body").css("height", "30px");
-                } else {
-                    $("#helpDiv").hide();
-                    $("#mainDiv").show();
-                    $("html").css("min-width", "800px");
-                    $("body").css("height", "350px");
-                }
+        if (asExtension) {
+            if (!word || "" == word) {
+                $("#mainDiv").hide();
+                $("#helpDiv").show();
+                $("html").css("min-width", "230px");
+                $("body").css("height", "30px");
+            } else {
+                $("#helpDiv").hide();
+                $("#mainDiv").show();
+                $("html").css("min-width", "800px");
+                $("body").css("height", "350px");
             }
+        }
 
-            fe = new frontend.Frontend(
-                new knModel.Graph(lookupEngine.Dictionary),
-                webColaLibrary,
-                js_cookie);
+        fe = new frontend.Frontend(
+            new knModel.Graph(lookupEngine.Dictionary),
+            webColaLibrary,
+            js_cookie);
 
-            fe.loadWordHistory('#wordHistoryCombo');
+        fe.loadWordHistory("#wordHistoryCombo");
 
-            $("#hiddenWordsCombo").change(function() {
+        $("#hiddenWordsCombo").change(function() {
 
-                var wordSelected = $("#hiddenWordsCombo").val();
-                if (wordSelected) {
+            var wordSelected = $("#hiddenWordsCombo").val();
+            if (wordSelected) {
 
-                    fe.unHideWord(wordSelected);
-                }
-            });
-
-            setupPageControllers();
-
-            // get first node
-            fe.main(word || fe.getParameterByName('start') || '楽しい');
+                fe.unHideWord(wordSelected);
+            }
         });
 
+        setupPageControllers();
+
+        // get first node
+        fe.main(word || fe.getParameterByName("start") || "楽しい");
+    });
 }
 
 
 // using the "native" api, somehow require-api comes too late for the chrome extension to take off
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener("DOMContentLoaded", function() {
 
-    if (typeof chrome !== 'undefined' && chrome.tabs) {
+    if (typeof chrome !== "undefined" && chrome.tabs) {
         chrome.tabs.executeScript({
             code: "window.getSelection().toString();"
         }, function(selection) {
