@@ -43,6 +43,20 @@
             ],
             "port": 1234,
             "protocol": "legacy"
+        },
+        {
+            "name": "http://localhost:3000/",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:3000/",
+            "webRoot": "${workspaceRoot}/views"
+        },
+        {
+            "name": "file:///navigateKanji.html",
+            "type": "chrome",
+            "request": "launch",
+            "sourceMaps": true,
+            "file": "${workspaceRoot}/views/navigateKanji.html"
         }
     ],
     "configurations_": [{
