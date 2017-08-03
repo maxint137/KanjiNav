@@ -1,0 +1,14 @@
+{
+    "compileOnSave": true,
+
+    "files": [
+        "learn.serialize.library.ts"
+    ],
+
+    "compilerOptions": {
+        "module": "commonjs",
+        "traceResolution": false,
+        "experimentalDecorators": true,
+        "target": "es6"
+    }
+}

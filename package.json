@@ -28,7 +28,8 @@
     },
     "scripts": {
         "_comment": "mocha -w -r views/tests/tsconfig.js --watch-extensions ts --reporter dot views/tests/**/*.spec.ts",
-        "test": "mocha -r views/tests/tsconfig.js views/tests/**/*.spec.ts"
+        "test": "mocha -r views/tests/tsconfig.js views/tests/**/*.spec.ts",
+        "debug": "node --nolazy --debug-brk=1234 views/tests/learn.serialize.library.js"
     },
     "repository": {
         "type": "git",

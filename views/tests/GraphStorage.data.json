@@ -1,0 +1,123 @@
+{
+    "enjoyable": {
+        "_id": "5963751e22393e0862837549",
+        "JLPT": 5,
+        "hiragana": "たのしい",
+        "word": "楽しい",
+        "kanjis": [{
+            "__v": 1,
+            "character": "楽",
+            "JLPT": 4,
+            "_id": "5963751e22393e0862836bee",
+            "words": [
+                { "_id": "5963751e22393e086283746b", "JLPT": 5, "hiragana": "おんがく", "word": "音楽", "kanjis": [], "english": ["Music"] },
+                { "_id": "5963751e22393e0862837549", "JLPT": 5, "hiragana": "たのしい", "word": "楽しい", "kanjis": [], "english": ["enjoyable"] },
+                { "_id": "5963751e22393e08628377fd", "JLPT": 4, "hiragana": "たのしみ", "word": "楽しみ", "kanjis": [], "english": ["joy"] },
+                { "_id": "5963751e22393e08628377fe", "JLPT": 4, "hiragana": "たのしむ", "word": "楽む", "kanjis": [], "english": ["to enjoy oneself"] },
+                { "_id": "5963751e22393e0862837ff9", "JLPT": 3, "hiragana": "らく", "word": "楽", "kanjis": [], "english": ["comfort", "ease"] },
+                { "_id": "5963751e22393e086283815b", "JLPT": 2, "hiragana": "がっき", "word": "楽器", "kanjis": [], "english": ["musical instrument"] },
+                { "_id": "5963751e22393e086283826c", "JLPT": 2, "hiragana": "ごらく", "word": "娯楽", "kanjis": [], "english": ["pleasure", "amusement"] },
+                { "_id": "5963751e22393e0862838886", "JLPT": 1, "hiragana": "がっき", "word": "楽器", "kanjis": [], "english": ["musical instrument"] },
+                { "_id": "5963751e22393e0862838997", "JLPT": 1, "hiragana": "ごらく", "word": "娯楽", "kanjis": [], "english": ["pleasure", "amusement"] }
+            ],
+            "english": ["music", "comfort", " ease"],
+            "kunyomi": ["たの.しい", "たの.しむ"],
+            "onyomi": ["ガク", "ラク", "ゴウ", "コノ."]
+        }],
+        "english": ["enjoyable"]
+    },
+
+    "pronunciation": {
+        "_id": "5963751e22393e086283786a",
+        "JLPT": 4,
+        "hiragana": "はつおん",
+        "word": "発音",
+        "kanjis": [{
+                "__v": 1,
+                "character": "発",
+                "JLPT": 4,
+                "_id": "5963751e22393e0862836b96",
+                "words": [{
+                        "_id": "5963751e22393e08628377a4",
+                        "JLPT": 4,
+                        "hiragana": "しゅっぱつ・する",
+                        "word": "出発",
+                        "kanjis": [],
+                        "english": ["to depart"]
+                    },
+                    { "_id": "5963751e22393e086283786a", "JLPT": 4, "hiragana": "はつおん", "word": "発音", "kanjis": [], "english": ["pronunciation"] },
+                    { "_id": "5963751e22393e0862837c15", "JLPT": 3, "hiragana": "しゅっぱつ", "word": "出発", "kanjis": [], "english": ["departure"] },
+                    { "_id": "5963751e22393e0862837e7d", "JLPT": 3, "hiragana": "ばくはつ", "word": "爆発", "kanjis": [], "english": ["explosion", "detonation", "eruption"] },
+                    { "_id": "5963751e22393e0862837e8e", "JLPT": 3, "hiragana": "はっけん", "word": "発見", "kanjis": [], "english": ["discovery", "detection", "finding"] },
+                    { "_id": "5963751e22393e0862837e8f", "JLPT": 3, "hiragana": "はっこう", "word": "発行", "kanjis": [], "english": ["issue (publications)"] },
+                    { "_id": "5963751e22393e0862837e90", "JLPT": 3, "hiragana": "はっしゃ", "word": "発車", "kanjis": [], "english": ["departure of a vehicle"] },
+                    { "_id": "5963751e22393e0862837e92", "JLPT": 3, "hiragana": "はったつ", "word": "発達", "kanjis": [], "english": ["development", "growth"] },
+                    { "_id": "5963751e22393e0862837e94", "JLPT": 3, "hiragana": "はってん", "word": "発展", "kanjis": [], "english": ["development", "growth"] },
+                    { "_id": "5963751e22393e0862837e95", "JLPT": 3, "hiragana": "はっぴょう", "word": "発表", "kanjis": [], "english": ["announcement", "publication"] },
+                    { "_id": "5963751e22393e0862837e96", "JLPT": 3, "hiragana": "はつめい", "word": "発明", "kanjis": [], "english": ["invention"] },
+                    { "_id": "5963751e22393e0862838335", "JLPT": 2, "hiragana": "じょうはつ", "word": "蒸発", "kanjis": [], "english": ["evaporation", "unexplained disappearance"] },
+                    { "_id": "5963751e22393e0862838423", "JLPT": 2, "hiragana": "たつ", "word": "発つ", "kanjis": [], "english": ["to depart (on a plane", "train", " etc.)"] },
+                    { "_id": "5963751e22393e0862838577", "JLPT": 2, "hiragana": "はっき", "word": "発揮", "kanjis": [], "english": ["exhibition", "demonstration", "utilization", "display"] },
+                    { "_id": "5963751e22393e0862838579", "JLPT": 2, "hiragana": "はっしゃ", "word": "発射", "kanjis": [], "english": ["firing", "shooting", "discharge", "catapult"] },
+                    { "_id": "5963751e22393e086283857a", "JLPT": 2, "hiragana": "はっそう", "word": "発想", "kanjis": [], "english": ["expression (music)", "conceptualization"] },
+                    { "_id": "5963751e22393e086283857b", "JLPT": 2, "hiragana": "はつでん", "word": "発電", "kanjis": [], "english": ["generation (e.g. power)"] },
+                    { "_id": "5963751e22393e086283857c", "JLPT": 2, "hiragana": "はつばい", "word": "発売", "kanjis": [], "english": ["sale"] },
+                    { "_id": "5963751e22393e0862838a60", "JLPT": 1, "hiragana": "じょうはつ", "word": "蒸発", "kanjis": [], "english": ["evaporation", "unexplained disappearance"] },
+                    { "_id": "5963751e22393e0862838b4e", "JLPT": 1, "hiragana": "たつ", "word": "発つ", "kanjis": [], "english": ["to depart (on a plane", "train", " etc.)"] },
+                    { "_id": "5963751e22393e0862838ca2", "JLPT": 1, "hiragana": "はっき", "word": "発揮", "kanjis": [], "english": ["exhibition", "demonstration", "utilization", "display"] },
+                    { "_id": "5963751e22393e0862838ca4", "JLPT": 1, "hiragana": "はっしゃ", "word": "発射", "kanjis": [], "english": ["firing", "shooting", "discharge", "catapult"] },
+                    { "_id": "5963751e22393e0862838ca5", "JLPT": 1, "hiragana": "はっそう", "word": "発想", "kanjis": [], "english": ["expression (music)", "conceptualization"] },
+                    { "_id": "5963751e22393e0862838ca6", "JLPT": 1, "hiragana": "はつでん", "word": "発電", "kanjis": [], "english": ["generation (e.g. power)"] },
+                    { "_id": "5963751e22393e0862838ca7", "JLPT": 1, "hiragana": "はつばい", "word": "発売", "kanjis": [], "english": ["sale"] }
+                ],
+                "english": ["discharge", "departure", " publish", " emit", " start from", " disclose"],
+                "kunyomi": ["た.つ", "あば.く", "おこ.る", "つか.わす"],
+                "onyomi": ["ハツ", "ホツ", "ハナ."]
+            },
+            {
+                "__v": 1,
+                "character": "音",
+                "JLPT": 4,
+                "_id": "5963751e22393e0862836c05",
+                "words": [{ "_id": "5963751e22393e086283746b", "JLPT": 5, "hiragana": "おんがく", "word": "音楽", "kanjis": [], "english": ["Music"] },
+                    { "_id": "5963751e22393e08628376dd", "JLPT": 4, "hiragana": "おと", "word": "音", "kanjis": [], "english": ["sound", "note"] },
+                    { "_id": "5963751e22393e086283786a", "JLPT": 4, "hiragana": "はつおん", "word": "発音", "kanjis": [], "english": ["pronunciation"] },
+                    { "_id": "5963751e22393e08628379ee", "JLPT": 3, "hiragana": "おん", "word": "音", "kanjis": [], "english": ["sound", "note"] },
+                    { "_id": "5963751e22393e0862837cda", "JLPT": 3, "hiragana": "そうおん", "word": "騒音", "kanjis": [], "english": ["noise"] },
+                    { "_id": "5963751e22393e0862837fad", "JLPT": 3, "hiragana": "ものおと", "word": "物音", "kanjis": [], "english": ["sounds"] },
+                    { "_id": "5963751e22393e0862838251", "JLPT": 2, "hiragana": "ごじゅうおん", "word": "五十音", "kanjis": [], "english": ["the Japanese syllabary"] },
+                    { "_id": "5963751e22393e086283829d", "JLPT": 2, "hiragana": "ざつおん", "word": "雑音", "kanjis": [], "english": ["noise (jarring", "grating)"] },
+                    { "_id": "5963751e22393e0862838740", "JLPT": 2, "hiragana": "ろくおん", "word": "録音", "kanjis": [], "english": ["(audio) recording"] },
+                    { "_id": "5963751e22393e086283897c", "JLPT": 1, "hiragana": "ごじゅうおん", "word": "五十音", "kanjis": [], "english": ["the Japanese syllabary"] },
+                    { "_id": "5963751e22393e08628389c8", "JLPT": 1, "hiragana": "ざつおん", "word": "雑音", "kanjis": [], "english": ["noise (jarring", "grating)"] },
+                    { "_id": "5963751e22393e0862838e6b", "JLPT": 1, "hiragana": "ろくおん", "word": "録音", "kanjis": [], "english": ["(audio) recording"] }
+                ],
+                "english": ["sound", "noise"],
+                "kunyomi": ["おと"],
+                "onyomi": ["オン", "イン", "-ノン"]
+            }
+        ],
+        "english": ["pronunciation"]
+    },
+
+    "ease": {
+        "_id": "5963751e22393e0862836bee",
+        "JLPT": 4,
+        "character": "楽",
+        "__v": 1,
+        "words": [
+            { "_id": "5963751e22393e086283746b", "JLPT": 5, "hiragana": "おんがく", "word": "音楽", "kanjis": [], "english": ["Music"] },
+            { "_id": "5963751e22393e0862837549", "JLPT": 5, "hiragana": "たのしい", "word": "楽しい", "kanjis": [], "english": ["enjoyable"] },
+            { "_id": "5963751e22393e08628377fd", "JLPT": 4, "hiragana": "たのしみ", "word": "楽しみ", "kanjis": [], "english": ["joy"] },
+            { "_id": "5963751e22393e08628377fe", "JLPT": 4, "hiragana": "たのしむ", "word": "楽む", "kanjis": [], "english": ["to enjoy oneself"] },
+            { "_id": "5963751e22393e0862837ff9", "JLPT": 3, "hiragana": "らく", "word": "楽", "kanjis": [], "english": ["comfort", "ease"] },
+            { "_id": "5963751e22393e086283815b", "JLPT": 2, "hiragana": "がっき", "word": "楽器", "kanjis": [], "english": ["musical instrument"] },
+            { "_id": "5963751e22393e086283826c", "JLPT": 2, "hiragana": "ごらく", "word": "娯楽", "kanjis": [], "english": ["pleasure", "amusement"] },
+            { "_id": "5963751e22393e0862838886", "JLPT": 1, "hiragana": "がっき", "word": "楽器", "kanjis": [], "english": ["musical instrument"] },
+            { "_id": "5963751e22393e0862838997", "JLPT": 1, "hiragana": "ごらく", "word": "娯楽", "kanjis": [], "english": ["pleasure", "amusement"] }
+        ],
+        "english": ["music", "comfort", " ease"],
+        "kunyomi": ["たの.しい", "たの.しむ"],
+        "onyomi": ["ガク", "ラク", "ゴウ", "コノ."]
+    }
+}

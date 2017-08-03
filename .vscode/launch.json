@@ -2,15 +2,57 @@
     "version": "0.1.0",
     // List of configurations. Add new configurations or edit existing ones.  
     // ONLY "node" and "mono" are supported, change "type" to switch.
-    "configurations": [
+    "configurations": [{
+            "type": "node",
+            "request": "attach",
+            "name": "Attach",
+            "port": 17892
+        },
         {
+            "name": "Attach to Mocha",
+            "request": "attach",
+            "type": "node",
+            "address": "localhost",
+            "port": 5858,
+            "sourceMaps": true
+        },
+        {
+            "name": "Run mocha",
+            "type": "node",
+            "request": "launch",
+            // "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+            "program": "C:\\Users\\maxlevy\\AppData\\Roaming\\npm\\node_modules\\mocha\\bin\\mocha",
+            "stopOnEntry": false,
+            "sourceMaps": true,
+
+            "args": ["${file}", "--no-timeouts"],
+
+            "cwd": "${workspaceRoot}",
+            "runtimeExecutable": null,
+            "env": { "NODE_ENV": "testing" }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch via NPM",
+            "runtimeExecutable": "npm.cmd",
+            "cwd": "${workspaceRoot}",
+            "runtimeArgs": [
+                "run-script",
+                "debug"
+            ],
+            "port": 1234,
+            "protocol": "legacy"
+        }
+    ],
+    "configurations_": [{
             "name": "Launch localhost",
             "type": "chrome",
             "request": "launch",
             "url": "file:///C:/Dev/KanjiNav/views/browsemovies.html",
             "webRoot": "${workspaceRoot}/app/files"
         },
-         {
+        {
             "name": "Attach",
             "type": "chrome",
             "request": "attach",

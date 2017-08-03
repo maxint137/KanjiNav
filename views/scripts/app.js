@@ -25,7 +25,11 @@ var requireConfig = {
         "serverDictionary": "./js/scripts/serverDictionary",
         "frontend": "./js/scripts/frontend",
         "knModel": "./js/scripts/knModel",
+        "knGraph": "./js/scripts/knGraph",
+        "graphStorage": "./js/scripts/graphStorage",
         "data": "./js/scripts/data",
+        "reflect-metadata": "./node_modules/reflect-metadata/Reflect",
+        "class-transformer": "./node_modules/class-transformer/class-transformer.amd",
     }
 };
 
@@ -261,6 +265,25 @@ function zoomToFit() {
     Frontend.Frontend.prototype.zoomToFit();
 }
 
+// using the "native" api, somehow require-api comes too late for the chrome extension to take off
+document.addEventListener("DOMContentLoaded", function() {
+
+    if (typeof chrome !== "undefined" && chrome.tabs) {
+        chrome.tabs.executeScript({
+            code: "window.getSelection().toString();"
+        }, function(selection) {
+
+            var word = !selection || "" === selection[0] ? "" : selection[0].trim();
+
+            fly(word, true);
+        });
+
+    } else {
+
+        // fly "locally" if loaded as a file://..
+        fly("", false, location.protocol == "file:");
+    }
+});
 
 function fly(word, asExtension, useLocalDictionary) {
 
@@ -269,17 +292,17 @@ function fly(word, asExtension, useLocalDictionary) {
     // "bootstrap" does not return an object. Must appear at the end
     var libs = ["jquery",
         dictionary,
-        "knModel",
+        "knGraph",
         "frontend",
         "cola",
-        "d3",
-        "d3-request",
-        "d3-collection",
         "js-cookie",
+        // "MetadataStorage",
+        //"serializerTs",
+        //"graphStorage",
         "bootstrap"
     ];
 
-    require(libs, function($, lookupEngine, knModel, frontend, webColaLibrary, d3, d3_request, js_cookie) {
+    require(libs, function($, lookupEngine, knGraph, frontend, webColaLibrary, d3, d3_request, js_cookie) {
 
         if (asExtension) {
             if (!word || "" == word) {
@@ -296,7 +319,7 @@ function fly(word, asExtension, useLocalDictionary) {
         }
 
         fe = new frontend.Frontend(
-            new knModel.Graph(lookupEngine.Dictionary),
+            new knGraph.Graph(lookupEngine.Dictionary),
             webColaLibrary,
             js_cookie);
 
@@ -317,24 +340,3 @@ function fly(word, asExtension, useLocalDictionary) {
         fe.main(word || fe.getParameterByName("start") || "楽しい");
     });
 }
-
-
-// using the "native" api, somehow require-api comes too late for the chrome extension to take off
-document.addEventListener("DOMContentLoaded", function() {
-
-    if (typeof chrome !== "undefined" && chrome.tabs) {
-        chrome.tabs.executeScript({
-            code: "window.getSelection().toString();"
-        }, function(selection) {
-
-            var word = !selection || "" === selection[0] ? "" : selection[0].trim();
-
-            fly(word, true);
-        });
-
-    } else {
-
-        // fly "locally" if loaded as a file://..
-        fly("", false, location.protocol == "file:");
-    }
-});

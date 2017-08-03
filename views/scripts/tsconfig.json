@@ -7,7 +7,8 @@
         "watch": true,
 
         // Specify ECMAScript target version: "ES3" (default), "ES5", "ES6"/"ES2015", "ES2016", "ES2017" "ESNext". 
-        "target": "es6",
+        "target": "ES6",
+        "experimentalDecorators": true,
 
         "lib": ["dom", "es2015.promise", "es5", "es6"],
 

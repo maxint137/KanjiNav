@@ -66,8 +66,8 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             // Standard functions will dynamically bind this depending on execution context (just like in JavaScript)
             // Arrow functions on the other hand will preserve this of enclosing context.
             // var d = this.modelGraph.loadNode(word.length == 1
-            //  ? KNModel_NodeType.Char
-            //  : KNModel_NodeType.Word, word, v => this.addViewNode(v));
+            //  ? NodeType.Char
+            //  : NodeType.Word, word, v => this.addViewNode(v));
             const d = this.modelGraph.loadNode(word.length === 1 ? "Kanji" : "Word", word, (v) => this.addViewNode(v));
             $.when(d).then((loadedNode) => { this.refocus(loadedNode); });
         }
@@ -125,12 +125,18 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
         }
         // UF: these are not sufficient anymore, we must (de)serialize the model data as well
         saveGraph() {
-            this.viewGraphSaved.nodes = this.viewGraph.nodes;
-            this.refreshViewGraph();
+            // this.viewGraphSaved.nodes = this.viewGraph.nodes;
+            // this.refreshViewGraph();
+            this.modelGraph.save("test");
         }
         loadGraph() {
-            this.viewGraph.nodes = this.viewGraphSaved.nodes;
+            this.modelGraph.load("test");
+            for (const nodeKey of Object.keys(this.modelGraph.nodes)) {
+                this.addViewNode(this.modelGraph.nodes[nodeKey]);
+            }
             this.refreshViewGraph();
+            // this.viewGraph.nodes = this.viewGraphSaved.nodes;
+            // this.refreshViewGraph();
         }
         // adds the node to the viewGraph, picks the initial position based on the startPos and assigns viewGraphId
         // used to schedule the images rendering
@@ -504,7 +510,6 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
         redraw(transition) {
             // if mouse down then we are dragging not panning
             if (this.nodeMouseDown) {
-                // debugger;
                 return;
             }
             // read the current zoom translation vector and the current zoom scale

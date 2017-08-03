@@ -8,14 +8,22 @@ import * as d3 from "d3";
 import * as cola from "../node_modules/webcola/WebCola/index";
 
 import * as KNApi from "./knApi";
-import { Graph as KNModel_Graph, INode as KNModel_INode, NodeTypes as KNModel_NodeTypes } from "./knModel";
+import {
+    INeighborID,
+    INode as INodeKN,
+    NodeTypes,
+} from "./knModel";
 
-class ViewNodeBase implements KNModel_INode {
+import {
+    Graph as GraphKN,
+} from "./knGraph";
 
-    constructor(public mn: KNModel_INode) { }
+class ViewNodeBase implements INodeKN {
+
+    constructor(public mn: INodeKN) { }
 
     get text(): string { return this.mn.text; }
-    get type(): KNModel_NodeTypes { return this.mn.type; }
+    get type(): NodeTypes { return this.mn.type; }
     get id(): string { return this.mn.id; }
     get title(): string[] { return this.mn.title; }
     get subscript(): string[] { return this.mn.subscript; }
@@ -23,7 +31,7 @@ class ViewNodeBase implements KNModel_INode {
     get hint(): string[] { return this.mn.hint; }
     get JLPT(): KNApi.JlptLevel { return this.mn.JLPT; }
     get isKanji(): boolean { return this.mn.isKanji; }
-    get hood(): KNModel_INode[] { return this.mn.hood; }
+    get hood(): INeighborID[] { return this.mn.hood; }
     get degree(): number { return this.mn.degree; }
 }
 
@@ -43,7 +51,7 @@ class ViewNode extends ViewNodeBase implements cola.Node {
     public viewGraphId: number;
     public hidden: boolean;
 
-    constructor(mn: KNModel_INode) {
+    constructor(mn: INodeKN) {
         super(mn);
         this.hidden = false;
     }
@@ -98,7 +106,7 @@ export class Frontend {
     // ??
     private nodeMouseDown: boolean;
 
-    constructor(public modelGraph: KNModel_Graph, public webColaLibrary: any, public cookies: Cookies.CookiesStatic) {
+    constructor(public modelGraph: GraphKN, public webColaLibrary: any, public cookies: Cookies.CookiesStatic) {
 
         this.calcMySize();
 
@@ -150,8 +158,8 @@ export class Frontend {
         // Standard functions will dynamically bind this depending on execution context (just like in JavaScript)
         // Arrow functions on the other hand will preserve this of enclosing context.
         // var d = this.modelGraph.loadNode(word.length == 1
-        //  ? KNModel_NodeType.Char
-        //  : KNModel_NodeType.Word, word, v => this.addViewNode(v));
+        //  ? NodeType.Char
+        //  : NodeType.Word, word, v => this.addViewNode(v));
         const d = this.modelGraph.loadNode(word.length === 1 ? "Kanji" : "Word", word, (v) => this.addViewNode(v));
 
         $.when(d).then((loadedNode: any) => { this.refocus(loadedNode); });
@@ -225,18 +233,27 @@ export class Frontend {
 
     // UF: these are not sufficient anymore, we must (de)serialize the model data as well
     private saveGraph() {
-        this.viewGraphSaved.nodes = this.viewGraph.nodes;
-        this.refreshViewGraph();
+        // this.viewGraphSaved.nodes = this.viewGraph.nodes;
+        // this.refreshViewGraph();
+        this.modelGraph.save("test");
     }
 
     private loadGraph() {
-        this.viewGraph.nodes = this.viewGraphSaved.nodes;
+        this.modelGraph.load("test");
+
+        for (const nodeKey of Object.keys(this.modelGraph.nodes)) {
+            this.addViewNode(this.modelGraph.nodes[nodeKey]);
+        }
+
         this.refreshViewGraph();
+
+        // this.viewGraph.nodes = this.viewGraphSaved.nodes;
+        // this.refreshViewGraph();
     }
 
     // adds the node to the viewGraph, picks the initial position based on the startPos and assigns viewGraphId
     // used to schedule the images rendering
-    private addViewNode(mn: KNModel_INode, startPos?: cola.Node) {
+    private addViewNode(mn: INodeKN, startPos?: cola.Node) {
 
         const vn: ViewNode = new ViewNode(mn);
 
@@ -251,14 +268,14 @@ export class Frontend {
     }
 
     // expands the selected node, renders the updated graph
-    private refocus(node: KNModel_INode) {
+    private refocus(node: INodeKN) {
 
         // find the corresponding view-node:
         // let focus: ViewNode = this.viewGraph.nodes.filter((vn: ViewNode) => vn.id == node.id)[0];
         const focus: ViewNode = this.viewGraph.nodes.filter((vn: ViewNode) => vn.mn.id === node.id)[0];
 
-        const neighborsExpanded: JQueryPromise<KNModel_INode[]> =
-            this.modelGraph.expandNeighbors(focus.mn, (mn: KNModel_INode) => {
+        const neighborsExpanded: JQueryPromise<INodeKN[]> =
+            this.modelGraph.expandNeighbors(focus.mn, (mn: INodeKN) => {
                 if (!this.inView(this.findNode(mn))) {
                     this.addViewNode(mn, focus);
                 }
@@ -270,7 +287,7 @@ export class Frontend {
         $.when(neighborsExpanded).then((hood: any) => this.addViewLinks(node, hood));
     }
 
-    private addViewLinks(node: KNModel_INode, hood: KNModel_INode[]) {
+    private addViewLinks(node: INodeKN, hood: INodeKN[]) {
         const u: ViewNode = this.findNode(node);
 
         if (typeof hood !== "undefined") {
@@ -604,7 +621,7 @@ export class Frontend {
         }
     }
 
-    private findNode(n: KNModel_INode): ViewNode {
+    private findNode(n: INodeKN): ViewNode {
         return this.viewGraph.nodes.filter((fen) => fen.id === n.id)[0];
     }
 
@@ -634,7 +651,7 @@ export class Frontend {
         this.update();
     }
 
-    private unCollapseNode(node: KNModel_INode) {
+    private unCollapseNode(node: INodeKN) {
 
         this.viewGraph.links
             .filter((l) => l.target.mn === node)
@@ -713,7 +730,6 @@ export class Frontend {
     private redraw(transition?: boolean) {
         // if mouse down then we are dragging not panning
         if (this.nodeMouseDown) {
-            // debugger;
             return;
         }
 
