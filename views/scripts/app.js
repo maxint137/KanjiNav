@@ -296,13 +296,11 @@ function fly(word, asExtension, useLocalDictionary) {
         "frontend",
         "cola",
         "js-cookie",
-        // "MetadataStorage",
-        //"serializerTs",
-        //"graphStorage",
+        "graphStorage",
         "bootstrap"
     ];
 
-    require(libs, function($, lookupEngine, knGraph, frontend, webColaLibrary, d3, d3_request, js_cookie) {
+    require(libs, function($, lookupEngine, knGraph, frontend, webColaLibrary, js_cookie, graphStorage) {
 
         if (asExtension) {
             if (!word || "" == word) {
@@ -319,7 +317,7 @@ function fly(word, asExtension, useLocalDictionary) {
         }
 
         fe = new frontend.Frontend(
-            new knGraph.Graph(lookupEngine.Dictionary),
+            new knGraph.Graph(lookupEngine.Dictionary, "", graphStorage),
             webColaLibrary,
             js_cookie);
 
