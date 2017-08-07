@@ -20,13 +20,16 @@ var requireConfig = {
         "d3-dsv": "https://cdnjs.cloudflare.com/ajax/libs/d3-dsv/1.0.5/d3-dsv.min",
         "bootstrap": "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min",
         "js-cookie": "https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.3/js.cookie.min",
+        "underscore": "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min",
         "cola": "./node_modules/webcola/WebCola/cola.min",
         "localDictionary": "./js/scripts/localDictionary",
         "serverDictionary": "./js/scripts/serverDictionary",
         "frontend": "./js/scripts/frontend",
         "knModel": "./js/scripts/knModel",
+        "knApi": "./js/scripts/knApi",
         "knGraph": "./js/scripts/knGraph",
-        "graphStorage": "./js/scripts/graphStorage",
+        "IStorage": "./js/scripts/IStorage",
+        "sstorage": "./js/scripts/snapshotStorage",
         "data": "./js/scripts/data",
         "reflect-metadata": "./node_modules/reflect-metadata/Reflect",
         "class-transformer": "./node_modules/class-transformer/class-transformer.amd",
@@ -241,6 +244,7 @@ function setupPageControllers() {
             });
 
             $("#addButton").on("click", function() {
+                fe.clearAll();
                 fe.navigateToWord($("#word").val());
             });
 
@@ -296,11 +300,11 @@ function fly(word, asExtension, useLocalDictionary) {
         "frontend",
         "cola",
         "js-cookie",
-        "graphStorage",
+        "sstorage",
         "bootstrap"
     ];
 
-    require(libs, function($, lookupEngine, knGraph, frontend, webColaLibrary, js_cookie, graphStorage) {
+    require(libs, function($, lookupEngine, knGraph, frontend, webColaLibrary, js_cookie, sstorage) {
 
         if (asExtension) {
             if (!word || "" == word) {
@@ -317,9 +321,10 @@ function fly(word, asExtension, useLocalDictionary) {
         }
 
         fe = new frontend.Frontend(
-            new knGraph.Graph(lookupEngine.Dictionary, "", graphStorage),
+            new knGraph.Graph(lookupEngine.Dictionary, ""),
             webColaLibrary,
-            js_cookie);
+            js_cookie,
+            new sstorage.SnapshotDB());
 
         fe.loadWordHistory("#wordHistoryCombo");
 
@@ -335,6 +340,6 @@ function fly(word, asExtension, useLocalDictionary) {
         setupPageControllers();
 
         // get first node
-        fe.main(word || fe.getParameterByName("start") || "楽しい");
+        fe.navigateToWord(word || fe.getParameterByName("start") || "楽しい");
     });
 }

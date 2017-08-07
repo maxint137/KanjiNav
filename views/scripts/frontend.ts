@@ -3,12 +3,15 @@
 // see http://garrettn.github.io/blog/2014/02/19/write-modular-javascript-that-works-anywhere-with-umd/
 // import "/views/node_modules/@types/d3/index.d.ts";
 import * as d3 from "d3";
+import * as _ from "underscore";
+
 // import { D3StyleLayoutAdaptor as ColaD3StyleLayoutAdaptor } from "../node_modules/webcola/WebCola/src/d3v3adaptor"
 
 import * as cola from "../node_modules/webcola/WebCola/index";
 
 import * as KNApi from "./knApi";
 import {
+    Edge,
     INeighborID,
     INode as INodeKN,
     NodeTypes,
@@ -17,6 +20,14 @@ import {
 import {
     Graph as GraphKN,
 } from "./knGraph";
+
+import {
+    EdgeDescriptor,
+    IPersistentStorage,
+    ISnapshotDB,
+    NodeDescriptor,
+    Snapshot,
+} from "IStorage"
 
 class ViewNodeBase implements INodeKN {
 
@@ -38,13 +49,12 @@ class ViewNodeBase implements INodeKN {
 class ViewNode extends ViewNodeBase implements cola.Node {
 
     // cola.Node's implementation
-    public index?: number;
     public x: number;
     public y: number;
+    public index?: number;
     public width?: number;
     public height?: number;
     public fixed: number;
-    public number: number;
 
     // app specific:
     public color: string;
@@ -68,6 +78,18 @@ class ViewGraph {
     public links: ViewLink[];
 }
 
+class LocalPersistentStorage implements IPersistentStorage {
+    public serialize(o: string) {
+        console.log(o);
+        localStorage.setItem("KanjiNav", o);
+    }
+    public deserialize(): string {
+        const s = localStorage.getItem("KanjiNav");
+        return s;
+    }
+}
+
+// tslint:disable-next-line:max-classes-per-file
 export class Frontend {
     private static readonly jlptSelectedLevelsCookieName = "jlptSelectedLevels";
     private static readonly wordsHistoryCookieName = "wordsHistory";
@@ -76,6 +98,9 @@ export class Frontend {
     private static fontSize: number = 22;
     private static nodeWidth: number = 30;
     private static nodeHeight: number = Frontend.fontSize;
+
+    // the word that was loaded the last
+    private currentWord: string;
 
     // canvas size
     private width: number;
@@ -106,7 +131,16 @@ export class Frontend {
     // ??
     private nodeMouseDown: boolean;
 
-    constructor(public modelGraph: GraphKN, public webColaLibrary: any, public cookies: Cookies.CookiesStatic) {
+    private storage: IPersistentStorage;
+
+    constructor(
+        public modelGraph: GraphKN,
+        public webColaLibrary: any,
+        public cookies: Cookies.CookiesStatic,
+        public ssDB: ISnapshotDB) {
+
+        this.storage = new LocalPersistentStorage();
+        this.ssDB.deserialize(this.storage);
 
         this.calcMySize();
 
@@ -152,17 +186,25 @@ export class Frontend {
     }
 
     // adds a word to graph
-    public main(word: string) {
+    public navigateToWord(word: string) {
 
-        // Note: http://piotrwalat.net/arrow-function-expressions-in-typescript/
-        // Standard functions will dynamically bind this depending on execution context (just like in JavaScript)
-        // Arrow functions on the other hand will preserve this of enclosing context.
-        // var d = this.modelGraph.loadNode(word.length == 1
-        //  ? NodeType.Char
-        //  : NodeType.Word, word, v => this.addViewNode(v));
-        const d = this.modelGraph.loadNode(word.length === 1 ? "Kanji" : "Word", word, (v) => this.addViewNode(v));
+        this.updateWordInHistory(word);
 
-        $.when(d).then((loadedNode: any) => { this.refocus(loadedNode); });
+        this.loadWord(word);
+    }
+
+    public deleteGraph() {
+        this.deleteGraphImp(this.currentWord);
+    }
+
+    public saveGraph() {
+
+        this.saveGraphImp(this.currentWord);
+    }
+
+    public loadGraph() {
+
+        this.loadGraphImp(this.currentWord);
     }
 
     public clearAll() {
@@ -231,24 +273,41 @@ export class Frontend {
         addGradient("ReverseEdgeGradient", "darkGray", 1, this.red, 1);
     }
 
-    // UF: these are not sufficient anymore, we must (de)serialize the model data as well
-    private saveGraph() {
-        // this.viewGraphSaved.nodes = this.viewGraph.nodes;
-        // this.refreshViewGraph();
-        this.modelGraph.save("test");
+    private saveGraphImp(id: string) {
+
+        let key: string;
+        const ss: Snapshot = new Snapshot(id);
+
+        this.viewGraph.nodes.forEach((vn) => {
+            ss.nodes.push(new NodeDescriptor(vn.mn.id, vn.x, vn.y, this.modelGraph.nodes[vn.mn.id]))
+        })
+
+        for (key of Object.keys(this.modelGraph.edges)) {
+            ss.edges.push(new EdgeDescriptor(key, this.modelGraph.edges[key]))
+        }
+
+        this.ssDB.saveSnapshot(ss);
+        this.ssDB.serialize(this.storage);
     }
 
-    private loadGraph() {
-        this.modelGraph.load("test");
+    private loadGraphImp(id: string) {
 
-        for (const nodeKey of Object.keys(this.modelGraph.nodes)) {
-            this.addViewNode(this.modelGraph.nodes[nodeKey]);
+        const ss: Snapshot = this.ssDB.loadSnapshot(id);
+
+        // setup the model
+        ss.nodes.forEach((n) => { this.modelGraph.nodes[n.name] = n.node; });
+        ss.edges.forEach((e) => { this.modelGraph.edges[e.name] = e.edge; });
+
+        // setup the view:
+        for (const nodeKey of Object.keys(ss.nodes)) {
+            this.addViewNode(ss.nodes[nodeKey].node, { x: ss.nodes[nodeKey].x, y: ss.nodes[nodeKey].y });
         }
 
         this.refreshViewGraph();
+    }
 
-        // this.viewGraph.nodes = this.viewGraphSaved.nodes;
-        // this.refreshViewGraph();
+    private deleteGraphImp(id: string) {
+        // this.storage.deleteNodesPosition(id);
     }
 
     // adds the node to the viewGraph, picks the initial position based on the startPos and assigns viewGraphId
@@ -356,7 +415,7 @@ export class Frontend {
 
     private nodeIsNotFilteredOut(n: ViewNode) {
 
-        return n.mn.isKanji
+        return n.isKanji
             || (false === n.hidden && this.isSelectedJlpt(n.mn.JLPT));
     }
 
@@ -515,7 +574,7 @@ export class Frontend {
             // create a reference to the <g> id sections defined in the existing svg markup exported from Inkscape
             .append("use")
             // kanjiBG or g12??
-            .attr("xlink:href", (n: ViewNode) => n.mn.isKanji ? "#kanjiBG" : `#wc_${n.mn.text.length}`)
+            .attr("xlink:href", (n: ViewNode) => n.isKanji ? "#kanjiBG" : `#wc_${n.mn.text.length}`)
             ;
 
         wordCard
@@ -706,11 +765,43 @@ export class Frontend {
         };
     }
 
-    private navigateToWord(word: string) {
+    private loadWord(word: string) {
 
-        this.updateWordInHistory(word);
+        // Note: http://piotrwalat.net/arrow-function-expressions-in-typescript/
+        // Standard functions will dynamically bind this depending on execution context (just like in JavaScript)
+        // Arrow functions on the other hand will preserve this of enclosing context.
+        // var d = this.modelGraph.loadNode(word.length == 1
+        //  ? NodeType.Char
+        //  : NodeType.Word, word, v => this.addViewNode(v));
+        const modelNodeLoaded: JQueryPromise<INodeKN> = this.modelGraph.loadNode(
+            word.length === 1 ? "Kanji" : "Word",
+            word,
+        );
 
-        this.main(word);
+        $.when(modelNodeLoaded).then((modelNode: INodeKN) => {
+
+            // if this word has a snapshot, load it
+            if (!this.canLoadSnapshot(modelNode)) {
+
+                this.addViewNode(modelNode);
+                this.refocus(modelNode);
+            }
+
+            this.currentWord = modelNode.id;
+        });
+    }
+
+    private canLoadSnapshot(modelNode: INodeKN): boolean {
+
+        const ss: Snapshot = this.ssDB.loadSnapshot(modelNode.id);
+
+        if (!ss) {
+            return false;
+        }
+
+        this.loadGraphImp(modelNode.id);
+
+        return true;
     }
 
     private calcMySize() {

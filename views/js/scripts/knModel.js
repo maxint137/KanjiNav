@@ -1,4 +1,10 @@
-define(["require", "exports"], function (require, exports) {
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+define(["require", "exports", "class-transformer", "./knApi"], function (require, exports, class_transformer_1, KNApi) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function opposite(tp) {
@@ -6,58 +12,28 @@ define(["require", "exports"], function (require, exports) {
     }
     exports.opposite = opposite;
     class BaseNode {
-        constructor(dictEntry) {
-            this.dictEntry = dictEntry;
-        }
         static makeId(type, text) {
             return `${type}_${text}`;
-        }
-        get JLPT() {
-            return this.dictEntry.JLPT;
-        }
-        get hint() {
-            return this.dictEntry.english;
-        }
-        get isKanji() {
-            return this.type === "Kanji";
-        }
-        get id() {
-            return BaseNode.makeId(this.type, this.text);
-        }
-        get hood() {
-            return this.hoodData;
-        }
-        get title() {
-            throw new Error("Base class implementation was called.");
-        }
-        get subscript() {
-            throw new Error("Base class implementation was called.");
-        }
-        get superscript() {
-            throw new Error("Base class implementation was called.");
-        }
-        get text() {
-            throw new Error("Base class implementation was called.");
-        }
-        get type() {
-            throw new Error("Base class implementation was called.");
         }
     }
     exports.BaseNode = BaseNode;
     class WordNode extends BaseNode {
-        constructor(dbWord) {
-            super(dbWord);
-            this.dbWord = dbWord;
+        constructor(nodeData) {
+            super();
             // when de-serialized the parameter is undefined
-            if (typeof dbWord === "undefined") {
+            if (typeof nodeData === "undefined") {
                 return;
             }
+            this.nodeData = nodeData;
             this.hoodData = this.dbWord.kanjis.map((kanji) => {
                 return {
                     id: WordNode.makeId("Kanji", kanji.character),
                     text: kanji.character,
                 };
             });
+        }
+        get dbWord() {
+            return this.nodeData;
         }
         get text() {
             return this.dbWord.word;
@@ -74,22 +50,43 @@ define(["require", "exports"], function (require, exports) {
         get superscript() {
             return [this.dbWord.hiragana];
         }
+        get JLPT() {
+            return this.nodeData.JLPT;
+        }
+        get hint() {
+            return this.nodeData.english;
+        }
+        get isKanji() {
+            return this.type === "Kanji";
+        }
+        get id() {
+            return BaseNode.makeId(this.type, this.text);
+        }
+        get hood() {
+            return this.hoodData;
+        }
     }
+    __decorate([
+        class_transformer_1.Type(() => KNApi.DbWord)
+    ], WordNode.prototype, "nodeData", void 0);
     exports.WordNode = WordNode;
     class KanjiNode extends BaseNode {
-        constructor(dbKanji) {
-            super(dbKanji);
-            this.dbKanji = dbKanji;
+        constructor(nodeData) {
+            super();
             // when de-serialized the parameter is undefined
-            if (typeof dbKanji === "undefined") {
+            if (typeof nodeData === "undefined") {
                 return;
             }
+            this.nodeData = nodeData;
             this.hoodData = this.dbKanji.words.map((word) => {
                 return {
                     id: WordNode.makeId("Word", word.word),
                     text: word.word,
                 };
             });
+        }
+        get dbKanji() {
+            return this.nodeData;
         }
         get text() {
             return this.dbKanji.character;
@@ -106,7 +103,25 @@ define(["require", "exports"], function (require, exports) {
         get superscript() {
             return [this.dbKanji.kunyomi[0]];
         }
+        get JLPT() {
+            return this.nodeData.JLPT;
+        }
+        get hint() {
+            return this.nodeData.english;
+        }
+        get isKanji() {
+            return this.type === "Kanji";
+        }
+        get id() {
+            return BaseNode.makeId(this.type, this.text);
+        }
+        get hood() {
+            return this.hoodData;
+        }
     }
+    __decorate([
+        class_transformer_1.Type(() => KNApi.DbKanji)
+    ], KanjiNode.prototype, "nodeData", void 0);
     exports.KanjiNode = KanjiNode;
     // just the opposite of what they recommend in
     // https://stackoverflow.com/questions/42634116/factory-returning-classes-in-typescript

@@ -1,4 +1,4 @@
-define(["require", "exports", "d3"], function (require, exports, d3) {
+define(["require", "exports", "d3", "IStorage"], function (require, exports, d3, IStorage_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class ViewNodeBase {
@@ -27,11 +27,25 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
     }
     class ViewGraph {
     }
+    class LocalPersistentStorage {
+        serialize(o) {
+            console.log(o);
+            localStorage.setItem("KanjiNav", o);
+        }
+        deserialize() {
+            const s = localStorage.getItem("KanjiNav");
+            return s;
+        }
+    }
+    // tslint:disable-next-line:max-classes-per-file
     class Frontend {
-        constructor(modelGraph, webColaLibrary, cookies) {
+        constructor(modelGraph, webColaLibrary, cookies, ssDB) {
             this.modelGraph = modelGraph;
             this.webColaLibrary = webColaLibrary;
             this.cookies = cookies;
+            this.ssDB = ssDB;
+            this.storage = new LocalPersistentStorage();
+            this.ssDB.deserialize(this.storage);
             this.calcMySize();
             this.red = "rgb(125, 0, 0)";
             this.viewGraph = {
@@ -61,15 +75,18 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             this.setupJlptChecks();
         }
         // adds a word to graph
-        main(word) {
-            // Note: http://piotrwalat.net/arrow-function-expressions-in-typescript/
-            // Standard functions will dynamically bind this depending on execution context (just like in JavaScript)
-            // Arrow functions on the other hand will preserve this of enclosing context.
-            // var d = this.modelGraph.loadNode(word.length == 1
-            //  ? NodeType.Char
-            //  : NodeType.Word, word, v => this.addViewNode(v));
-            const d = this.modelGraph.loadNode(word.length === 1 ? "Kanji" : "Word", word, (v) => this.addViewNode(v));
-            $.when(d).then((loadedNode) => { this.refocus(loadedNode); });
+        navigateToWord(word) {
+            this.updateWordInHistory(word);
+            this.loadWord(word);
+        }
+        deleteGraph() {
+            this.deleteGraphImp(this.currentWord);
+        }
+        saveGraph() {
+            this.saveGraphImp(this.currentWord);
+        }
+        loadGraph() {
+            this.loadGraphImp(this.currentWord);
         }
         clearAll() {
             this.viewGraph = {
@@ -123,20 +140,31 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             addGradient("EdgeGradient", this.red, 1, "darkGray", 1);
             addGradient("ReverseEdgeGradient", "darkGray", 1, this.red, 1);
         }
-        // UF: these are not sufficient anymore, we must (de)serialize the model data as well
-        saveGraph() {
-            // this.viewGraphSaved.nodes = this.viewGraph.nodes;
-            // this.refreshViewGraph();
-            this.modelGraph.save("test");
+        saveGraphImp(id) {
+            let key;
+            const ss = new IStorage_1.Snapshot(id);
+            this.viewGraph.nodes.forEach((vn) => {
+                ss.nodes.push(new IStorage_1.NodeDescriptor(vn.mn.id, vn.x, vn.y, this.modelGraph.nodes[vn.mn.id]));
+            });
+            for (key of Object.keys(this.modelGraph.edges)) {
+                ss.edges.push(new IStorage_1.EdgeDescriptor(key, this.modelGraph.edges[key]));
+            }
+            this.ssDB.saveSnapshot(ss);
+            this.ssDB.serialize(this.storage);
         }
-        loadGraph() {
-            this.modelGraph.load("test");
-            for (const nodeKey of Object.keys(this.modelGraph.nodes)) {
-                this.addViewNode(this.modelGraph.nodes[nodeKey]);
+        loadGraphImp(id) {
+            const ss = this.ssDB.loadSnapshot(id);
+            // setup the model
+            ss.nodes.forEach((n) => { this.modelGraph.nodes[n.name] = n.node; });
+            ss.edges.forEach((e) => { this.modelGraph.edges[e.name] = e.edge; });
+            // setup the view:
+            for (const nodeKey of Object.keys(ss.nodes)) {
+                this.addViewNode(ss.nodes[nodeKey].node, { x: ss.nodes[nodeKey].x, y: ss.nodes[nodeKey].y });
             }
             this.refreshViewGraph();
-            // this.viewGraph.nodes = this.viewGraphSaved.nodes;
-            // this.refreshViewGraph();
+        }
+        deleteGraphImp(id) {
+            // this.storage.deleteNodesPosition(id);
         }
         // adds the node to the viewGraph, picks the initial position based on the startPos and assigns viewGraphId
         // used to schedule the images rendering
@@ -213,7 +241,7 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             this.update();
         }
         nodeIsNotFilteredOut(n) {
-            return n.mn.isKanji
+            return n.isKanji
                 || (false === n.hidden && this.isSelectedJlpt(n.mn.JLPT));
         }
         filteredNodes() {
@@ -345,7 +373,7 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
                 .append("g")
                 .attr("style", (n) => `fill: ${this.jlpt2color(n.mn.JLPT)}`)
                 .append("use")
-                .attr("xlink:href", (n) => n.mn.isKanji ? "#kanjiBG" : `#wc_${n.mn.text.length}`);
+                .attr("xlink:href", (n) => n.isKanji ? "#kanjiBG" : `#wc_${n.mn.text.length}`);
             wordCard
                 .on("click", (n) => { this.hideNode(n); });
             // the spikes
@@ -492,9 +520,30 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
                 y,
             };
         }
-        navigateToWord(word) {
-            this.updateWordInHistory(word);
-            this.main(word);
+        loadWord(word) {
+            // Note: http://piotrwalat.net/arrow-function-expressions-in-typescript/
+            // Standard functions will dynamically bind this depending on execution context (just like in JavaScript)
+            // Arrow functions on the other hand will preserve this of enclosing context.
+            // var d = this.modelGraph.loadNode(word.length == 1
+            //  ? NodeType.Char
+            //  : NodeType.Word, word, v => this.addViewNode(v));
+            const modelNodeLoaded = this.modelGraph.loadNode(word.length === 1 ? "Kanji" : "Word", word);
+            $.when(modelNodeLoaded).then((modelNode) => {
+                // if this word has a snapshot, load it
+                if (!this.canLoadSnapshot(modelNode)) {
+                    this.addViewNode(modelNode);
+                    this.refocus(modelNode);
+                }
+                this.currentWord = modelNode.id;
+            });
+        }
+        canLoadSnapshot(modelNode) {
+            const ss = this.ssDB.loadSnapshot(modelNode.id);
+            if (!ss) {
+                return false;
+            }
+            this.loadGraphImp(modelNode.id);
+            return true;
         }
         calcMySize() {
             // take into account the height of the toolbar

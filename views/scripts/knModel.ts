@@ -1,3 +1,5 @@
+import { Exclude, Type } from "class-transformer";
+
 import * as KNApi from "./knApi";
 
 export type NodeTypes = "Word" | "Kanji";
@@ -21,7 +23,6 @@ export interface INode {
 
     isKanji: boolean;
 
-    //@Type(() => INeighborID)
     hood: INeighborID[];
 
     degree: number;
@@ -32,64 +33,37 @@ export interface INeighborID {
     readonly text: string;
 }
 
-export class BaseNode implements INode {
+export abstract class BaseNode {
 
     public static makeId(type: string, text: string): string {
         return `${type}_${text}`;
     }
 
     public degree: number;
+
+    //public nodeData: KNApi.DictEntry;
+
     protected hoodData: INeighborID[];
-
-    constructor(public dictEntry: KNApi.DictEntry) {
-    }
-
-    get JLPT(): KNApi.JlptLevel {
-        return this.dictEntry.JLPT;
-    }
-
-    get hint(): string[] {
-        return this.dictEntry.english;
-    }
-
-    get isKanji(): boolean {
-        return this.type === "Kanji";
-    }
-
-    get id(): string {
-        return BaseNode.makeId(this.type, this.text);
-    }
-
-    get hood(): INeighborID[] {
-        return this.hoodData;
-    }
-
-    get title(): string[] {
-        throw new Error("Base class implementation was called.");
-    }
-    get subscript(): string[] {
-        throw new Error("Base class implementation was called.");
-    }
-    get superscript(): string[] {
-        throw new Error("Base class implementation was called.");
-    }
-    get text(): string {
-        throw new Error("Base class implementation was called.");
-    }
-    get type(): NodeTypes {
-        throw new Error("Base class implementation was called.");
-    }
 }
 
 export class WordNode extends BaseNode implements INode {
 
-    constructor(public dbWord: KNApi.DbWord) {
-        super(dbWord);
+    public get dbWord(): KNApi.DbWord {
+        return this.nodeData as KNApi.DbWord;
+    }
+
+    @Type(() => KNApi.DbWord)
+    public nodeData: KNApi.DbWord;
+
+    constructor(nodeData: KNApi.DbWord) {
+        super();
 
         // when de-serialized the parameter is undefined
-        if (typeof dbWord === "undefined") {
+        if (typeof nodeData === "undefined") {
             return;
         }
+
+        this.nodeData = nodeData;
 
         this.hoodData = this.dbWord.kanjis.map((kanji: KNApi.DbKanji & KNApi.DbWord) => {
             return {
@@ -115,17 +89,45 @@ export class WordNode extends BaseNode implements INode {
     get superscript(): string[] {
         return [this.dbWord.hiragana];
     }
+
+    get JLPT(): KNApi.JlptLevel {
+        return this.nodeData.JLPT;
+    }
+
+    get hint(): string[] {
+        return this.nodeData.english;
+    }
+
+    get isKanji(): boolean {
+        return this.type === "Kanji";
+    }
+
+    get id(): string {
+        return BaseNode.makeId(this.type, this.text);
+    }
+
+    get hood(): INeighborID[] {
+        return this.hoodData;
+    }
 }
 
 export class KanjiNode extends BaseNode implements INode {
 
-    constructor(public dbKanji: KNApi.DbKanji) {
-        super(dbKanji);
+    public get dbKanji(): KNApi.DbKanji {
+        return this.nodeData as KNApi.DbKanji;
+    }
+
+    @Type(() => KNApi.DbKanji)
+    public nodeData: KNApi.DbKanji;
+
+    constructor(nodeData: KNApi.DbKanji) {
+        super();
 
         // when de-serialized the parameter is undefined
-        if (typeof dbKanji === "undefined") {
+        if (typeof nodeData === "undefined") {
             return;
         }
+        this.nodeData = nodeData;
 
         this.hoodData = this.dbKanji.words.map((word: KNApi.DbKanji & KNApi.DbWord) => {
             return {
@@ -150,6 +152,26 @@ export class KanjiNode extends BaseNode implements INode {
     }
     get superscript(): string[] {
         return [this.dbKanji.kunyomi[0]];
+    }
+
+    get JLPT(): KNApi.JlptLevel {
+        return this.nodeData.JLPT;
+    }
+
+    get hint(): string[] {
+        return this.nodeData.english;
+    }
+
+    get isKanji(): boolean {
+        return this.type === "Kanji";
+    }
+
+    get id(): string {
+        return BaseNode.makeId(this.type, this.text);
+    }
+
+    get hood(): INeighborID[] {
+        return this.hoodData;
     }
 }
 

@@ -1,3 +1,5 @@
+import { Exclude, Type } from "class-transformer";
+
 export interface IMap<T> {
     [key: string]: T;
 }
@@ -21,6 +23,8 @@ export class WordCore extends DictEntry {
 }
 
 export class DbWord extends WordCore {
+
+    @Exclude()
     public kanjis: DbKanji[];
 }
 
@@ -28,5 +32,7 @@ export class DbKanji extends DictEntry {
     public character: string;
     public onyomi: string[];
     public kunyomi: string[];
+
+    @Exclude()
     public words: WordCore[];
 }

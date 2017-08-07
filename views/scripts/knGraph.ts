@@ -6,7 +6,6 @@
 
 import { Type } from "../node_modules/class-transformer/index"
 
-import { GraphStorage, IGraphStorage } from "./graphStorage";
 import * as KNApi from "./knApi";
 import { BaseNode, Edge, INode, nodeFactory, NodeTypes, opposite } from "./knModel";
 
@@ -17,20 +16,17 @@ export class Graph {
     // maps string to an edge
     public edges: KNApi.IMap<Edge> = {};
 
-    private ts: IGraphStorage;
-
-    constructor(public db: KNApi.IJapaneseDictionary, public jlptFilter: string, storage?: IGraphStorage) {
-        this.ts = storage || new GraphStorage();
+    constructor(public db: KNApi.IJapaneseDictionary, public jlptFilter: string) {
     }
 
-    public save(saveId: string) {
-        this.ts.saveMaps(saveId, { nodes: this.nodes, edges: this.edges });
-    }
-    public load(saveId: string) {
+    // public save(saveId: string) {
+    //     this.ts.saveMaps(saveId, { nodes: this.nodes, edges: this.edges });
+    // }
+    // public load(saveId: string) {
 
-        this.reset();
-        this.ts.loadMaps(saveId, { nodes: this.nodes, edges: this.edges });
-    }
+    //     this.reset();
+    //     this.ts.loadMaps(saveId, { nodes: this.nodes, edges: this.edges });
+    // }
 
     public reset() {
         this.nodes = {};
@@ -79,7 +75,7 @@ export class Graph {
             });
 
             // call back the user
-            if (userCallback !== undefined) {
+            if (typeof userCallback !== "undefined") {
                 userCallback(nNode);
             }
 

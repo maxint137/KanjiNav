@@ -28,7 +28,7 @@ define(["require", "exports", "class-transformer", "./knModel", "reflect-metadat
     __decorate([
         class_transformer_1.Type(() => knModel_1.Edge)
     ], EdgeWithKey.prototype, "val", void 0);
-    class GraphStorage {
+    class Storage {
         constructor() {
             this.data = {};
         }
@@ -80,6 +80,6 @@ define(["require", "exports", "class-transformer", "./knModel", "reflect-metadat
             return array;
         }
     }
-    exports.GraphStorage = GraphStorage;
+    exports.Storage = Storage;
 });
 //# sourceMappingURL=graphStorage.js.map

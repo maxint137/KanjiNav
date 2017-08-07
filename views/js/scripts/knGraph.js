@@ -3,26 +3,25 @@
 // tslint:disable:object-literal-sort-keys
 // tslint:disable:label-position
 // tslint:disable:no-unused-expression
-define(["require", "exports", "./graphStorage", "./knModel"], function (require, exports, graphStorage_1, knModel_1) {
+define(["require", "exports", "./knModel"], function (require, exports, knModel_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Graph {
-        constructor(db, jlptFilter, storage) {
+        constructor(db, jlptFilter) {
             this.db = db;
             this.jlptFilter = jlptFilter;
             // maps string to a Node
             this.nodes = {};
             // maps string to an edge
             this.edges = {};
-            this.ts = storage || new graphStorage_1.GraphStorage();
         }
-        save(saveId) {
-            this.ts.saveMaps(saveId, { nodes: this.nodes, edges: this.edges });
-        }
-        load(saveId) {
-            this.reset();
-            this.ts.loadMaps(saveId, { nodes: this.nodes, edges: this.edges });
-        }
+        // public save(saveId: string) {
+        //     this.ts.saveMaps(saveId, { nodes: this.nodes, edges: this.edges });
+        // }
+        // public load(saveId: string) {
+        //     this.reset();
+        //     this.ts.loadMaps(saveId, { nodes: this.nodes, edges: this.edges });
+        // }
         reset() {
             this.nodes = {};
             this.edges = {};
@@ -60,7 +59,7 @@ define(["require", "exports", "./graphStorage", "./knModel"], function (require,
                     }
                 });
                 // call back the user
-                if (userCallback !== undefined) {
+                if (typeof userCallback !== "undefined") {
                     userCallback(nNode);
                 }
                 // finished

@@ -1,5 +1,5 @@
 // tslint:disable:no-unused-expression
-// mocha -w -r views/tests/tsconfig.js --watch-extensions ts --reporter dot views/tests/**/GraphStorage.spec.ts
+// mocha -w -r views/tests/tsconfig.js --watch-extensions ts views/tests/**/GraphStorage.spec.ts --reporter
 // mocha --debug-brk -r views/tests/tsconfig.js views/tests/**/GraphStorage.spec.ts
 // "C:\Program Files (x86)\nodejs\node.exe" --debug-brk=17892 --nolazy
 //      c:\Users\maxlevy\AppData\Roaming\npm\node_modules\mocha\bin\_mocha
@@ -14,8 +14,8 @@ should();
 
 import * as testWords from "./GraphStorage.data.json";
 
-import { GraphStorage, IGraphStorage } from "../scripts/graphStorage";
 import { DbWord, JlptLevel } from "../scripts/KNApi";
+import { IGraphStorage, PositionMap, Storage } from "../scripts/storage";
 import { Edge, INode, KanjiNode, NodeTypes, WordNode } from "./../scripts/knModel";
 
 const enjoyable = "enjoyable";
@@ -28,13 +28,34 @@ const wordsList = [
     { word: ease, hoodCount: 9 },
 ];
 
-describe("Serializer helper!", () => {
+describe("Serializer", () => {
+    it("knows how to save ViewNodePositions", () => {
+
+        const viewNodePositions: PositionMap = {
+            node1: { x: 10, y: 100 },
+            node2: { x: 11, y: 101 },
+        };
+
+        const ts = new Storage();
+        expect(ts.isItemAvailable("test")).is.false;
+
+        ts.saveNodesPosition("test_00", viewNodePositions);
+        expect(ts.isItemAvailable("test_00")).is.true;
+        expect(ts.isItemAvailable("test_001")).is.false;
+
+        const loadedNodePositions: PositionMap = {};
+        ts.loadNodesPosition("test_00", loadedNodePositions);
+        expect(ts.isItemAvailable("test_00")).is.true;
+
+        expect(loadedNodePositions).to.be.deep.equal(viewNodePositions);
+    });
+
     it("knows how to save a single node", () => {
 
         const oneNode: { [key: string]: INode } = {};
         oneNode["only-you"] = testWords[enjoyable];
 
-        const ts = new GraphStorage();
+        const ts = new Storage();
         ts.saveMaps("test_01", { nodes: oneNode, edges: null });
     });
 
@@ -43,7 +64,7 @@ describe("Serializer helper!", () => {
         const oneEdge: { [key: string]: Edge } = {};
         oneEdge["0"] = Edge.makeEdge("Word", "Start", "End");
 
-        const gs = new GraphStorage();
+        const gs = new Storage();
         gs.saveMaps("test_02", { nodes: null, edges: oneEdge });
 
         const oneEdgeLoaded: { [key: string]: Edge } = {};
@@ -63,7 +84,7 @@ describe("Serializer helper!", () => {
         expect(oneEdge[0].toString()).to.be.equal(oneEdgeLoaded[0].toString());
     });
 
-    it("knows how to load a saved object", () => {
+    it("knows how to load saved nodes+edges", () => {
 
         const savedNodes: { [key: string]: INode } = {};
 
@@ -84,7 +105,7 @@ describe("Serializer helper!", () => {
 
         const loadedNodes: { [key: string]: INode } = {};
 
-        const gs = new GraphStorage();
+        const gs = new Storage();
         gs.saveMaps("saveId", { nodes: savedNodes, edges: null });
         gs.loadMaps("saveId", { nodes: loadedNodes, edges: null });
 

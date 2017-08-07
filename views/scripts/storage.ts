@@ -1,3 +1,4 @@
+// tslint:disable:max-classes-per-file
 import { deserializeArray, serialize, Type } from "class-transformer"; //"./../node_modules/class-transformer/index";
 
 import "reflect-metadata";
@@ -24,10 +25,30 @@ export interface IGraphStorage {
     loadMaps(id: string, maps: IGraphMaps): void;
 }
 
+export class PositionMap {
+
+    [key: string]: { x: number, y: number };
+}
+
+export interface IViewStorage {
+
+    isItemAvailable(id: string): boolean;
+    saveNodesPosition(id: string, positions: PositionMap): void;
+    loadNodesPosition(id: string, positions: PositionMap): void;
+}
+
 class MapElement {
 
     public constructor(public key: string) { }
 };
+
+class NodePosition {
+    constructor(public x: number, public y: number) { }
+}
+class NodePositionWithKey extends MapElement {
+    @Type(() => NodePosition)
+    public val: NodePosition;
+}
 
 class WordNodeWithKey extends MapElement {
     @Type(() => WordNode)
@@ -44,8 +65,11 @@ class EdgeWithKey extends MapElement {
     public val: Edge;
 }
 
-export class GraphStorage implements IGraphStorage {
+export class Storage implements IGraphStorage, IViewStorage {
 
+    private static PositionsId(id: string): string {
+        return `${id}-positions`;
+    }
     private static wordNodesId(id: string): string {
         return `${id}-wordNodes`;
     }
@@ -58,49 +82,65 @@ export class GraphStorage implements IGraphStorage {
 
     private data: { [key: string]: string } = {};
 
+    public isItemAvailable(id: string): boolean {
+        return !(typeof this.data[Storage.PositionsId(id)] === "undefined");
+    }
+
+    public saveNodesPosition(id: string, positions: PositionMap): void {
+        this.data[Storage.PositionsId(id)] = serialize(this.map2array(positions, null));
+    }
+
+    public loadNodesPosition(id: string, positions: PositionMap): void {
+
+        this.array2map<NodePosition>(
+            NodePositionWithKey,
+            this.data[Storage.PositionsId(id)],
+            positions);
+    }
+
     public saveMaps(id: string, maps: IGraphMaps): void {
 
         if (maps.nodes) {
-            this.data[GraphStorage.wordNodesId(id)]
+            this.data[Storage.wordNodesId(id)]
                 = serialize(this.map2array(maps.nodes, (node) => "Word" === node.type));
 
-            this.data[GraphStorage.kanjiNodesId(id)]
+            this.data[Storage.kanjiNodesId(id)]
                 = serialize(this.map2array(maps.nodes, (node) => "Kanji" === node.type));
         }
 
         if (maps.edges) {
-            this.data[GraphStorage.edgesId(id)]
+            this.data[Storage.edgesId(id)]
                 = serialize(this.map2array(maps.edges, null));
         }
     }
 
     public loadMaps(id: string, maps: IGraphMaps): void {
 
-        if (this.data[GraphStorage.wordNodesId(id)]) {
+        if (this.data[Storage.wordNodesId(id)]) {
             this.array2map<INode>(
                 WordNodeWithKey,
-                this.data[GraphStorage.wordNodesId(id)],
+                this.data[Storage.wordNodesId(id)],
                 maps.nodes);
         }
 
-        if (this.data[GraphStorage.kanjiNodesId(id)]) {
+        if (this.data[Storage.kanjiNodesId(id)]) {
             this.array2map<INode>(
                 KanjiNodeWithKey,
-                this.data[GraphStorage.kanjiNodesId(id)],
+                this.data[Storage.kanjiNodesId(id)],
                 maps.nodes);
         }
 
-        if (this.data[GraphStorage.edgesId(id)]) {
+        if (this.data[Storage.edgesId(id)]) {
 
             this.array2map<Edge>(
                 EdgeWithKey,
-                this.data[GraphStorage.edgesId(id)],
+                this.data[Storage.edgesId(id)],
                 maps.edges);
         }
     }
 
     private array2map<T>(
-        classType: { new (...args: any[]): { key: string, val: T } },
+        classType: { new(...args: any[]): { key: string, val: T } },
         data: string,
         map: { [key: string]: T }): void {
 
