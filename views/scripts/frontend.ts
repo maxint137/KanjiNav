@@ -276,10 +276,10 @@ export class Frontend {
     private saveGraphImp(id: string) {
 
         let key: string;
-        const ss: Snapshot = new Snapshot(id);
+        const ss: Snapshot = new Snapshot(id, this.jlpts);
 
         this.viewGraph.nodes.forEach((vn) => {
-            ss.nodes.push(new NodeDescriptor(vn.mn.id, vn.x, vn.y, this.modelGraph.nodes[vn.mn.id]))
+            ss.nodes.push(new NodeDescriptor(vn.mn.id, vn.x, vn.y, vn.hidden, this.modelGraph.nodes[vn.mn.id]))
         })
 
         for (key of Object.keys(this.modelGraph.edges)) {
@@ -294,13 +294,22 @@ export class Frontend {
 
         const ss: Snapshot = this.ssDB.loadSnapshot(id);
 
+        this.setupJlptChecks(ss.jlpts);
+
         // setup the model
         ss.nodes.forEach((n) => { this.modelGraph.nodes[n.name] = n.node; });
         ss.edges.forEach((e) => { this.modelGraph.edges[e.name] = e.edge; });
 
         // setup the view:
         for (const nodeKey of Object.keys(ss.nodes)) {
-            this.addViewNode(ss.nodes[nodeKey].node, { x: ss.nodes[nodeKey].x, y: ss.nodes[nodeKey].y });
+            this.addViewNode(
+                ss.nodes[nodeKey].node,
+                {
+                    x: ss.nodes[nodeKey].x,
+                    y: ss.nodes[nodeKey].y,
+                },
+                ss.nodes[nodeKey].hidden,
+            );
         }
 
         this.refreshViewGraph();
@@ -312,7 +321,7 @@ export class Frontend {
 
     // adds the node to the viewGraph, picks the initial position based on the startPos and assigns viewGraphId
     // used to schedule the images rendering
-    private addViewNode(mn: INodeKN, startPos?: cola.Node) {
+    private addViewNode(mn: INodeKN, startPos?: cola.Node, hidden?: boolean) {
 
         const vn: ViewNode = new ViewNode(mn);
 
@@ -321,6 +330,13 @@ export class Frontend {
         if (typeof startPos !== "undefined") {
             vn.x = startPos.x;
             vn.y = startPos.y;
+        }
+
+        if (typeof hidden !== "undefined") {
+            vn.hidden = hidden;
+            if (vn.hidden) {
+                this.addToHiddenCombo(vn);
+            }
         }
 
         this.viewGraph.nodes.push(vn);
@@ -661,7 +677,7 @@ export class Frontend {
     }
 
     private hideNode(n: ViewNode) {
-        // don"t hide kanji
+        // don't hide kanji
         if (n.mn.isKanji) {
             return;
         }
@@ -669,6 +685,11 @@ export class Frontend {
         n.hidden = true;
 
         this.update();
+
+        this.addToHiddenCombo(n);
+    }
+
+    private addToHiddenCombo(n: ViewNode) {
 
         // add the word to the combo, if it's not there yet
         const hiddenWordsCombo: JQuery = $("#hiddenWordsCombo");
@@ -877,18 +898,21 @@ export class Frontend {
         }
     }
 
-    private setupJlptChecks() {
+    private setupJlptChecks(value?: string) {
 
-        this.jlpts = this.storageGet(Frontend.jlptSelectedLevelsCookieName);
-        if (!this.jlpts) {
-            this.jlptSelect(5);
-            this.jlptSelect(4);
-        }
+        this.jlpts = value || this.storageGet(Frontend.jlptSelectedLevelsCookieName);
+        this.jlpts = this.jlpts || "54";
+        
+        "12345".split("").forEach((n) => {
 
-        this.jlpts.split("").forEach((n) => {
+            const checked = -1 !== this.jlpts.indexOf(n);
 
-            $(`#JLPT${n}`).prop("checked", true);
-            $(`#JLPT${n}`).parents("label").addClass("active");
+            $(`#JLPT${n}`).prop("checked", checked);
+            if (checked) {
+                $(`#JLPT${n}`).parents("label").addClass("active");
+            } else {
+                $(`#JLPT${n}`).parents("label").removeClass("active");
+            }
         });
     }
 

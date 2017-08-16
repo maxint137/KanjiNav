@@ -45,6 +45,10 @@ define(["require", "exports", "class-transformer", "./knApi"], function (require
             return [this.dbWord.word];
         }
         get subscript() {
+            const MaxCharsInSubscript = 10;
+            if (MaxCharsInSubscript < this.dbWord.english[0].length) {
+                return [this.dbWord.english[0].slice(0, MaxCharsInSubscript) + "..."];
+            }
             return [this.dbWord.english[0] + (1 < this.dbWord.english.length ? "..." : "")];
         }
         get superscript() {
@@ -127,10 +131,10 @@ define(["require", "exports", "class-transformer", "./knApi"], function (require
     // https://stackoverflow.com/questions/42634116/factory-returning-classes-in-typescript
     function nodeFactory(type, dbData) {
         if (type === "Word") {
-            return new WordNode(dbData);
+            return new WordNode(class_transformer_1.plainToClass(KNApi.DbWord, dbData, { ignoreDecorators: true }));
         }
         if (type === "Kanji") {
-            return new KanjiNode(dbData);
+            return new KanjiNode(class_transformer_1.plainToClass(KNApi.DbKanji, dbData, { ignoreDecorators: true }));
         }
         throw new Error(`Unexpected node type: ${type}`);
     }

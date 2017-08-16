@@ -1,4 +1,4 @@
-import { Exclude, Type } from "class-transformer";
+import { plainToClass, Type } from "class-transformer";
 
 import * as KNApi from "./knApi";
 
@@ -41,8 +41,6 @@ export abstract class BaseNode {
 
     public degree: number;
 
-    //public nodeData: KNApi.DictEntry;
-
     protected hoodData: INeighborID[];
 }
 
@@ -84,6 +82,12 @@ export class WordNode extends BaseNode implements INode {
         return [this.dbWord.word];
     }
     get subscript(): string[] {
+        const MaxCharsInSubscript = 10;
+
+        if (MaxCharsInSubscript < this.dbWord.english[0].length) {
+            return [this.dbWord.english[0].slice(0, MaxCharsInSubscript) + "..."];
+        }
+
         return [this.dbWord.english[0] + (1 < this.dbWord.english.length ? "..." : "")];
     }
     get superscript(): string[] {
@@ -180,10 +184,10 @@ export class KanjiNode extends BaseNode implements INode {
 export function nodeFactory(type: NodeTypes, dbData: KNApi.DbWord & KNApi.DbKanji): INode {
 
     if (type === "Word") {
-        return new WordNode(dbData);
+        return new WordNode(plainToClass(KNApi.DbWord, dbData, { ignoreDecorators: true }));
     }
     if (type === "Kanji") {
-        return new KanjiNode(dbData);
+        return new KanjiNode(plainToClass(KNApi.DbKanji, dbData, { ignoreDecorators: true }));
     }
 
     throw new Error(`Unexpected node type: ${type}`);

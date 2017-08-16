@@ -1,3 +1,4 @@
+// tslint:disable:import-spacing
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -11,12 +12,14 @@ define(["require", "exports", "underscore", "class-transformer", "./IStorage", "
     // so that de/serialization is possible
     class SnapshotDistilled {
         constructor(ss) {
+            this.wordNodes = [];
+            this.kanjiNodes = [];
+            this.edges = [];
             if (!ss) {
                 return;
             }
             this.id = ss.id;
-            this.wordNodes = [];
-            this.kanjiNodes = [];
+            this.jlpts = ss.jlpts;
             ss.nodes.forEach((ln) => {
                 if (ln.node.isKanji) {
                     this.kanjiNodes.push(new KanjiNodeEx(ln));
@@ -37,20 +40,21 @@ define(["require", "exports", "underscore", "class-transformer", "./IStorage", "
     __decorate([
         class_transformer_1.Type(() => knModel_1.Edge)
     ], SnapshotDistilled.prototype, "edges", void 0);
-    class NameLocation {
-        constructor(name, x, y) {
+    class NodeExBase {
+        constructor(name, x, y, hidden) {
             this.name = name;
             this.x = x;
             this.y = y;
+            this.hidden = hidden;
         }
     }
-    class WordNodeEx extends NameLocation {
+    class WordNodeEx extends NodeExBase {
         constructor(wd) {
             if (!wd) {
-                super(null, 0, 0);
+                super(null, 0, 0, false);
                 return;
             }
-            super(wd.name, wd.x, wd.y);
+            super(wd.name, wd.x, wd.y, wd.hidden);
             if (wd.node.isKanji) {
                 throw new Error("Wrong INode type passed");
             }
@@ -62,13 +66,13 @@ define(["require", "exports", "underscore", "class-transformer", "./IStorage", "
     __decorate([
         class_transformer_1.Type(() => knModel_1.WordNode)
     ], WordNodeEx.prototype, "node", void 0);
-    class KanjiNodeEx extends NameLocation {
+    class KanjiNodeEx extends NodeExBase {
         constructor(nd) {
             if (!nd) {
-                super(null, 0, 0);
+                super(null, 0, 0, false);
                 return;
             }
-            super(nd.name, nd.x, nd.y);
+            super(nd.name, nd.x, nd.y, nd.hidden);
             if (!nd.node.isKanji) {
                 throw new Error("Wrong INode type passed");
             }
@@ -110,12 +114,12 @@ define(["require", "exports", "underscore", "class-transformer", "./IStorage", "
                 return null;
             }
             const sd = this.snapshots[index];
-            const ss = new Storage.Snapshot(sd.id);
+            const ss = new Storage.Snapshot(sd.id, sd.jlpts);
             sd.wordNodes.forEach((wn) => {
-                ss.nodes.push(new Storage.NodeDescriptor(wn.name, wn.x, wn.y, class_transformer_1.classToClass(wn.node)));
+                ss.nodes.push(new Storage.NodeDescriptor(wn.name, wn.x, wn.y, wn.hidden, class_transformer_1.classToClass(wn.node)));
             });
             sd.kanjiNodes.forEach((kn) => {
-                ss.nodes.push(new Storage.NodeDescriptor(kn.name, kn.x, kn.y, class_transformer_1.classToClass(kn.node)));
+                ss.nodes.push(new Storage.NodeDescriptor(kn.name, kn.x, kn.y, kn.hidden, class_transformer_1.classToClass(kn.node)));
             });
             ss.edges = class_transformer_1.classToClass(sd.edges);
             return ss;

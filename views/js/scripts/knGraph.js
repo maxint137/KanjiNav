@@ -15,13 +15,6 @@ define(["require", "exports", "./knModel"], function (require, exports, knModel_
             // maps string to an edge
             this.edges = {};
         }
-        // public save(saveId: string) {
-        //     this.ts.saveMaps(saveId, { nodes: this.nodes, edges: this.edges });
-        // }
-        // public load(saveId: string) {
-        //     this.reset();
-        //     this.ts.loadMaps(saveId, { nodes: this.nodes, edges: this.edges });
-        // }
         reset() {
             this.nodes = {};
             this.edges = {};

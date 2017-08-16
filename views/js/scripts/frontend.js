@@ -142,9 +142,9 @@ define(["require", "exports", "d3", "IStorage"], function (require, exports, d3,
         }
         saveGraphImp(id) {
             let key;
-            const ss = new IStorage_1.Snapshot(id);
+            const ss = new IStorage_1.Snapshot(id, this.jlpts);
             this.viewGraph.nodes.forEach((vn) => {
-                ss.nodes.push(new IStorage_1.NodeDescriptor(vn.mn.id, vn.x, vn.y, this.modelGraph.nodes[vn.mn.id]));
+                ss.nodes.push(new IStorage_1.NodeDescriptor(vn.mn.id, vn.x, vn.y, vn.hidden, this.modelGraph.nodes[vn.mn.id]));
             });
             for (key of Object.keys(this.modelGraph.edges)) {
                 ss.edges.push(new IStorage_1.EdgeDescriptor(key, this.modelGraph.edges[key]));
@@ -154,12 +154,16 @@ define(["require", "exports", "d3", "IStorage"], function (require, exports, d3,
         }
         loadGraphImp(id) {
             const ss = this.ssDB.loadSnapshot(id);
+            this.setupJlptChecks(ss.jlpts);
             // setup the model
             ss.nodes.forEach((n) => { this.modelGraph.nodes[n.name] = n.node; });
             ss.edges.forEach((e) => { this.modelGraph.edges[e.name] = e.edge; });
             // setup the view:
             for (const nodeKey of Object.keys(ss.nodes)) {
-                this.addViewNode(ss.nodes[nodeKey].node, { x: ss.nodes[nodeKey].x, y: ss.nodes[nodeKey].y });
+                this.addViewNode(ss.nodes[nodeKey].node, {
+                    x: ss.nodes[nodeKey].x,
+                    y: ss.nodes[nodeKey].y,
+                }, ss.nodes[nodeKey].hidden);
             }
             this.refreshViewGraph();
         }
@@ -168,12 +172,18 @@ define(["require", "exports", "d3", "IStorage"], function (require, exports, d3,
         }
         // adds the node to the viewGraph, picks the initial position based on the startPos and assigns viewGraphId
         // used to schedule the images rendering
-        addViewNode(mn, startPos) {
+        addViewNode(mn, startPos, hidden) {
             const vn = new ViewNode(mn);
             vn.viewGraphId = this.viewGraph.nodes.length;
             if (typeof startPos !== "undefined") {
                 vn.x = startPos.x;
                 vn.y = startPos.y;
+            }
+            if (typeof hidden !== "undefined") {
+                vn.hidden = hidden;
+                if (vn.hidden) {
+                    this.addToHiddenCombo(vn);
+                }
             }
             this.viewGraph.nodes.push(vn);
         }
@@ -438,12 +448,15 @@ define(["require", "exports", "d3", "IStorage"], function (require, exports, d3,
             dataView.selectAll(".spike").remove();
         }
         hideNode(n) {
-            // don"t hide kanji
+            // don't hide kanji
             if (n.mn.isKanji) {
                 return;
             }
             n.hidden = true;
             this.update();
+            this.addToHiddenCombo(n);
+        }
+        addToHiddenCombo(n) {
             // add the word to the combo, if it's not there yet
             const hiddenWordsCombo = $("#hiddenWordsCombo");
             if (0 === hiddenWordsCombo.find(`option[value="${n.id}"]`).length) {
@@ -608,15 +621,18 @@ define(["require", "exports", "d3", "IStorage"], function (require, exports, d3,
                 this.cookies.set(paramName, value);
             }
         }
-        setupJlptChecks() {
-            this.jlpts = this.storageGet(Frontend.jlptSelectedLevelsCookieName);
-            if (!this.jlpts) {
-                this.jlptSelect(5);
-                this.jlptSelect(4);
-            }
-            this.jlpts.split("").forEach((n) => {
-                $(`#JLPT${n}`).prop("checked", true);
-                $(`#JLPT${n}`).parents("label").addClass("active");
+        setupJlptChecks(value) {
+            this.jlpts = value || this.storageGet(Frontend.jlptSelectedLevelsCookieName);
+            this.jlpts = this.jlpts || "54";
+            "12345".split("").forEach((n) => {
+                const checked = -1 !== this.jlpts.indexOf(n);
+                $(`#JLPT${n}`).prop("checked", checked);
+                if (checked) {
+                    $(`#JLPT${n}`).parents("label").addClass("active");
+                }
+                else {
+                    $(`#JLPT${n}`).parents("label").removeClass("active");
+                }
             });
         }
         removeWordFromHistory(selectBoxId, word) {

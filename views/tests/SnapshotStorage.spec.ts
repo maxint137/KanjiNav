@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 // mocha -w -r views/tests/tsconfig.js --watch-extensions ts views/tests/**/SnapshotStorage.spec.ts --reporter progress
 // mocha --debug-brk -r views/tests/tsconfig.js views/tests/**/SnapshotStorage.spec.ts
 
@@ -16,12 +18,38 @@ import * as testWords from "./GraphStorage.data.json";
 
 function makeSnapshot(id: string): Snapshot {
 
-    const ss = new Snapshot(id);
+    const ss = new Snapshot(id, "543");
 
-    ss.nodes.push({ name: "ease", x: 10, y: 100, node: nodeFactory("Word", testWords.enjoyable) });
-    ss.nodes.push({ name: "ease", x: 20, y: 200, node: nodeFactory("Kanji", testWords.ease) });
+    ss.nodes.push({
+        hidden: false,
+        name: "ease",
+        node: nodeFactory("Word", testWords.enjoyable),
+        x: 10,
+        y: 100,
+    });
+
+    ss.nodes.push({
+        hidden: false,
+        name: "ease",
+        node: nodeFactory("Kanji", testWords.ease),
+        x: 20,
+        y: 200,
+    });
 
     return ss;
+}
+
+// we don't serialize the DbWord/Kanjis when taking snapshots, 
+// yet these are loaded from the network, that's why we "fix" these arrays with a const
+function cleanupData(ssIn, ssOut): void {
+
+    const cleanIt = (n) => {
+        n.node.nodeData.words = 7;
+        n.node.nodeData.kanjis = 8;
+    };
+
+    _.forEach(ssIn.nodes, (n) => cleanIt(n));
+    _.forEach(ssOut.nodes, (n) => cleanIt(n));
 }
 
 describe("SnapshotSerializer", () => {
@@ -34,6 +62,7 @@ describe("SnapshotSerializer", () => {
         db.saveSnapshot(ssIn);
 
         const ssOut = db.loadSnapshot(ssIn.id);
+        cleanupData(ssIn, ssOut);
 
         expect(ssOut.id).to.be.equal(ssIn.id, `Not the same id: '${ssIn.id}'/s'${ssOut.id}'`);
         expect(ssOut).to.be.deep.equal(ssIn, `Not the same object: '${ssIn.id}'/'${ssOut.id}'`);
@@ -49,7 +78,10 @@ describe("SnapshotSerializer", () => {
         const ssIn: Snapshot = makeSnapshot("test");
 
         db.saveSnapshot(ssIn);
-        expect(db.loadSnapshot(ssIn.id))
+        let ssOut = db.loadSnapshot(ssIn.id);
+        cleanupData(ssIn, ssOut);
+
+        expect(ssOut)
             .to
             .be
             .deep
@@ -57,16 +89,13 @@ describe("SnapshotSerializer", () => {
             `Not the same object: '${ssIn.id}'`);
 
         ssIn.id = "test1";
-        expect(db.loadSnapshot(ssIn.id))
-            .not
-            .to
-            .be
-            .deep
-            .equal(ssIn,
-            `The same object: '${ssIn.id}'`);
+        const duh = expect(db.loadSnapshot(ssIn.id)).be.null;
 
         db.saveSnapshot(ssIn);
-        expect(db.loadSnapshot(ssIn.id))
+        ssOut = db.loadSnapshot(ssIn.id);
+        cleanupData(ssIn, ssOut);
+
+        expect(ssOut)
             .to
             .be
             .deep
@@ -92,6 +121,7 @@ describe("SnapshotSerializer", () => {
         const db2: SnapshotDB = new SnapshotDB();
         db2.deserialize(ps);
         const ssOut: Snapshot = db2.loadSnapshot(ssIn.id);
+        cleanupData(ssIn, ssOut);
 
         expect(ssIn)
             .to

@@ -19,15 +19,6 @@ export class Graph {
     constructor(public db: KNApi.IJapaneseDictionary, public jlptFilter: string) {
     }
 
-    // public save(saveId: string) {
-    //     this.ts.saveMaps(saveId, { nodes: this.nodes, edges: this.edges });
-    // }
-    // public load(saveId: string) {
-
-    //     this.reset();
-    //     this.ts.loadMaps(saveId, { nodes: this.nodes, edges: this.edges });
-    // }
-
     public reset() {
         this.nodes = {};
         this.edges = {};

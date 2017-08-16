@@ -22,7 +22,7 @@ export class Snapshot {
     public nodes: NodeDescriptor[];
     public edges: EdgeDescriptor[];
 
-    constructor(public id: string) {
+    constructor(public id: string, public jlpts: string) {
         this.nodes = [];
         this.edges = [];
     }
@@ -30,8 +30,9 @@ export class Snapshot {
 
 export class NodeDescriptor {
 
-    constructor(public name: string, public x: number, public y: number, public node: INode) { }
-
+    constructor(public name: string,
+        public x: number, public y: number, public hidden: boolean,
+        public node: INode) { }
 }
 
 export class EdgeDescriptor {
